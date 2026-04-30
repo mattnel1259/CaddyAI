@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CaddyAI">
+<meta name="theme-color" content="#22c55e">
+<meta name="description" content="Personal disc golf analytics, AI caddie, and round tracker">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>CaddyAI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap');
+
+:root {
+  --ink: #0e1117;
+  --ink2: #1a2030;
+  --ink3: #252d3d;
+  --border: #2e3a4e;
+  --muted: #5a6a82;
+  --text: #d4dff0;
+  --dim: #8a9ab5;
+  --grass: #22c55e;
+  --grass2: #16a34a;
+  --sky: #38bdf8;
+  --fire: #fb923c;
+  --rose: #f43f5e;
+  --gold: #fbbf24;
+  --radius: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--text); display: flex; flex-direction: column; }
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  #topbar { padding: 0 12px; gap: 0; height: 48px; overflow-x: auto; }
+  .brand { font-size: 17px; margin-right: 12px; flex-shrink: 0; }
+  .nav-btn { padding: 0 10px; font-size: 12px; flex-shrink: 0; }
+  .topbar-right { display: none; }
+  #app { flex-direction: column; }
+  #sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); flex-direction: row; overflow-x: auto; }
+  #course-scroll { display: flex; flex-direction: row; flex: 1; overflow-x: auto; padding: 4px 8px; }
+  .course-item { flex-shrink: 0; border-left: none; border-bottom: 2px solid transparent; padding: 6px 10px; }
+  .course-item.active { border-bottom-color: var(--grass); border-left: none; }
+  .sidebar-stats { display: none; }
+  .add-course-btn { display: none; }
+  #main { padding: 14px; overflow-y: auto; }
+  .kpi-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kpi { padding: 10px 12px; }
+  .kpi-val { font-size: 20px; }
+  .hole-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .hole-card { padding: 10px; }
+  .hc-num { font-size: 22px; }
+  .two-col { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .lz-wrap { align-items: center; }
+  #lz-svg { width: 140px; height: 140px; }
+  .disc-bag { grid-template-columns: repeat(2, 1fr); }
+  .flight-btn-row { gap: 4px; }
+  .fnum-btn { width: 30px; height: 30px; font-size: 11px; }
+  .type-btn { font-size: 10px; padding: 4px 8px; }
+  .caddie-hole-select { flex-direction: column; gap: 8px; }
+  .caddie-hole-select .fg select { width: 100% !important; }
+  .modal { width: 95vw; padding: 18px; }
+  /* Safe area for iPhone notch */
+  body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+}
+
+@media (max-width: 480px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .hole-grid { grid-template-columns: repeat(2, 1fr); }
+  .disc-bag { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .nav-btn { padding: 0 8px; font-size: 11px; }
+}
+
+/* ── MOBILE BOTTOM NAV (phones only) ── */
+@media (max-width: 768px) {
+  #sidebar { display: none; }
+  #mobile-nav { display: flex; }
+  #topbar .nav-btn { display: none; }
+  #topbar { justify-content: space-between; }
+  .brand { margin-right: 0; }
+  #topbar-import { display: flex !important; }
+  #main { padding-bottom: 70px; }
+}
+
+#mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 58px;
+  background: var(--ink2);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.mob-nav-btn {
+  flex: 1; background: none; border: none;
+  color: var(--muted); font-family: 'Archivo', sans-serif;
+  font-size: 10px; font-weight: 500;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; transition: color .15s;
+  padding: 6px 0;
+}
+.mob-nav-btn .icon { font-size: 20px; line-height: 1; }
+.mob-nav-btn.active { color: var(--grass); }
+.mob-nav-btn:hover { color: var(--text); }
+
+/* PWA install banner */
+#install-banner {
+  display: none;
+  background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(56,189,248,.1));
+  border: 1px solid rgba(34,197,94,.3);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#install-banner .ib-text { font-size: 13px; flex: 1; min-width: 180px; }
+#install-banner .ib-text strong { color: var(--grass); }
+
+/* ── EXISTING CSS CONTINUES ── */
+#topbar {
+  height: 52px; flex-shrink: 0;
+  background: var(--ink2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 0; position: relative; z-index: 10;
+}
+.brand {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 20px; letter-spacing: -0.5px;
+  color: var(--grass); margin-right: 32px;
+}
+.brand span { color: var(--text); }
+.nav-btn {
+  height: 52px; padding: 0 16px; border: none; background: none;
+  color: var(--muted); font-family: 'Archivo', sans-serif;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all .15s;
+}
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active { color: var(--grass); border-bottom-color: var(--grass); }
+.topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.btn { padding: 7px 14px; border-radius: 7px; font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+.btn-ghost { background: none; border: 1px solid var(--border); color: var(--dim); }
+.btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+.btn-green { background: var(--grass); color: #000; }
+.btn-green:hover { background: var(--grass2); }
+.course-pill {
+  font-size: 12px; font-weight: 500; color: var(--sky);
+  background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.2);
+  padding: 4px 10px; border-radius: 20px;
+}
+
+/* ── LAYOUT ── */
+#app { display: flex; flex: 1; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--ink2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-head { padding: 14px 14px 8px; }
+.sidebar-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px; }
+.course-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; cursor: pointer; transition: background .1s;
+  border-left: 2px solid transparent;
+}
+.course-item:hover { background: var(--ink3); }
+.course-item.active { background: rgba(34,197,94,.07); border-left-color: var(--grass); }
+.course-item-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
+.course-item-meta { font-size: 10px; color: var(--muted); }
+.course-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sidebar-stats { margin-top: auto; padding: 14px; border-top: 1px solid var(--border); }
+.s-stat { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+.s-stat-val { font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 500; color: var(--text); }
+.add-course-btn { width: 100%; background: none; border: 1px dashed var(--border); color: var(--muted); font-family: 'Archivo', sans-serif; font-size: 12px; padding: 7px; border-radius: 7px; cursor: pointer; transition: all .15s; margin-top: 8px; }
+.add-course-btn:hover { border-color: var(--grass); color: var(--grass); }
+
+/* ── MAIN SCROLL ── */
+#main { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── SECTION HEADS ── */
+.sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.sec-title { font-family: 'Archivo Black', sans-serif; font-size: 18px; letter-spacing: -0.3px; }
+.sec-sub { font-size: 12px; color: var(--muted); }
+
+/* ── STAT CARDS ROW ── */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.kpi { background: var(--ink2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.kpi-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+.kpi-val { font-family: 'Fira Code', monospace; font-size: 26px; font-weight: 500; line-height: 1; }
+.kpi-val.green { color: var(--grass); }
+.kpi-val.sky { color: var(--sky); }
+.kpi-val.fire { color: var(--fire); }
+.kpi-val.rose { color: var(--rose); }
+.kpi-val.gold { color: var(--gold); }
+.kpi-delta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── HOLE GRID ── */
+.hole-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; margin-bottom: 24px; }
+.hole-card {
+  background: var(--ink2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px; cursor: pointer;
+  transition: all .15s; position: relative; overflow: hidden;
+}
+.hole-card:hover { border-color: var(--grass); transform: translateY(-1px); }
+.hole-card.problem { border-color: rgba(244,63,94,.35); }
+.hole-card.strength { border-color: rgba(34,197,94,.35); }
+.hc-num { font-family: 'Archivo Black', sans-serif; font-size: 28px; color: var(--ink3); line-height: 1; }
+.hc-par { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.hc-avg { font-family: 'Fira Code', monospace; font-size: 20px; font-weight: 500; }
+.hc-vs { font-size: 10px; font-weight: 600; margin-top: 1px; }
+.hc-rounds { font-size: 10px; color: var(--muted); }
+.hc-trend { display: flex; align-items: flex-end; gap: 1px; margin-top: 6px; height: 20px; }
+.hc-trend-bar { width: 4px; border-radius: 2px 2px 0 0; }
+.hole-badge { position: absolute; top: 8px; right: 8px; font-size: 8px; font-weight: 700; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; }
+
+/* ── PANEL ── */
+.panel { background: var(--ink2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
+.panel-title { font-size: 13px; font-weight: 600; color: var(--dim); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+/* ── TABLE ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+.tbl td { padding: 9px 10px; border-bottom: 1px solid rgba(46,58,78,.5); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(255,255,255,.02); }
+.mono { font-family: 'Fira Code', monospace; font-size: 12px; }
+
+/* ── FORM ── */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.fg input, .fg select, .fg textarea {
+  background: var(--ink3); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--text);
+  font-family: 'Archivo', sans-serif; font-size: 13px;
+  padding: 8px 10px; outline: none; transition: border-color .15s;
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--grass); }
+.fg select option { background: var(--ink3); }
+.form-actions { display: flex; gap: 10px; margin-top: 14px; }
+
+/* ── LANDING ZONE ── */
+.lz-wrap { display: flex; flex-direction: column; gap: 6px; }
+#lz-svg { width: 160px; height: 160px; cursor: crosshair; border: 1px solid var(--border); border-radius: 8px; }
+.lz-legend { display: flex; gap: 8px; flex-wrap: wrap; }
+.lz-li { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); }
+.lz-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* ── TREND CHART ── */
+.trend-wrap { position: relative; width: 100%; height: 120px; }
+.trend-svg { width: 100%; height: 100%; overflow: visible; }
+
+/* ── AI CADDIE PANEL ── */
+.ai-panel {
+  background: linear-gradient(135deg, rgba(34,197,94,.06), rgba(56,189,248,.04));
+  border: 1px solid rgba(34,197,94,.2); border-radius: var(--radius);
+  padding: 18px; margin-bottom: 16px;
+}
+.ai-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.ai-orb {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--grass), var(--sky));
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.ai-title { font-family: 'Archivo Black', sans-serif; font-size: 16px; }
+.ai-sub { font-size: 11px; color: var(--muted); }
+#ai-output { font-size: 13.5px; line-height: 1.75; }
+.ai-rec { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 12px 14px; margin-top: 10px; }
+.ai-rec-tag { font-size: 11px; font-weight: 600; color: var(--grass); margin-bottom: 3px; }
+.ai-rec-body { font-size: 12.5px; line-height: 1.65; }
+.ai-loading { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; }
+.ai-loading::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--grass); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:.2} 50%{opacity:1} }
+
+/* ── CADDIE PAGE ── */
+.caddie-hole-select { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
+.caddie-recommendation {
+  background: linear-gradient(135deg, rgba(251,191,36,.06), rgba(34,197,94,.04));
+  border: 1px solid rgba(251,191,36,.25); border-radius: var(--radius); padding: 18px;
+}
+.caddie-rec-title { font-family: 'Archivo Black', sans-serif; font-size: 16px; color: var(--gold); margin-bottom: 10px; }
+
+.disc-suggestion {
+  padding: 10px 14px; cursor: pointer; transition: background .1s;
+  border-bottom: 1px solid var(--border);
+}
+.disc-suggestion:last-child { border-bottom: none; }
+.disc-suggestion:hover { background: var(--ink3); }
+@keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+/* ── DISC ADD FORM ── */
+.type-btn {
+  background: var(--ink3); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'Archivo', sans-serif;
+  font-size: 11px; font-weight: 600; padding: 5px 10px;
+  border-radius: 6px; cursor: pointer; transition: all .15s;
+  white-space: nowrap;
+}
+.type-btn:hover { border-color: var(--muted); color: var(--text); }
+.type-btn.active { background: rgba(34,197,94,.12); border-color: var(--grass); color: var(--grass); }
+
+.flight-group { display: flex; flex-direction: column; gap: 8px; }
+.flight-label { display: flex; align-items: baseline; gap: 8px; }
+.flight-label > span:first-child { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); }
+.flight-hint { font-size: 10px; color: var(--muted); flex: 1; }
+.flight-selected-val { font-family: 'Fira Code', monospace; font-size: 13px; font-weight: 600; color: var(--grass); min-width: 20px; text-align: right; }
+
+.flight-btn-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.fnum-btn {
+  width: 34px; height: 34px;
+  background: var(--ink3); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'Fira Code', monospace;
+  font-size: 12px; font-weight: 500;
+  border-radius: 7px; cursor: pointer; transition: all .12s;
+  display: flex; align-items: center; justify-content: center;
+}
+.fnum-btn:hover { border-color: var(--dim); color: var(--text); transform: scale(1.05); }
+.fnum-btn.active { background: rgba(34,197,94,.15); border-color: var(--grass); color: var(--grass); font-weight: 700; transform: scale(1.08); box-shadow: 0 0 0 2px rgba(34,197,94,.2); }
+.fnum-understable { border-color: rgba(56,189,248,.2); color: var(--sky); }
+.fnum-understable:hover { border-color: var(--sky); }
+.fnum-understable.active { background: rgba(56,189,248,.15); border-color: var(--sky); color: var(--sky); box-shadow: 0 0 0 2px rgba(56,189,248,.2); }
+.fnum-overstable { border-color: rgba(244,63,94,.2); color: var(--rose); }
+.fnum-overstable:hover { border-color: var(--rose); }
+.fnum-overstable.active { background: rgba(244,63,94,.15); border-color: var(--rose); color: var(--rose); box-shadow: 0 0 0 2px rgba(244,63,94,.2); }
+.fnum-neutral { border-color: rgba(251,191,36,.2); color: var(--gold); }
+.fnum-neutral:hover { border-color: var(--gold); }
+.fnum-neutral.active { background: rgba(251,191,36,.15); border-color: var(--gold); color: var(--gold); box-shadow: 0 0 0 2px rgba(251,191,36,.2); }
+
+.disc-bag { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.disc-card { background: var(--ink2); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; position: relative; }
+.disc-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.disc-type { font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+.disc-nums { display: flex; gap: 4px; flex-wrap: wrap; }
+.dn { font-family: 'Fira Code', monospace; font-size: 10px; background: var(--ink3); border: 1px solid var(--border); color: var(--dim); padding: 2px 6px; border-radius: 4px; }
+.disc-perf { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+.disc-del { position: absolute; top: 9px; right: 9px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; line-height: 1; transition: color .15s; }
+.disc-del:hover { color: var(--rose); }
+
+/* ── SPARKLINE ── */
+.sparkline { display: flex; align-items: flex-end; gap: 2px; height: 28px; }
+.spark-bar { border-radius: 2px 2px 0 0; min-width: 5px; flex: 1; }
+
+/* ── CHIPS ── */
+.chip { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; border: 1px solid; }
+.chip-green { border-color: var(--grass); color: var(--grass); background: rgba(34,197,94,.1); }
+.chip-sky { border-color: var(--sky); color: var(--sky); background: rgba(56,189,248,.1); }
+.chip-fire { border-color: var(--fire); color: var(--fire); background: rgba(251,146,60,.1); }
+.chip-rose { border-color: var(--rose); color: var(--rose); background: rgba(244,63,94,.1); }
+.chip-gold { border-color: var(--gold); color: var(--gold); background: rgba(251,191,36,.1); }
+
+/* ── TWO COL ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 20px; right: 20px; background: var(--ink2); border: 1px solid var(--grass); color: var(--text); font-size: 13px; padding: 10px 16px; border-radius: 8px; z-index: 9999; opacity: 0; transform: translateY(8px); transition: all .2s; pointer-events: none; }
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── MODAL ── */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--ink2); border: 1px solid var(--border); border-radius: 12px; padding: 22px; width: 400px; max-width: 95vw; }
+.modal-title { font-family: 'Archivo Black', sans-serif; font-size: 18px; margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── SCORE LOG TABLE SIDEBAR COURSES ── */
+#course-scroll { flex: 1; overflow-y: auto; padding: 4px 0; }
+
+/* ── HEATMAP ── */
+.heatmap-hole { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.heatmap-label { width: 50px; font-size: 11px; color: var(--muted); text-align: right; flex-shrink: 0; }
+.heatmap-bar { flex: 1; height: 18px; border-radius: 3px; position: relative; overflow: hidden; }
+.heatmap-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+.heatmap-val { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-family: 'Fira Code', monospace; font-size: 10px; }
+
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty p { font-size: 13px; line-height: 1.7; max-width: 300px; margin: 0 auto; }
+
+/* ── PROGRESS RING ── */
+.progress-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.progress-ring-label { font-size: 11px; color: var(--muted); }
+
+/* stagger load */
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.hole-card { animation: fadeUp .2s ease both; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="brand">Caddy<span>AI</span></div>
+  <button class="nav-btn active" onclick="nav('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="nav('caddie')">🎯 AI Caddie</button>
+  <button class="nav-btn" onclick="nav('log')">Log Round</button>
+  <button class="nav-btn" onclick="nav('analytics')">Analytics</button>
+  <button class="nav-btn" onclick="nav('discs')">My Bag</button>
+  <div class="topbar-right">
+    <span class="course-pill" id="active-course-pill">No course selected</span>
+    <label class="btn btn-ghost" style="cursor:pointer">📥 Import CSV<input type="file" accept=".csv" style="display:none" onchange="importCSV(this)"></label>
+    <button class="btn btn-green" onclick="nav('log')">+ Log Round</button>
+  </div>
+  <!-- Mobile: just show import -->
+  <label id="topbar-import" style="display:none;cursor:pointer;margin-left:auto" class="btn btn-ghost">
+    📥<input type="file" accept=".csv" style="display:none" onchange="importCSV(this)">
+  </label>
+</div>
+
+<div id="app">
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-head">
+    <div class="sidebar-label">My Courses</div>
+  </div>
+  <div id="course-scroll"></div>
+  <div style="padding:8px 14px;">
+    <button class="add-course-btn" onclick="openModal('modal-course')">+ Add Course</button>
+  </div>
+  <div class="sidebar-stats">
+    <div class="sidebar-label">Overall</div>
+    <div class="s-stat"><span style="color:var(--muted);font-size:12px">Rounds</span><span class="s-stat-val" id="ss-rounds">—</span></div>
+    <div class="s-stat"><span style="color:var(--muted);font-size:12px">Avg ±par</span><span class="s-stat-val" id="ss-avg">—</span></div>
+    <div class="s-stat"><span style="color:var(--muted);font-size:12px">Birdies</span><span class="s-stat-val" style="color:var(--grass)" id="ss-birdies">—</span></div>
+    <div class="s-stat"><span style="color:var(--muted);font-size:12px">Aces</span><span class="s-stat-val" style="color:var(--gold)" id="ss-aces">—</span></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <!-- PWA Install Banner -->
+    <div id="install-banner" style="display:none;background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(56,189,248,.1));border:1px solid rgba(34,197,94,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:13px;flex:1;min-width:180px"><strong style="color:var(--grass)">📲 Install CaddyAI</strong> — Add to your home screen for the full app experience</div>
+      <button class="btn btn-green" style="font-size:12px" onclick="installApp()">Install App</button>
+      <button class="btn btn-ghost" style="font-size:12px" onclick="dismissInstallBanner()">Later</button>
+    </div>
+    <div class="kpi-row" id="kpi-row"></div>
+    <div class="sec-head">
+      <div class="sec-title" id="dash-title">Select a Course</div>
+      <div class="sec-sub" id="dash-sub"></div>
+    </div>
+    <div class="hole-grid" id="hole-grid"></div>
+  </div>
+
+  <!-- AI CADDIE -->
+  <div id="page-caddie" class="page">
+    <div class="sec-head"><div class="sec-title">🎯 AI Caddie</div><div class="sec-sub">Pre-hole disc & shot recommendations powered by your 10-year history</div></div>
+    <div class="caddie-hole-select">
+      <div class="fg"><label>Course</label><select id="cad-course" onchange="cadUpdateHoles()" style="width:220px"></select></div>
+      <div class="fg"><label>Hole</label><select id="cad-hole" style="width:120px"></select></div>
+      <div class="fg"><label>Conditions</label><select id="cad-conditions" style="width:130px">
+        <option>Calm</option><option>Windy</option><option>Rainy</option><option>Cold</option><option>Hot</option>
+      </select></div>
+      <button class="btn btn-green" onclick="runCaddie()" style="height:36px;margin-top:auto">Get Recommendation</button>
+    </div>
+    <div id="caddie-output">
+      <div class="empty"><div class="empty-icon">🤖</div><p>Select a course and hole above, then click "Get Recommendation" to get your AI caddie's advice before you throw.</p></div>
+    </div>
+  </div>
+
+  <!-- LOG ROUND -->
+  <div id="page-log" class="page">
+    <div class="sec-head"><div class="sec-title">Log a Throw</div></div>
+    <div class="panel">
+      <div class="form-grid">
+        <div class="fg"><label>Course</label><select id="log-course" onchange="logUpdateHoles()"><option value="">— Select —</option></select></div>
+        <div class="fg"><label>Hole</label><select id="log-hole"><option value="">— Select course —</option></select></div>
+        <div class="fg"><label>Date</label><input type="date" id="log-date"></div>
+        <div class="fg"><label>Disc Thrown</label><select id="log-disc"><option value="">— Select —</option></select></div>
+        <div class="fg"><label>Score</label>
+          <select id="log-score">
+            <option value="1">1 — Ace 🎯</option>
+            <option value="2">2</option><option value="3" selected>3</option>
+            <option value="4">4</option><option value="5">5</option>
+            <option value="6">6</option><option value="7">7</option><option value="8">8+</option>
+          </select>
+        </div>
+        <div class="fg"><label>Shot Type</label>
+          <select id="log-shot">
+            <option value="Drive">Drive (tee shot)</option>
+            <option value="Approach">Approach</option>
+            <option value="Putt">Putt / Upshot</option>
+            <option value="Layup">Layup</option>
+          </select>
+        </div>
+        <div class="fg"><label>Conditions</label>
+          <select id="log-cond">
+            <option>Calm</option><option>Windy</option><option>Rainy</option><option>Cold</option><option>Hot</option>
+          </select>
+        </div>
+        <div class="fg"><label>Notes</label><input type="text" id="log-notes" placeholder="e.g. hit tree, headwind"></div>
+      </div>
+
+      <!-- Landing Zone -->
+      <div style="margin-top:14px">
+        <div class="fg" style="flex-direction:row;gap:20px;align-items:flex-start;flex-wrap:wrap">
+          <div class="lz-wrap">
+            <label class="fg" style="padding-bottom:5px">Landing Zone <span style="color:var(--muted);font-size:10px">(click to mark)</span></label>
+            <svg id="lz-svg" viewBox="0 0 160 160">
+              <defs>
+                <radialGradient id="fwGrad" cx="50%" cy="60%" r="55%">
+                  <stop offset="0%" stop-color="#1a3d1a"/>
+                  <stop offset="100%" stop-color="#0d2010"/>
+                </radialGradient>
+              </defs>
+              <rect width="160" height="160" fill="#0a1410" rx="7"/>
+              <!-- Rough -->
+              <ellipse cx="80" cy="85" rx="58" ry="66" fill="#0d1e0f"/>
+              <!-- Fairway -->
+              <ellipse cx="80" cy="88" rx="38" ry="55" fill="url(#fwGrad)" stroke="#2a4a2a" stroke-width="1"/>
+              <!-- Guide rings -->
+              <ellipse cx="80" cy="88" rx="18" ry="22" fill="none" stroke="#1a2f1a" stroke-width="1" stroke-dasharray="3,3"/>
+              <ellipse cx="80" cy="88" rx="32" ry="40" fill="none" stroke="#1a2f1a" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- Tee -->
+              <rect x="69" y="130" width="22" height="13" rx="3" fill="#162616" stroke="#2d4a2d" stroke-width="1"/>
+              <text x="80" y="140" text-anchor="middle" fill="#4a7a4a" font-size="7" font-family="sans-serif" font-weight="600">TEE</text>
+              <!-- Basket -->
+              <circle cx="80" cy="22" r="8" fill="#162616" stroke="#22c55e" stroke-width="1.5"/>
+              <text x="80" y="26" text-anchor="middle" fill="#22c55e" font-size="8" font-family="sans-serif">⛳</text>
+              <!-- OB markers -->
+              <text x="6" y="80" fill="#2a1a1a" font-size="7" font-family="sans-serif" transform="rotate(-90,6,80)">OB</text>
+              <text x="154" y="80" fill="#2a1a1a" font-size="7" font-family="sans-serif" transform="rotate(90,154,80)">OB</text>
+              <!-- Historical dots -->
+              <g id="lz-history"></g>
+              <!-- New dot -->
+              <circle id="lz-new" cx="-20" cy="-20" r="6" fill="#fb923c" stroke="white" stroke-width="1.5" opacity=".9"/>
+            </svg>
+            <div class="lz-legend">
+              <div class="lz-li"><div class="lz-dot" style="background:var(--grass)"></div>Birdie+</div>
+              <div class="lz-li"><div class="lz-dot" style="background:var(--sky)"></div>Par</div>
+              <div class="lz-li"><div class="lz-dot" style="background:var(--rose)"></div>Bogey+</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <div class="fg" style="margin-bottom:10px"><label>Landing Zone Notes</label><textarea id="log-lz-notes" rows="3" placeholder="e.g. landed in rough left, bounced OB..."></textarea></div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.7">
+              💡 <strong style="color:var(--dim)">Tip:</strong> Click anywhere on the fairway map to mark where your disc landed. Historical throws for this hole show automatically so you can see your patterns.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-green" onclick="saveThrow()">Save Throw</button>
+        <button class="btn btn-ghost" onclick="clearLog()">Clear</button>
+      </div>
+    </div>
+
+    <div class="sec-head"><div class="sec-title">Recent Throws</div></div>
+    <div class="panel" style="padding:0;overflow:hidden">
+      <table class="tbl" id="recent-tbl">
+        <thead><tr><th>Date</th><th>Course</th><th>Hole</th><th>Disc</th><th>Type</th><th>Score</th><th>Cond.</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="recent-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div id="page-analytics" class="page">
+    <div class="sec-head"><div class="sec-title">Analytics</div><div class="sec-sub">Deep dive into your game</div></div>
+
+    <!-- AI Analysis -->
+    <div class="ai-panel">
+      <div class="ai-head">
+        <div class="ai-orb">🧠</div>
+        <div><div class="ai-title">AI Game Analysis</div><div class="ai-sub">Personalized insights based on your 10-year history</div></div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="ai-course" style="background:var(--ink3);border:1px solid var(--border);color:var(--text);font-family:Archivo,sans-serif;font-size:12px;padding:7px 10px;border-radius:7px;outline:none" onchange="aiUpdateHoles()">
+            <option value="">All Courses</option>
+          </select>
+          <select id="ai-hole" style="background:var(--ink3);border:1px solid var(--border);color:var(--text);font-family:Archivo,sans-serif;font-size:12px;padding:7px 10px;border-radius:7px;outline:none">
+            <option value="">All Holes</option>
+          </select>
+          <button class="btn btn-green" onclick="runAnalysis()">Analyze My Game</button>
+        </div>
+      </div>
+      <div id="ai-output"><div style="font-size:13px;color:var(--muted)">Select filters and click Analyze to get personalized coaching from your real data.</div></div>
+    </div>
+
+    <div class="two-col">
+      <!-- Hole Heatmap -->
+      <div class="panel">
+        <div class="panel-title">🌡️ Hole Difficulty Heatmap <span style="font-size:10px;color:var(--muted);font-weight:400">(avg score vs par)</span></div>
+        <div id="heatmap-content"></div>
+      </div>
+
+      <!-- Score Distribution -->
+      <div class="panel">
+        <div class="panel-title">📊 Score Distribution</div>
+        <div id="score-dist"></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- Trend over time -->
+      <div class="panel">
+        <div class="panel-title">📈 Performance Trend <span style="font-size:10px;color:var(--muted);font-weight:400">(last 20 rounds)</span></div>
+        <div id="trend-chart"></div>
+      </div>
+
+      <!-- Weakness/Strength summary -->
+      <div class="panel">
+        <div class="panel-title">💪 Strengths & Weaknesses</div>
+        <div id="sw-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCS -->
+  <div id="page-discs" class="page">
+    <div class="sec-head"><div class="sec-title">My Bag</div><div class="sec-sub" id="disc-count-sub"></div></div>
+    <div class="disc-bag" id="disc-bag"></div>
+
+    <div class="sec-head" style="margin-top:8px"><div class="sec-title">Add Disc</div></div>
+    <div class="panel" id="add-disc-panel">
+
+      <!-- Row 1: Name + Type -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div class="fg">
+          <label style="display:flex;align-items:center;gap:8px">
+            Disc Name
+            <span id="lookup-status" style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;display:none"></span>
+          </label>
+          <div style="position:relative">
+            <input type="text" id="nd-name" placeholder="e.g. Innova Destroyer" oninput="scheduleDiscLookup(this.value)" autocomplete="off">
+            <div id="lookup-spinner" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--grass);border-radius:50%;animation:spin .6s linear infinite"></div>
+          </div>
+          <div id="disc-suggestions" style="display:none;position:absolute;z-index:50;background:var(--ink2);border:1px solid var(--border);border-radius:8px;margin-top:4px;min-width:260px;box-shadow:0 8px 24px rgba(0,0,0,.4);overflow:hidden"></div>
+        </div>
+        <div class="fg"><label>Type</label>
+          <div id="nd-type-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
+            <button class="type-btn active" data-val="Distance Driver" onclick="selectType(this)">💨 Distance</button>
+            <button class="type-btn" data-val="Fairway Driver" onclick="selectType(this)">🎯 Fairway</button>
+            <button class="type-btn" data-val="Hybrid Driver" onclick="selectType(this)">⚡ Hybrid</button>
+            <button class="type-btn" data-val="Midrange" onclick="selectType(this)">🔵 Midrange</button>
+            <button class="type-btn" data-val="Putter" onclick="selectType(this)">🟢 Putter</button>
+          </div>
+          <input type="hidden" id="nd-type" value="Distance Driver">
+        </div>
+      </div>
+
+      <!-- Flight Numbers -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-bottom:20px">
+
+        <!-- Speed -->
+        <div class="flight-group">
+          <div class="flight-label">
+            <span>Speed</span>
+            <span class="flight-hint">How fast you need to throw</span>
+            <span class="flight-selected-val" id="nd-speed-val">—</span>
+          </div>
+          <div class="flight-btn-row" id="nd-speed-btns">
+            <button class="fnum-btn" data-group="speed" data-val="1" onclick="selectFlight(this)">1</button>
+            <button class="fnum-btn" data-group="speed" data-val="2" onclick="selectFlight(this)">2</button>
+            <button class="fnum-btn" data-group="speed" data-val="3" onclick="selectFlight(this)">3</button>
+            <button class="fnum-btn" data-group="speed" data-val="4" onclick="selectFlight(this)">4</button>
+            <button class="fnum-btn" data-group="speed" data-val="5" onclick="selectFlight(this)">5</button>
+            <button class="fnum-btn" data-group="speed" data-val="6" onclick="selectFlight(this)">6</button>
+            <button class="fnum-btn" data-group="speed" data-val="7" onclick="selectFlight(this)">7</button>
+            <button class="fnum-btn" data-group="speed" data-val="8" onclick="selectFlight(this)">8</button>
+            <button class="fnum-btn" data-group="speed" data-val="9" onclick="selectFlight(this)">9</button>
+            <button class="fnum-btn" data-group="speed" data-val="10" onclick="selectFlight(this)">10</button>
+            <button class="fnum-btn" data-group="speed" data-val="11" onclick="selectFlight(this)">11</button>
+            <button class="fnum-btn" data-group="speed" data-val="12" onclick="selectFlight(this)">12</button>
+            <button class="fnum-btn" data-group="speed" data-val="13" onclick="selectFlight(this)">13</button>
+            <button class="fnum-btn" data-group="speed" data-val="14" onclick="selectFlight(this)">14</button>
+          </div>
+        </div>
+
+        <!-- Glide -->
+        <div class="flight-group">
+          <div class="flight-label">
+            <span>Glide</span>
+            <span class="flight-hint">How long it stays airborne</span>
+            <span class="flight-selected-val" id="nd-glide-val">—</span>
+          </div>
+          <div class="flight-btn-row" id="nd-glide-btns">
+            <button class="fnum-btn" data-group="glide" data-val="1" onclick="selectFlight(this)">1</button>
+            <button class="fnum-btn" data-group="glide" data-val="2" onclick="selectFlight(this)">2</button>
+            <button class="fnum-btn" data-group="glide" data-val="3" onclick="selectFlight(this)">3</button>
+            <button class="fnum-btn" data-group="glide" data-val="4" onclick="selectFlight(this)">4</button>
+            <button class="fnum-btn" data-group="glide" data-val="5" onclick="selectFlight(this)">5</button>
+            <button class="fnum-btn" data-group="glide" data-val="6" onclick="selectFlight(this)">6</button>
+            <button class="fnum-btn" data-group="glide" data-val="7" onclick="selectFlight(this)">7</button>
+          </div>
+        </div>
+
+        <!-- Turn -->
+        <div class="flight-group">
+          <div class="flight-label">
+            <span>Turn</span>
+            <span class="flight-hint">High-speed right drift (RHBH)</span>
+            <span class="flight-selected-val" id="nd-turn-val">—</span>
+          </div>
+          <div class="flight-btn-row" id="nd-turn-btns">
+            <button class="fnum-btn fnum-understable" data-group="turn" data-val="-5" onclick="selectFlight(this)">-5</button>
+            <button class="fnum-btn fnum-understable" data-group="turn" data-val="-4" onclick="selectFlight(this)">-4</button>
+            <button class="fnum-btn fnum-understable" data-group="turn" data-val="-3" onclick="selectFlight(this)">-3</button>
+            <button class="fnum-btn fnum-understable" data-group="turn" data-val="-2" onclick="selectFlight(this)">-2</button>
+            <button class="fnum-btn fnum-understable" data-group="turn" data-val="-1" onclick="selectFlight(this)">-1</button>
+            <button class="fnum-btn" data-group="turn" data-val="0" onclick="selectFlight(this)">0</button>
+            <button class="fnum-btn fnum-overstable" data-group="turn" data-val="1" onclick="selectFlight(this)">+1</button>
+          </div>
+        </div>
+
+        <!-- Fade -->
+        <div class="flight-group">
+          <div class="flight-label">
+            <span>Fade</span>
+            <span class="flight-hint">Low-speed left finish (RHBH)</span>
+            <span class="flight-selected-val" id="nd-fade-val">—</span>
+          </div>
+          <div class="flight-btn-row" id="nd-fade-btns">
+            <button class="fnum-btn fnum-understable" data-group="fade" data-val="0" onclick="selectFlight(this)">0</button>
+            <button class="fnum-btn fnum-neutral" data-group="fade" data-val="1" onclick="selectFlight(this)">1</button>
+            <button class="fnum-btn fnum-neutral" data-group="fade" data-val="2" onclick="selectFlight(this)">2</button>
+            <button class="fnum-btn fnum-overstable" data-group="fade" data-val="3" onclick="selectFlight(this)">3</button>
+            <button class="fnum-btn fnum-overstable" data-group="fade" data-val="4" onclick="selectFlight(this)">4</button>
+            <button class="fnum-btn fnum-overstable" data-group="fade" data-val="5" onclick="selectFlight(this)">5</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Flight plate preview -->
+      <div id="flight-preview" style="display:none;background:var(--ink3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Flight Numbers</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:20px;font-weight:500;color:var(--sky)" id="fp-speed">—</div><div style="font-size:9px;color:var(--muted);margin-top:2px">SPEED</div></div>
+          <div style="color:var(--border);font-size:20px">/</div>
+          <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:20px;font-weight:500;color:var(--grass)" id="fp-glide">—</div><div style="font-size:9px;color:var(--muted);margin-top:2px">GLIDE</div></div>
+          <div style="color:var(--border);font-size:20px">/</div>
+          <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:20px;font-weight:500;color:var(--fire)" id="fp-turn">—</div><div style="font-size:9px;color:var(--muted);margin-top:2px">TURN</div></div>
+          <div style="color:var(--border);font-size:20px">/</div>
+          <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:20px;font-weight:500;color:var(--rose)" id="fp-fade">—</div><div style="font-size:9px;color:var(--muted);margin-top:2px">FADE</div></div>
+        </div>
+        <div id="fp-stability-tag" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid"></div>
+        <div id="fp-flight-desc" style="font-size:11px;color:var(--muted);flex:1;min-width:150px"></div>
+      </div>
+
+      <!-- Plastic/notes + Add button -->
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div class="fg" style="flex:1;min-width:200px"><label>Plastic / Notes</label><input type="text" id="nd-notes" placeholder="e.g. Champion plastic, overstable bomber"></div>
+        <button class="btn btn-green" style="height:36px;white-space:nowrap" onclick="addDisc()">+ Add to Bag</button>
+        <button class="btn btn-ghost" style="height:36px" onclick="clearDiscForm()">Clear</button>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODALS -->
+<div class="modal-bg" id="modal-course">
+  <div class="modal">
+    <div class="modal-title">Add Course</div>
+    <div class="fg" style="margin-bottom:10px"><label>Course Name</label><input type="text" id="nc-name" placeholder="e.g. Maple Hill DGC"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Number of Holes</label><input type="number" id="nc-holes" value="18" min="9" max="36"></div>
+    <div class="fg"><label>Par per hole (comma separated)</label><input type="text" id="nc-pars" placeholder="3,3,4,3,3,3,3,3,4,..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-course')">Cancel</button>
+      <button class="btn btn-green" onclick="addCourse()">Add Course</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav id="mobile-nav">
+  <button class="mob-nav-btn active" onclick="nav('dashboard');setMobNav(this)">
+    <span class="icon">📊</span>Dashboard
+  </button>
+  <button class="mob-nav-btn" onclick="nav('caddie');setMobNav(this)">
+    <span class="icon">🎯</span>Caddie
+  </button>
+  <button class="mob-nav-btn" onclick="nav('log');setMobNav(this)">
+    <span class="icon">✏️</span>Log
+  </button>
+  <button class="mob-nav-btn" onclick="nav('analytics');setMobNav(this)">
+    <span class="icon">📈</span>Analytics
+  </button>
+  <button class="mob-nav-btn" onclick="nav('discs');setMobNav(this)">
+    <span class="icon">🥏</span>My Bag
+  </button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+const UDISC = {"courses":[{"id":"c_black_diamond_at_eme","name":"Black Diamond at Emery Park","holes":18,"pars":[4,4,4,4,4,4,4,4,3,3,5,4,3,3,4,4,4,4]},{"id":"c_lighthouse_at_como_l","name":"Lighthouse at Como Lake","holes":18,"pars":[3,4,4,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3]},{"id":"c_ellicott_creek_park","name":"Ellicott Creek Park","holes":18,"pars":[3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_the_27_at_joseph_dav","name":"The 27 at Joseph Davis State Park","holes":27,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_the_ravine_at_chestn","name":"The Ravine at Chestnut Ridge","holes":18,"pars":[3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_royalton_ravine","name":"Royalton Ravine","holes":18,"pars":[3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3]},{"id":"c_hawk_s_landing","name":"Hawk's Landing","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_the_greens_dgc_at_ou","name":"The Greens DGC at Outwater Memorial Park","holes":18,"pars":[3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_bond_lake_disc_golf_","name":"Bond Lake Disc Golf Course","holes":18,"pars":[3,3,3,4,3,4,3,3,3,3,3,3,3,3,3,3,3,4]},{"id":"c_pine_woods_park_dgc","name":"Pine Woods Park DGC","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_blue_heron_at_beaver","name":"Blue Heron at Beaver Island State Park","holes":18,"pars":[3,3,3,4,3,3,3,3,3,3,3,4,3,4,4,3,3,4]},{"id":"c_royalton_ravine","name":"Royalton Ravine","holes":18,"pars":[3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3]},{"id":"c_newfane_pro_am_blarn","name":"Newfane Pro-Am/Blarney Stone","holes":18,"pars":[3,3,5,3,3,4,3,3,3,3,4,5,3,3,3,3,3,4]},{"id":"c_maple_hill","name":"Maple Hill","holes":18,"pars":[4,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,4,4]}],"holeStats":{"c_black_diamond_at_eme":{"1":{"count":48,"avg":5.75,"best":3,"worst":9,"scores":[5,5,4,4,7,8,5,9,6,6,6,4,5,6,5,5,9,7,8,7]},"2":{"count":48,"avg":4.083,"best":3,"worst":6,"scores":[3,4,4,3,4,5,4,3,4,3,3,6,4,3,3,5,5,3,5,4]},"3":{"count":48,"avg":3.729,"best":3,"worst":6,"scores":[3,4,3,3,3,3,3,4,3,4,3,4,5,4,4,4,5,3,4,5]},"4":{"count":48,"avg":3.792,"best":2,"worst":6,"scores":[3,6,4,4,3,3,3,6,3,4,4,5,4,6,3,4,4,5,5,5]},"5":{"count":48,"avg":4.229,"best":2,"worst":7,"scores":[3,5,4,3,3,6,4,6,4,5,4,4,4,5,7,5,6,5,6,5]},"6":{"count":48,"avg":4.312,"best":3,"worst":7,"scores":[3,3,5,4,6,4,3,5,7,4,4,5,5,7,4,6,5,3,3,4]},"7":{"count":48,"avg":4.083,"best":2,"worst":6,"scores":[4,4,5,3,3,4,2,6,6,3,4,3,5,6,4,6,4,4,4,5]},"8":{"count":48,"avg":4.646,"best":3,"worst":10,"scores":[3,3,3,5,4,7,10,5,4,4,6,4,6,5,6,6,4,3,3,5]},"9":{"count":48,"avg":2.854,"best":2,"worst":5,"scores":[2,3,2,2,2,3,2,3,3,3,2,3,2,4,3,3,3,4,3,3]},"10":{"count":45,"avg":3.511,"best":2,"worst":5,"scores":[3,4,4,3,3,4,3,3,4,4,3,3,4,4,5,3,5,4,5,4]},"11":{"count":45,"avg":5.022,"best":3,"worst":8,"scores":[5,6,5,4,4,5,4,6,5,4,6,7,4,7,4,7,6,4,5,6]},"12":{"count":45,"avg":4.8,"best":3,"worst":7,"scores":[3,5,5,4,4,6,5,6,5,4,4,5,5,6,4,6,6,5,6,4]},"13":{"count":45,"avg":3.444,"best":2,"worst":5,"scores":[2,3,3,2,4,3,3,4,5,3,4,4,2,5,4,4,4,4,3,3]},"14":{"count":44,"avg":3.568,"best":2,"worst":7,"scores":[3,6,4,3,2,5,2,4,3,3,3,3,3,5,5,6,7,3,4,5]},"15":{"count":44,"avg":3.909,"best":2,"worst":7,"scores":[4,5,6,3,4,3,3,4,5,3,3,3,4,4,3,6,5,5,4,4]},"16":{"count":44,"avg":3.727,"best":3,"worst":6,"scores":[5,3,5,3,3,4,3,4,3,4,4,3,4,5,3,6,4,3,4,4]},"17":{"count":44,"avg":4.955,"best":3,"worst":9,"scores":[3,6,5,4,5,4,5,5,9,5,6,5,4,5,4,7,6,6,4,4]},"18":{"count":45,"avg":3.933,"best":2,"worst":6,"scores":[4,4,3,4,3,4,4,4,3,3,4,2,3,4,4,5,4,4,4,5]}},"c_lighthouse_at_como_l":{"1":{"count":88,"avg":4.193,"best":2,"worst":6,"scores":[4,5,6,5,3,3,4,3,4,3,3,3,4,4,3,5,4,3,4,4]},"2":{"count":88,"avg":3.898,"best":2,"worst":8,"scores":[4,6,3,5,4,3,6,3,3,4,4,5,4,3,3,3,4,4,3,5]},"3":{"count":88,"avg":3.773,"best":3,"worst":6,"scores":[3,4,3,3,3,4,3,4,3,3,4,4,3,5,3,3,4,5,3,4]},"4":{"count":88,"avg":3.273,"best":2,"worst":5,"scores":[3,4,4,3,3,4,3,3,4,3,3,4,3,4,3,4,4,4,5,3]},"5":{"count":88,"avg":2.705,"best":2,"worst":4,"scores":[2,3,3,3,3,3,4,3,4,2,2,3,3,3,3,2,3,3,3,4]},"6":{"count":88,"avg":2.909,"best":2,"worst":6,"scores":[3,5,4,3,3,3,3,4,3,3,3,3,3,3,4,3,3,5,3,3]},"7":{"count":88,"avg":3.761,"best":2,"worst":6,"scores":[4,5,4,4,5,3,3,4,4,4,6,4,5,6,6,4,4,5,5,6]},"8":{"count":86,"avg":3.558,"best":2,"worst":7,"scores":[3,3,3,5,4,4,4,3,4,4,4,4,4,3,4,3,4,7,5,4]},"9":{"count":86,"avg":2.872,"best":2,"worst":5,"scores":[3,4,3,2,3,3,3,3,3,2,3,3,3,3,5,3,4,4,3,4]},"10":{"count":84,"avg":4.024,"best":2,"worst":8,"scores":[4,4,5,4,4,4,5,8,6,4,4,5,6,4,5,4,6,5,5,5]},"11":{"count":83,"avg":3.313,"best":2,"worst":6,"scores":[3,4,3,4,3,3,3,6,3,3,3,3,4,5,5,3,5,3,4,5]},"12":{"count":81,"avg":3.444,"best":2,"worst":6,"scores":[3,3,5,4,3,3,3,4,3,4,4,4,4,4,4,3,5,6,3,4]},"13":{"count":81,"avg":2.889,"best":2,"worst":5,"scores":[3,3,2,4,3,3,2,5,3,3,3,3,3,3,3,4,3,3,3,4]},"14":{"count":81,"avg":2.827,"best":2,"worst":6,"scores":[5,2,3,2,5,3,3,3,3,3,3,3,4,2,2,4,3,3,3,4]},"15":{"count":83,"avg":3.434,"best":2,"worst":5,"scores":[3,3,3,4,5,4,4,3,3,5,3,4,3,3,3,4,3,3,5,4]},"16":{"count":82,"avg":3.378,"best":2,"worst":5,"scores":[3,4,3,2,3,4,4,3,3,4,3,4,4,3,3,3,4,3,3,3]},"17":{"count":82,"avg":2.927,"best":2,"worst":5,"scores":[2,3,2,3,4,3,4,2,4,3,3,4,4,3,2,4,5,3,3,4]},"18":{"count":82,"avg":3.061,"best":2,"worst":5,"scores":[3,3,3,3,2,3,3,3,4,3,3,3,4,3,3,4,5,4,4,4]}},"c_ellicott_creek_park":{"1":{"count":62,"avg":2.661,"best":2,"worst":4,"scores":[2,2,3,3,2,3,2,2,4,4,3,3,3,3,4,2,3,3,4,3]},"2":{"count":62,"avg":2.871,"best":2,"worst":5,"scores":[2,3,4,3,4,3,3,3,4,3,4,4,3,3,2,3,2,3,4,3]},"3":{"count":62,"avg":2.774,"best":2,"worst":4,"scores":[2,3,3,3,4,2,3,2,2,4,3,3,3,3,4,3,2,3,3,3]},"4":{"count":62,"avg":3.823,"best":2,"worst":6,"scores":[3,3,4,3,3,4,4,3,4,4,4,3,3,4,4,3,2,4,3,3]},"5":{"count":62,"avg":3.274,"best":2,"worst":5,"scores":[3,3,5,3,3,4,3,4,3,4,3,3,4,3,3,4,5,4,3,3]},"6":{"count":62,"avg":3.032,"best":2,"worst":5,"scores":[3,3,3,2,3,3,2,3,2,2,4,3,4,3,4,3,2,3,2,3]},"7":{"count":62,"avg":3.29,"best":2,"worst":6,"scores":[3,3,4,3,3,3,2,3,3,3,2,5,2,3,4,3,2,3,3,4]},"8":{"count":63,"avg":3.143,"best":2,"worst":4,"scores":[3,3,3,3,3,2,4,3,3,4,3,4,4,3,4,4,4,3,4,3]},"9":{"count":63,"avg":2.952,"best":2,"worst":5,"scores":[3,3,3,3,2,2,2,5,3,3,3,3,3,3,3,3,4,3,4,3]},"10":{"count":62,"avg":2.903,"best":2,"worst":6,"scores":[2,3,3,2,2,3,3,3,3,2,2,3,3,2,3,2,2,4,3,3]},"11":{"count":62,"avg":2.661,"best":2,"worst":4,"scores":[3,3,2,2,3,3,2,2,2,2,3,3,3,4,2,3,2,3,2,3]},"12":{"count":63,"avg":2.921,"best":2,"worst":5,"scores":[3,3,3,3,3,4,2,2,2,2,3,2,3,4,3,3,2,3,4,3]},"13":{"count":61,"avg":3.213,"best":2,"worst":7,"scores":[4,4,3,3,3,3,3,4,2,4,4,3,3,4,2,3,2,3,3,4]},"14":{"count":61,"avg":3.033,"best":2,"worst":5,"scores":[3,3,4,3,4,3,5,3,3,2,3,3,4,3,3,3,4,5,2,3]},"15":{"count":61,"avg":2.885,"best":2,"worst":5,"scores":[2,3,3,3,3,2,3,4,3,2,2,2,3,4,3,2,4,4,3,5]},"16":{"count":61,"avg":2.508,"best":1,"worst":5,"scores":[3,2,2,2,2,2,2,2,4,2,2,4,2,2,3,2,2,3,2,5]},"17":{"count":61,"avg":2.951,"best":2,"worst":5,"scores":[2,3,4,3,3,3,5,4,4,4,4,2,2,2,2,2,3,3,3,4]},"18":{"count":61,"avg":3.279,"best":2,"worst":6,"scores":[3,4,3,3,4,3,3,3,3,4,2,4,6,4,5,3,4,4,3,4]}},"c_bond_lake_disc_golf_":{"1":{"count":49,"avg":3.429,"best":2,"worst":5},"2":{"count":49,"avg":3.347,"best":2,"worst":5},"3":{"count":49,"avg":3.571,"best":3,"worst":6},"4":{"count":49,"avg":4.673,"best":3,"worst":8},"5":{"count":49,"avg":3.041,"best":2,"worst":6},"6":{"count":49,"avg":4.184,"best":2,"worst":7},"7":{"count":49,"avg":3.327,"best":2,"worst":5},"8":{"count":49,"avg":2.735,"best":2,"worst":5},"9":{"count":49,"avg":3.898,"best":2,"worst":6},"10":{"count":49,"avg":3.469,"best":2,"worst":6},"11":{"count":49,"avg":3.041,"best":2,"worst":5},"12":{"count":49,"avg":3.51,"best":2,"worst":6},"13":{"count":49,"avg":2.98,"best":2,"worst":5},"14":{"count":49,"avg":3.49,"best":2,"worst":5},"15":{"count":49,"avg":3.51,"best":2,"worst":5},"16":{"count":49,"avg":2.776,"best":2,"worst":4},"17":{"count":49,"avg":3.98,"best":2,"worst":7},"18":{"count":48,"avg":4.625,"best":3,"worst":9}},"c_the_ravine_at_chestn":{"1":{"count":24,"avg":3.417,"best":2,"worst":5},"2":{"count":24,"avg":3.25,"best":2,"worst":4},"3":{"count":24,"avg":3.083,"best":2,"worst":5},"4":{"count":24,"avg":3.083,"best":2,"worst":4},"5":{"count":24,"avg":3.75,"best":3,"worst":6},"6":{"count":24,"avg":3.375,"best":2,"worst":5},"7":{"count":23,"avg":3.478,"best":2,"worst":6},"8":{"count":23,"avg":3.217,"best":2,"worst":6},"9":{"count":23,"avg":2.783,"best":2,"worst":4},"10":{"count":23,"avg":3.304,"best":2,"worst":6},"11":{"count":23,"avg":3.609,"best":2,"worst":5},"12":{"count":23,"avg":3.391,"best":2,"worst":5},"13":{"count":22,"avg":3.136,"best":2,"worst":4},"14":{"count":22,"avg":3.182,"best":2,"worst":5},"15":{"count":23,"avg":3.217,"best":2,"worst":5},"16":{"count":23,"avg":2.783,"best":2,"worst":4},"17":{"count":23,"avg":2.739,"best":2,"worst":4},"18":{"count":23,"avg":3.087,"best":2,"worst":4}},"c_royalton_ravine":{"1":{"count":20,"avg":2.75,"best":2,"worst":4},"2":{"count":20,"avg":3.95,"best":2,"worst":6},"3":{"count":20,"avg":2.9,"best":2,"worst":4},"4":{"count":20,"avg":3.6,"best":3,"worst":5},"5":{"count":20,"avg":4.1,"best":3,"worst":6},"6":{"count":20,"avg":3.1,"best":2,"worst":4},"7":{"count":20,"avg":3.25,"best":2,"worst":5},"8":{"count":20,"avg":2.95,"best":2,"worst":5},"9":{"count":20,"avg":4.25,"best":3,"worst":6},"10":{"count":20,"avg":3.95,"best":3,"worst":7},"11":{"count":20,"avg":2.55,"best":1,"worst":4},"12":{"count":20,"avg":3.75,"best":2,"worst":6},"13":{"count":20,"avg":3.9,"best":3,"worst":5},"14":{"count":20,"avg":3.15,"best":2,"worst":5},"15":{"count":20,"avg":4.0,"best":3,"worst":6},"16":{"count":20,"avg":3.75,"best":2,"worst":6},"17":{"count":20,"avg":2.95,"best":2,"worst":4},"18":{"count":20,"avg":3.45,"best":2,"worst":7}},"c_hawk_s_landing":{"1":{"count":12,"avg":2.667,"best":2,"worst":3},"2":{"count":12,"avg":2.917,"best":2,"worst":5},"3":{"count":12,"avg":2.333,"best":1,"worst":4},"4":{"count":12,"avg":3.0,"best":2,"worst":4},"5":{"count":12,"avg":2.917,"best":2,"worst":4},"6":{"count":12,"avg":3.083,"best":2,"worst":4},"7":{"count":12,"avg":2.25,"best":1,"worst":3},"8":{"count":12,"avg":2.75,"best":2,"worst":5},"9":{"count":12,"avg":2.917,"best":2,"worst":4},"10":{"count":12,"avg":3.0,"best":2,"worst":5},"11":{"count":12,"avg":3.167,"best":2,"worst":4},"12":{"count":12,"avg":3.417,"best":3,"worst":4},"13":{"count":12,"avg":2.833,"best":1,"worst":4},"14":{"count":12,"avg":3.0,"best":2,"worst":5},"15":{"count":12,"avg":3.083,"best":2,"worst":4},"16":{"count":12,"avg":2.833,"best":2,"worst":4},"17":{"count":12,"avg":2.833,"best":2,"worst":4},"18":{"count":12,"avg":2.667,"best":2,"worst":4}},"c_blue_heron_at_beaver":{"1":{"count":21,"avg":2.905,"best":2,"worst":5},"2":{"count":21,"avg":2.905,"best":2,"worst":4},"3":{"count":21,"avg":3.095,"best":2,"worst":6},"4":{"count":21,"avg":3.238,"best":2,"worst":5},"5":{"count":21,"avg":3.143,"best":2,"worst":5},"6":{"count":21,"avg":3.524,"best":2,"worst":5},"7":{"count":21,"avg":3.381,"best":2,"worst":5},"8":{"count":21,"avg":3.333,"best":2,"worst":5},"9":{"count":21,"avg":3.333,"best":3,"worst":5},"10":{"count":21,"avg":2.857,"best":2,"worst":4},"11":{"count":21,"avg":3.095,"best":2,"worst":5},"12":{"count":21,"avg":3.619,"best":3,"worst":5},"13":{"count":21,"avg":3.048,"best":2,"worst":6},"14":{"count":21,"avg":3.571,"best":2,"worst":6},"15":{"count":21,"avg":3.476,"best":3,"worst":5},"16":{"count":21,"avg":3.048,"best":2,"worst":4},"17":{"count":21,"avg":2.952,"best":2,"worst":4},"18":{"count":21,"avg":4.143,"best":3,"worst":6}},"c_pine_woods_park_dgc":{"1":{"count":22,"avg":2.773,"best":2,"worst":4},"2":{"count":22,"avg":2.727,"best":2,"worst":4},"3":{"count":22,"avg":2.818,"best":1,"worst":4},"4":{"count":22,"avg":2.727,"best":2,"worst":4},"5":{"count":22,"avg":3.0,"best":2,"worst":5},"6":{"count":22,"avg":2.955,"best":2,"worst":4},"7":{"count":22,"avg":3.0,"best":2,"worst":4},"8":{"count":22,"avg":2.773,"best":1,"worst":4},"9":{"count":22,"avg":2.955,"best":2,"worst":5},"10":{"count":22,"avg":2.773,"best":2,"worst":4},"11":{"count":22,"avg":2.818,"best":2,"worst":4},"12":{"count":22,"avg":3.227,"best":2,"worst":4},"13":{"count":18,"avg":2.611,"best":2,"worst":4},"14":{"count":18,"avg":2.944,"best":2,"worst":4},"15":{"count":18,"avg":2.889,"best":2,"worst":4},"16":{"count":18,"avg":3.0,"best":2,"worst":4},"17":{"count":18,"avg":3.167,"best":2,"worst":5},"18":{"count":18,"avg":2.833,"best":2,"worst":4}},"c_maple_hill":{"1":{"count":6,"avg":3.0,"best":2,"worst":4,"scores":[4,2,4,3,2,3]},"2":{"count":6,"avg":3.667,"best":2,"worst":5,"scores":[2,5,3,5,3,4]},"3":{"count":6,"avg":4.0,"best":3,"worst":6,"scores":[4,6,3,4,3,4]},"4":{"count":6,"avg":2.667,"best":2,"worst":3,"scores":[3,2,3,3,3,2]},"5":{"count":6,"avg":3.667,"best":3,"worst":5,"scores":[3,5,3,4,3,4]},"6":{"count":6,"avg":3.667,"best":2,"worst":5,"scores":[2,4,4,4,3,5]},"7":{"count":6,"avg":3.167,"best":3,"worst":4,"scores":[3,3,4,3,3,3]},"8":{"count":6,"avg":3.5,"best":2,"worst":4,"scores":[3,4,4,4,4,2]},"9":{"count":6,"avg":2.667,"best":2,"worst":5,"scores":[3,2,5,2,2,2]},"10":{"count":6,"avg":4.167,"best":3,"worst":6,"scores":[3,3,4,4,5,6]},"11":{"count":6,"avg":3.833,"best":3,"worst":5,"scores":[3,5,5,3,3,4]},"12":{"count":6,"avg":3.5,"best":3,"worst":4,"scores":[4,4,4,3,3,3]},"13":{"count":6,"avg":3.5,"best":3,"worst":4,"scores":[3,4,3,4,4,3]},"14":{"count":6,"avg":2.667,"best":2,"worst":4,"scores":[2,3,2,4,2,3]},"15":{"count":6,"avg":2.5,"best":2,"worst":3,"scores":[3,2,3,2,3,2]},"16":{"count":6,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3,3,3]},"17":{"count":6,"avg":4.333,"best":3,"worst":7,"scores":[3,4,7,4,4,4]},"18":{"count":6,"avg":5.0,"best":4,"worst":7,"scores":[5,4,7,4,5,5]}}}};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let S = { courses:[], discs:[], throws:[], holeStats:{}, selectedCourse:null, landingX:null, landingY:null };
+
+function save(){
+  try{
+    localStorage.setItem('cai3', JSON.stringify({
+      courses: S.courses,
+      discs: S.discs,
+      throws: S.throws,
+      selectedCourse: S.selectedCourse
+    }));
+  } catch(e){ console.error('Save failed:', e); }
+}
+
+function load(){
+  try{
+    // Try current key first
+    let raw = localStorage.getItem('cai3');
+
+    // Migrate from older keys if present
+    if(!raw) raw = localStorage.getItem('caddyai_state');
+    if(!raw) raw = localStorage.getItem('disciq_state');
+
+    if(raw){
+      const d = JSON.parse(raw);
+      S.courses = d.courses || [];
+      S.discs = d.discs || [];
+      S.throws = d.throws || [];
+      S.selectedCourse = d.selectedCourse || null;
+
+      // If migrated from old key, save under new key
+      if(!localStorage.getItem('cai3')) save();
+    }
+  } catch(e){ console.error('Load failed:', e); }
+}
+
+function init(){
+  load();
+  // Merge UDISC courses (don't duplicate)
+  UDISC.courses.forEach(c=>{
+    if(!S.courses.find(x=>x.id===c.id)) S.courses.push(c);
+  });
+  S.holeStats = UDISC.holeStats;
+  if(!S.discs.length){
+    S.discs=[
+      {id:'d1',name:'Innova Destroyer',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Champion'},
+      {id:'d2',name:'Innova Roc3',type:'Midrange',speed:7,glide:4,turn:0,fade:3,notes:''},
+      {id:'d3',name:'Discraft Buzzz',type:'Midrange',speed:5,glide:4,turn:-1,fade:1,notes:''},
+      {id:'d4',name:'Innova Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:''},
+      {id:'d5',name:'Latitude 64 Flow',type:'Fairway Driver',speed:9,glide:6,turn:-1,fade:2,notes:''},
+    ];
+  }
+  // Restore selected course, default to Lighthouse
+  if(!S.selectedCourse || !S.courses.find(c=>c.id===S.selectedCourse)){
+    S.selectedCourse = S.courses.find(c=>c.id==='c_lighthouse_at_como_l')?.id || S.courses[0]?.id;
+  }
+  save();
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+const fmtAvg = v => v ? v.toFixed(2) : '—';
+
+function getHoleStats(cid, hole){
+  const s = S.holeStats[cid]?.[hole];
+  const manual = S.throws.filter(t=>t.courseId===cid&&t.hole===hole);
+  if(manual.length){
+    const scores = manual.map(t=>t.score);
+    return { count:scores.length, avg:avg(scores), best:Math.min(...scores), worst:Math.max(...scores), scores, manual:true };
+  }
+  return s || null;
+}
+
+function getCourse(id){ return S.courses.find(c=>c.id===id); }
+
+function scoreVsPar(score, par){
+  const d = score-par;
+  if(d<=-2) return {label:'Eagle',cls:'chip-gold'};
+  if(d===-1) return {label:'Birdie',cls:'chip-green'};
+  if(d===0)  return {label:'Par',cls:'chip-sky'};
+  if(d===1)  return {label:'Bogey',cls:'chip-fire'};
+  return {label:`+${d}`,cls:'chip-rose'};
+}
+
+function avgColor(avg, par){
+  const d = avg-par;
+  if(d<=-0.5) return 'var(--grass)';
+  if(d<=0.1)  return 'var(--sky)';
+  if(d<=0.8)  return 'var(--fire)';
+  return 'var(--rose)';
+}
+
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2400); }
+
+function courseTotalRounds(cid){
+  const hs = S.holeStats[cid] || {};
+  const h1 = Object.values(hs)[0];
+  return h1 ? h1.count : 0;
+}
+
+function globalStats(){
+  let rounds=437, throws=0, totalDiff=0, birdies=0, aces=0;
+  S.courses.forEach(c=>{
+    const hs = S.holeStats[c.id]||{};
+    Object.entries(hs).forEach(([h,d])=>{
+      const par = c.pars[parseInt(h)-1]||3;
+      throws += d.count;
+      totalDiff += (d.avg-par)*d.count;
+      if(d.scores) d.scores.forEach(s=>{ if(s<par) birdies++; if(s===1) aces++; });
+    });
+  });
+  S.throws.forEach(t=>{
+    const c=getCourse(t.courseId);
+    const par=c?c.pars[t.hole-1]:3;
+    throws++;totalDiff+=t.score-par;
+    if(t.score<par)birdies++;if(t.score===1)aces++;
+  });
+  return { rounds, throws, avgDiff: throws?totalDiff/throws:0, birdies, aces };
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{ if(b.textContent.toLowerCase().replace(/[^a-z]/g,'').includes(page.substring(0,4))) b.classList.add('active'); });
+  if(page==='dashboard') renderDashboard();
+  if(page==='log') renderLog();
+  if(page==='analytics') renderAnalytics();
+  if(page==='discs') renderDiscs();
+  if(page==='caddie') renderCaddie();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════════════
+function renderSidebar(){
+  const el = document.getElementById('course-scroll');
+  const colors = ['var(--grass)','var(--sky)','var(--fire)','var(--gold)','var(--rose)','#c084fc','#34d399','#fb923c'];
+  el.innerHTML = S.courses.slice(0,20).map((c,i)=>{
+    const rounds = courseTotalRounds(c.id);
+    return `<div class="course-item ${S.selectedCourse===c.id?'active':''}" onclick="selectCourse('${c.id}')">
+      <div class="course-dot" style="background:${colors[i%colors.length]}"></div>
+      <div><div class="course-item-name">${c.name}</div><div class="course-item-meta">${c.holes}h · ${rounds} rounds</div></div>
+    </div>`;
+  }).join('');
+  // Sidebar stats
+  const gs = globalStats();
+  document.getElementById('ss-rounds').textContent = gs.rounds;
+  document.getElementById('ss-avg').textContent = (gs.avgDiff>=0?'+':'')+gs.avgDiff.toFixed(2);
+  document.getElementById('ss-avg').style.color = gs.avgDiff<=0?'var(--grass)':'var(--rose)';
+  document.getElementById('ss-birdies').textContent = gs.birdies;
+  document.getElementById('ss-aces').textContent = gs.aces;
+  // Course pill
+  const c = getCourse(S.selectedCourse);
+  document.getElementById('active-course-pill').textContent = c ? c.name : 'No course selected';
+}
+
+function selectCourse(id){ S.selectedCourse=id; save(); renderSidebar(); renderDashboard(); nav('dashboard'); }
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function renderDashboard(){
+  const c = getCourse(S.selectedCourse);
+  const kpiEl = document.getElementById('kpi-row');
+  const title = document.getElementById('dash-title');
+  const sub = document.getElementById('dash-sub');
+  const grid = document.getElementById('hole-grid');
+
+  if(!c){
+    kpiEl.innerHTML=''; title.textContent='Select a Course'; sub.textContent='';
+    grid.innerHTML=`<div class="empty">
+      <div class="empty-icon">🥏</div>
+      <p>Pick a course from the sidebar to see your stats.</p>
+      <div style="margin-top:16px">
+        <label class="btn btn-green" style="cursor:pointer;display:inline-block">
+          📥 Re-import UDisc CSV
+          <input type="file" accept=".csv" style="display:none" onchange="importCSV(this)">
+        </label>
+      </div>
+    </div>`;
+    return;
+  }
+
+  title.textContent = c.name;
+
+  // KPIs
+  let totalAvg=0, totalCount=0, birdies=0, pars=0, bogeys=0, best=99;
+  for(let h=1;h<=c.holes;h++){
+    const s=getHoleStats(c.id,h); if(!s) continue;
+    const par=c.pars[h-1];
+    totalAvg+=s.avg*s.count; totalCount+=s.count;
+    if(s.scores) s.scores.forEach(sc=>{ if(sc<par)birdies++; if(sc===par)pars++; if(sc>par)bogeys++; if(sc<best)best=sc; });
+  }
+  const overallAvg = totalCount?totalAvg/totalCount:0;
+  const parSum = c.pars.slice(0,c.holes).reduce((a,b)=>a+b,0)/c.holes;
+  const vspar = overallAvg - parSum;
+  const rounds = courseTotalRounds(c.id);
+  const birdiePct = totalCount ? ((birdies/totalCount)*100).toFixed(0) : 0;
+
+  sub.textContent = `${rounds} rounds · ${totalCount} holes logged`;
+
+  kpiEl.innerHTML = `
+    <div class="kpi"><div class="kpi-label">Avg Score/Hole</div><div class="kpi-val ${vspar<=0?'green':'fire'}">${fmtAvg(overallAvg)}</div><div class="kpi-delta">${vspar>=0?'+':''}${vspar.toFixed(2)} vs par avg</div></div>
+    <div class="kpi"><div class="kpi-label">Rounds</div><div class="kpi-val sky">${rounds}</div><div class="kpi-delta">since 2016</div></div>
+    <div class="kpi"><div class="kpi-label">Birdie Rate</div><div class="kpi-val green">${birdiePct}%</div><div class="kpi-delta">${birdies} birdies</div></div>
+    <div class="kpi"><div class="kpi-label">Best Score</div><div class="kpi-val gold">${best===99?'—':best}</div><div class="kpi-delta">single hole</div></div>
+    <div class="kpi"><div class="kpi-label">Par Rate</div><div class="kpi-val sky">${totalCount?((pars/totalCount)*100).toFixed(0):0}%</div><div class="kpi-delta">${pars} pars</div></div>
+    <div class="kpi"><div class="kpi-label">Bogey Rate</div><div class="kpi-val rose">${totalCount?((bogeys/totalCount)*100).toFixed(0):0}%</div><div class="kpi-delta">${bogeys} bogeys</div></div>
+  `;
+
+  // Hole cards
+  grid.innerHTML='';
+  for(let h=1;h<=c.holes;h++){
+    const par=c.pars[h-1];
+    const s=getHoleStats(c.id,h);
+    const col = s ? avgColor(s.avg,par) : 'var(--muted)';
+    const diff = s ? (s.avg-par) : null;
+    const isStrength = s && diff <= -0.3;
+    const isProblem = s && diff >= 0.7;
+
+    // Mini sparkline
+    let sparkHTML='';
+    if(s?.scores){
+      const sc=s.scores.slice(-8);
+      const mx=Math.max(...sc)+0.5;
+      sc.forEach(v=>{
+        const pct=((v/mx)*100).toFixed(0);
+        const bc=v<par?'var(--grass)':v===par?'var(--sky)':'var(--rose)';
+        sparkHTML+=`<div class="hc-trend-bar" style="height:${pct}%;background:${bc};opacity:.7"></div>`;
+      });
+    }
+
+    const card = document.createElement('div');
+    card.className = `hole-card${isProblem?' problem':isStrength?' strength':''}`;
+    card.style.animationDelay = ((h-1)*0.02)+'s';
+    card.innerHTML = `
+      ${isProblem?'<div class="hole-badge" style="background:rgba(244,63,94,.15);color:var(--rose)">Weak</div>':''}
+      ${isStrength?'<div class="hole-badge" style="background:rgba(34,197,94,.12);color:var(--grass)">Strong</div>':''}
+      <div class="hc-num">${h}</div>
+      <div class="hc-par">Par ${par} · ${s?s.count:0} rounds</div>
+      <div class="hc-avg" style="color:${col}">${s?fmtAvg(s.avg):'—'}</div>
+      <div class="hc-vs" style="color:${col}">${diff!==null?(diff>=0?'+':'')+diff.toFixed(2)+' vs par':''}</div>
+      <div class="hc-trend">${sparkHTML}</div>
+      ${s?`<div class="hc-rounds">Best: ${s.best} · Worst: ${s.worst}</div>`:'<div class="hc-rounds" style="color:var(--muted)">No data yet</div>'}
+    `;
+    card.onclick=()=>{ S.selectedCourse=c.id; document.getElementById('ai-course').value=c.id; document.getElementById('ai-hole').value=h; nav('analytics'); runAnalysis(); };
+    grid.appendChild(card);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOG ROUND
+// ═══════════════════════════════════════════════════════════
+function renderLog(){
+  const cs=document.getElementById('log-course');
+  cs.innerHTML='<option value="">— Select —</option>'+S.courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  if(S.selectedCourse) cs.value=S.selectedCourse;
+  logUpdateHoles();
+  const ds=document.getElementById('log-disc');
+  ds.innerHTML='<option value="">— Select —</option>'+S.discs.map(d=>`<option value="${d.id}">${d.name} (${d.type})</option>`).join('');
+  document.getElementById('log-date').value=new Date().toISOString().split('T')[0];
+  renderRecentThrows();
+  renderLZHistory();
+}
+
+function logUpdateHoles(){
+  const cid=document.getElementById('log-course').value;
+  const c=getCourse(cid);
+  const sel=document.getElementById('log-hole');
+  if(!c){sel.innerHTML='<option>— Select course first —</option>';return;}
+  sel.innerHTML=Array.from({length:c.holes},(_,i)=>`<option value="${i+1}">Hole ${i+1} (Par ${c.pars[i]})</option>`).join('');
+  renderLZHistory();
+}
+
+function renderLZHistory(){
+  const cid=document.getElementById('log-course')?.value;
+  const hole=parseInt(document.getElementById('log-hole')?.value);
+  const g=document.getElementById('lz-history'); if(!g)return;
+  const throws=S.throws.filter(t=>t.courseId===cid&&t.hole===hole&&t.landingX);
+  const c=getCourse(cid);
+  g.innerHTML=throws.slice(-20).map(t=>{
+    const par=c?c.pars[t.hole-1]:3;
+    const col=t.score<par?'var(--grass)':t.score===par?'var(--sky)':'var(--rose)';
+    return `<circle cx="${t.landingX}" cy="${t.landingY}" r="4" fill="${col}" opacity=".55"/>`;
+  }).join('');
+}
+
+document.addEventListener('change',e=>{
+  if(e.target.id==='log-hole'||e.target.id==='log-course') renderLZHistory();
+});
+
+document.getElementById('lz-svg').addEventListener('click',function(e){
+  const r=this.getBoundingClientRect();
+  const sc=160/r.width;
+  const x=(e.clientX-r.left)*sc, y=(e.clientY-r.top)*sc;
+  S.landingX=x; S.landingY=y;
+  const d=document.getElementById('lz-new');
+  d.setAttribute('cx',x); d.setAttribute('cy',y);
+});
+
+function saveThrow(){
+  const cid=document.getElementById('log-course').value;
+  const hole=parseInt(document.getElementById('log-hole').value);
+  const disc=document.getElementById('log-disc').value;
+  const score=parseInt(document.getElementById('log-score').value);
+  const date=document.getElementById('log-date').value;
+  const cond=document.getElementById('log-cond').value;
+  const shot=document.getElementById('log-shot').value;
+  const notes=document.getElementById('log-notes').value;
+  const lzNotes=document.getElementById('log-lz-notes').value;
+  if(!cid||!hole||!disc){toast('⚠️ Please fill in Course, Hole, and Disc');return;}
+  S.throws.push({id:'t'+Date.now(),courseId:cid,hole,disc,score,date,cond,shot,notes,lzNotes,landingX:S.landingX||80,landingY:S.landingY||80});
+  S.landingX=null; S.landingY=null;
+  document.getElementById('lz-new').setAttribute('cx',-20);
+  document.getElementById('lz-new').setAttribute('cy',-20);
+  save(); renderRecentThrows(); renderLZHistory(); renderSidebar();
+  toast('✅ Throw saved!');
+}
+
+function clearLog(){
+  ['log-disc','log-notes','log-lz-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('log-score').value='3';
+  S.landingX=null; S.landingY=null;
+  document.getElementById('lz-new').setAttribute('cx',-20);
+  document.getElementById('lz-new').setAttribute('cy',-20);
+}
+
+function renderRecentThrows(){
+  const tbody=document.getElementById('recent-tbody');
+  const recent=[...S.throws].reverse().slice(0,25);
+  if(!recent.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No throws logged yet</td></tr>';return;}
+  tbody.innerHTML=recent.map(t=>{
+    const c=getCourse(t.courseId);
+    const par=c?c.pars[t.hole-1]:3;
+    const sv=scoreVsPar(t.score,par);
+    const d=S.discs.find(x=>x.id===t.disc);
+    return `<tr>
+      <td class="mono" style="color:var(--muted)">${t.date}</td>
+      <td style="font-size:12px">${c?c.name:t.courseId}</td>
+      <td class="mono">H${t.hole}</td>
+      <td style="font-size:12px">${d?d.name:'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${t.shot||'—'}</td>
+      <td><span style="font-family:'Fira Code',monospace;font-size:13px;font-weight:500;color:${t.score<par?'var(--grass)':t.score===par?'var(--sky)':'var(--rose)'}">${t.score}</span> <span class="chip ${sv.cls}" style="font-size:9px">${sv.label}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${t.cond||'—'}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>
+      <td><button onclick="deleteThrow('${t.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px" title="Delete">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteThrow(id){ S.throws=S.throws.filter(t=>t.id!==id); save(); renderRecentThrows(); toast('🗑️ Removed'); }
+
+// ═══════════════════════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════════════════════
+function renderAnalytics(){
+  const aiCourse=document.getElementById('ai-course');
+  aiCourse.innerHTML='<option value="">All Courses</option>'+S.courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  if(S.selectedCourse) aiCourse.value=S.selectedCourse;
+  aiUpdateHoles();
+  renderHeatmap();
+  renderScoreDist();
+  renderTrend();
+  renderStrengthsWeaknesses();
+}
+
+function aiUpdateHoles(){
+  const cid=document.getElementById('ai-course').value;
+  const c=getCourse(cid);
+  const sel=document.getElementById('ai-hole');
+  sel.innerHTML='<option value="">All Holes</option>';
+  if(c){ for(let h=1;h<=c.holes;h++){ const o=document.createElement('option'); o.value=h; o.textContent=`Hole ${h} (Par ${c.pars[h-1]})`; sel.appendChild(o); } }
+}
+
+function renderHeatmap(){
+  const el=document.getElementById('heatmap-content');
+  const c=getCourse(S.selectedCourse); if(!c){el.innerHTML='<div style="color:var(--muted);font-size:13px">Select a course</div>';return;}
+  const diffs=[]; for(let h=1;h<=c.holes;h++){ const s=getHoleStats(c.id,h); if(s) diffs.push({h,d:s.avg-c.pars[h-1],avg:s.avg,par:c.pars[h-1],count:s.count}); }
+  diffs.sort((a,b)=>b.d-a.d);
+  const maxAbs=Math.max(...diffs.map(d=>Math.abs(d.d)));
+  el.innerHTML=diffs.slice(0,12).map(d=>{
+    const pct=Math.abs(d.d)/maxAbs*100;
+    const col=d.d<=0?'var(--grass)':d.d<=0.5?'var(--sky)':d.d<=1?'var(--fire)':'var(--rose)';
+    return `<div class="heatmap-hole">
+      <div class="heatmap-label">H${d.h} (P${d.par})</div>
+      <div class="heatmap-bar" style="background:var(--ink3)">
+        <div class="heatmap-fill" style="width:${pct}%;background:${col}"></div>
+        <span class="heatmap-val" style="color:${col}">${d.d>=0?'+':''}${d.d.toFixed(2)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderScoreDist(){
+  const el=document.getElementById('score-dist');
+  const c=getCourse(S.selectedCourse); if(!c){el.innerHTML='';return;}
+  let eagle=0,birdie=0,par=0,bogey=0,double=0,total=0;
+  for(let h=1;h<=c.holes;h++){
+    const s=getHoleStats(c.id,h); if(!s?.scores)continue;
+    const p=c.pars[h-1];
+    s.scores.forEach(sc=>{ total++; const d=sc-p; if(d<=-2)eagle++; else if(d===-1)birdie++; else if(d===0)par++; else if(d===1)bogey++; else double++; });
+  }
+  const bars=[
+    {label:'Eagle+',val:eagle,col:'var(--gold)'},
+    {label:'Birdie',val:birdie,col:'var(--grass)'},
+    {label:'Par',val:par,col:'var(--sky)'},
+    {label:'Bogey',val:bogey,col:'var(--fire)'},
+    {label:'Double+',val:double,col:'var(--rose)'},
+  ];
+  const max=Math.max(...bars.map(b=>b.val));
+  el.innerHTML=`<div style="display:flex;flex-direction:column;gap:7px">${bars.map(b=>{
+    const pct=max?b.val/max*100:0;
+    const rate=total?((b.val/total)*100).toFixed(1):0;
+    return `<div style="display:flex;align-items:center;gap:10px">
+      <div style="width:60px;font-size:11px;color:var(--muted);text-align:right">${b.label}</div>
+      <div style="flex:1;height:18px;background:var(--ink3);border-radius:3px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${b.col};opacity:.8;border-radius:3px"></div>
+      </div>
+      <div style="width:50px;font-family:'Fira Code',monospace;font-size:11px;color:${b.col}">${b.val} <span style="color:var(--muted)">${rate}%</span></div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderTrend(){
+  const el=document.getElementById('trend-chart');
+  const c=getCourse(S.selectedCourse); if(!c){el.innerHTML='';return;}
+  // Build round-by-round scores from manual throws
+  const rMap={};
+  S.throws.filter(t=>t.courseId===c.id).forEach(t=>{
+    if(!rMap[t.date]) rMap[t.date]={scores:[],pars:[]};
+    rMap[t.date].scores.push(t.score);
+    rMap[t.date].pars.push(c.pars[t.hole-1]);
+  });
+  const rounds=Object.entries(rMap).sort((a,b)=>a[0].localeCompare(b[0])).slice(-20);
+  if(!rounds.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:12px 0">Log rounds at this course to see trend data.</div>';return;}
+  const pts=rounds.map(([d,r])=>({date:d,diff:avg(r.scores)-avg(r.pars)}));
+  const vals=pts.map(p=>p.diff);
+  const mn=Math.min(...vals)-0.3, mx=Math.max(...vals)+0.3, rng=mx-mn||1;
+  const W=400, H=80;
+  const toY=v=>H-((v-mn)/rng*H);
+  const points=pts.map((p,i)=>`${(i/(pts.length-1||1))*W},${toY(p.diff)}`).join(' ');
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:80px;overflow:visible">
+    <line x1="0" y1="${toY(0)}" x2="${W}" y2="${toY(0)}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>
+    <polyline points="${points}" fill="none" stroke="var(--grass)" stroke-width="2" stroke-linejoin="round"/>
+    ${pts.map((p,i)=>`<circle cx="${(i/(pts.length-1||1))*W}" cy="${toY(p.diff)}" r="3" fill="${p.diff<=0?'var(--grass)':'var(--rose)'}"/>`).join('')}
+    <text x="0" y="${H+16}" fill="var(--muted)" font-size="9" font-family="sans-serif">${pts[0]?.date.slice(0,7)||''}</text>
+    <text x="${W}" y="${H+16}" fill="var(--muted)" font-size="9" font-family="sans-serif" text-anchor="end">${pts[pts.length-1]?.date.slice(0,7)||''}</text>
+  </svg>`;
+}
+
+function renderStrengthsWeaknesses(){
+  const el=document.getElementById('sw-content');
+  const c=getCourse(S.selectedCourse); if(!c){el.innerHTML='';return;}
+  const holes=[];
+  for(let h=1;h<=c.holes;h++){
+    const s=getHoleStats(c.id,h); if(!s)continue;
+    holes.push({h,par:c.pars[h-1],avg:s.avg,diff:s.avg-c.pars[h-1],count:s.count});
+  }
+  const sorted=[...holes].sort((a,b)=>a.diff-b.diff);
+  const top3=sorted.slice(0,3);
+  const bot3=sorted.slice(-3).reverse();
+  el.innerHTML=`
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--grass);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">💪 Strengths</div>
+      ${top3.map(h=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(46,58,78,.4)">
+        <div><span style="font-size:13px;font-weight:600">Hole ${h.h}</span> <span style="font-size:11px;color:var(--muted)">Par ${h.par} · ${h.count} rounds</span></div>
+        <div style="font-family:'Fira Code',monospace;font-size:13px;color:var(--grass)">${h.diff.toFixed(2)} vs par</div>
+      </div>`).join('')}
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--rose);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">⚠️ Weaknesses</div>
+      ${bot3.map(h=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(46,58,78,.4)">
+        <div><span style="font-size:13px;font-weight:600">Hole ${h.h}</span> <span style="font-size:11px;color:var(--muted)">Par ${h.par} · ${h.count} rounds</span></div>
+        <div style="font-family:'Fira Code',monospace;font-size:13px;color:var(--rose)">+${h.diff.toFixed(2)} vs par</div>
+      </div>`).join('')}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// AI ANALYSIS
+// ═══════════════════════════════════════════════════════════
+async function runAnalysis(){
+  const cid=document.getElementById('ai-course').value;
+  const hole=document.getElementById('ai-hole').value;
+  const out=document.getElementById('ai-output');
+  out.innerHTML='<div class="ai-loading">Analyzing your game data...</div>';
+  const c=getCourse(cid);
+  const holes=[];
+  const hs=cid?(S.holeStats[cid]||{}):{};
+  if(c){
+    for(let h=1;h<=c.holes;h++){
+      const s=getHoleStats(c.id,h);if(!s)continue;
+      if(hole&&parseInt(hole)!==h)continue;
+      holes.push({hole:h,par:c.pars[h-1],avg:s.avg,best:s.best,worst:s.worst,rounds:s.count,vspar:(s.avg-c.pars[h-1]).toFixed(2)});
+    }
+  }
+  const discStats=S.discs.map(d=>{
+    const t=S.throws.filter(x=>x.disc===d.id);
+    if(!t.length)return null;
+    const avgSc=avg(t.map(x=>x.score));
+    return {name:d.name,type:d.type,throws:t.length,avg:avgSc.toFixed(2)};
+  }).filter(Boolean);
+
+  const prompt=`You are CaddyAI, an expert disc golf analytics coach. Analyze this player's real UDisc data (Matt Nelson, 10 years of play, 437 rounds).
+
+${c?`Course: ${c.name}${hole?' Hole '+hole+' (Par '+c.pars[parseInt(hole)-1]+')':''}`:' Overall game analysis'}
+
+${holes.length?`Hole Statistics:
+${holes.map(h=>`H${h.hole} Par${h.par}: avg ${h.avg} (${h.vspar} vs par), best ${h.best}, ${h.rounds} rounds`).join('\n')}`:'' }
+
+${discStats.length?`Disc Performance from manual logs:
+${discStats.map(d=>`${d.name} (${d.type}): ${d.throws} throws, avg ${d.avg}`).join('\n')}`:'' }
+
+Provide a JSON response:
+{
+  "headline": "one punchy sentence about their game",
+  "summary": "2-3 sentences of honest assessment",
+  "recommendations": [
+    {"title":"...", "body":"..."},
+    {"title":"...", "body":"..."},
+    {"title":"...", "body":"..."}
+  ],
+  "keyInsight": "the single most important thing they should work on"
+}
+
+Be specific with hole numbers, averages, and actionable. Reference the actual data.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||'';
+    let parsed;
+    try{parsed=JSON.parse(text.replace(/```json|```/g,'').trim());}catch(e){parsed=null;}
+    if(parsed){
+      out.innerHTML=`
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">"${parsed.headline}"</div>
+        <div style="font-size:13.5px;line-height:1.75;color:var(--dim);margin-bottom:12px">${parsed.summary}</div>
+        ${parsed.recommendations.map(r=>`<div class="ai-rec"><div class="ai-rec-tag">💡 ${r.title}</div><div class="ai-rec-body">${r.body}</div></div>`).join('')}
+        <div class="ai-rec" style="border-color:rgba(251,191,36,.2);background:rgba(251,191,36,.04)"><div class="ai-rec-tag" style="color:var(--gold)">🎯 Key Focus</div><div class="ai-rec-body">${parsed.keyInsight}</div></div>
+      `;
+    } else {
+      out.innerHTML=`<div style="font-size:13.5px;line-height:1.75">${text}</div>`;
+    }
+  }catch(e){
+    out.innerHTML='<div style="color:var(--rose);font-size:13px">Analysis unavailable. Check connection.</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// AI CADDIE
+// ═══════════════════════════════════════════════════════════
+function renderCaddie(){
+  const cs=document.getElementById('cad-course');
+  cs.innerHTML='<option value="">— Select —</option>'+S.courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  if(S.selectedCourse) cs.value=S.selectedCourse;
+  cadUpdateHoles();
+}
+
+function cadUpdateHoles(){
+  const cid=document.getElementById('cad-course').value;
+  const c=getCourse(cid);
+  const sel=document.getElementById('cad-hole');
+  sel.innerHTML='<option value="">— Select —</option>';
+  if(c){ for(let h=1;h<=c.holes;h++){ const o=document.createElement('option'); o.value=h; o.textContent=`Hole ${h} (Par ${c.pars[h-1]})`; sel.appendChild(o); } }
+}
+
+async function runCaddie(){
+  const cid=document.getElementById('cad-course').value;
+  const hole=parseInt(document.getElementById('cad-hole').value);
+  const cond=document.getElementById('cad-conditions').value;
+  const out=document.getElementById('caddie-output');
+  if(!cid||!hole){out.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Please select a course and hole.</p></div>';return;}
+  const c=getCourse(cid);
+  const s=getHoleStats(cid,hole);
+  const par=c.pars[hole-1];
+  out.innerHTML=`<div class="ai-loading">Reading the hole...</div>`;
+  const discList=S.discs.map(d=>`${d.name} (${d.type}, Speed:${d.speed} Glide:${d.glide} Turn:${d.turn} Fade:${d.fade})`).join('\n');
+  const manualThrows=S.throws.filter(t=>t.courseId===cid&&t.hole===hole);
+  const shotTypes=manualThrows.length?Object.entries(manualThrows.reduce((a,t)=>{a[t.shot]=(a[t.shot]||0)+1;return a;},{})).map(([s,c])=>`${s}:${c}`).join(', '):'no logged data';
+  const prompt=`You are CaddyAI, a disc golf caddie giving a pre-shot recommendation.
+
+Player: Matt Nelson (10 years experience, 437 rounds logged)
+Course: ${c.name}
+Hole: ${hole}, Par ${par}
+Conditions: ${cond}
+
+Historical stats for this hole:
+${s?`- Average score: ${s.avg.toFixed(2)} (${(s.avg-par)>=0?'+':''}${(s.avg-par).toFixed(2)} vs par)\n- Best: ${s.best}, Worst: ${s.worst}\n- Rounds played: ${s.count}`:'No history yet'}
+${manualThrows.length?`- Recent scores: ${manualThrows.slice(-5).map(t=>t.score).join(', ')}\n- Shot types used: ${shotTypes}`:''}
+
+Player's discs in the bag:
+${discList}
+
+Give a pre-hole recommendation as JSON:
+{
+  "holeRead": "brief description of what this hole demands based on the stats",
+  "primaryDisc": "disc name and exactly why",
+  "backupDisc": "alternative disc and when to use it",
+  "shotType": "Drive/Approach/Putt recommendation and line",
+  "watchOut": "the specific danger on this hole based on his history",
+  "confidenceNote": "a realistic expectation based on his avg",
+  "conditionAdjustment": "specific advice for ${cond} conditions"
+}
+
+Be direct, specific, and reference actual hole stats. Sound like a real caddie.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||'';
+    let p; try{p=JSON.parse(text.replace(/```json|```/g,'').trim());}catch(e){p=null;}
+    if(p){
+      const diffStr=(s?.avg-par)>=0?'+':'';
+      out.innerHTML=`
+        <div class="caddie-recommendation">
+          <div class="caddie-rec-title">🎯 Hole ${hole} Caddie Report — ${c.name}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+            <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:12px">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px">Your Stats</div>
+              <div style="font-family:'Fira Code',monospace;font-size:22px;font-weight:500;color:${(s?.avg-par)<=0?'var(--grass)':'var(--rose)'}">${s?s.avg.toFixed(2):'—'}</div>
+              <div style="font-size:11px;color:var(--muted)">avg score · ${diffStr}${s?(s.avg-par).toFixed(2):'—'} vs par · ${s?.count||0} rounds</div>
+            </div>
+            <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:12px">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px">Hole Read</div>
+              <div style="font-size:12.5px;line-height:1.6">${p.holeRead}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="ai-rec" style="border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.05)">
+              <div class="ai-rec-tag">🥏 Primary Disc</div>
+              <div class="ai-rec-body">${p.primaryDisc}</div>
+            </div>
+            <div class="ai-rec">
+              <div class="ai-rec-tag">🔄 Backup Option</div>
+              <div class="ai-rec-body">${p.backupDisc}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="ai-rec">
+              <div class="ai-rec-tag">📐 Shot Type & Line</div>
+              <div class="ai-rec-body">${p.shotType}</div>
+            </div>
+            <div class="ai-rec" style="border-color:rgba(244,63,94,.2)">
+              <div class="ai-rec-tag" style="color:var(--rose)">⚠️ Watch Out</div>
+              <div class="ai-rec-body">${p.watchOut}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="ai-rec" style="border-color:rgba(251,191,36,.2)">
+              <div class="ai-rec-tag" style="color:var(--gold)">🎯 Realistic Expectation</div>
+              <div class="ai-rec-body">${p.confidenceNote}</div>
+            </div>
+            <div class="ai-rec" style="border-color:rgba(56,189,248,.2)">
+              <div class="ai-rec-tag" style="color:var(--sky)">🌤️ ${cond} Adjustment</div>
+              <div class="ai-rec-body">${p.conditionAdjustment}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      out.innerHTML=`<div class="panel"><div style="font-size:13.5px;line-height:1.75">${text}</div></div>`;
+    }
+  }catch(e){
+    out.innerHTML='<div style="color:var(--rose);font-size:13px;padding:20px">Caddie unavailable. Check connection.</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// DISC AUTO-LOOKUP
+// ═══════════════════════════════════════════════════════════
+let lookupTimer = null;
+
+// Local fallback database of popular discs
+const DISC_DB = [
+  {manufacturer:'Innova',name:'Destroyer',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver, great for experienced players'},
+  {manufacturer:'Innova',name:'Wraith',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Slightly understable destroyer, very popular'},
+  {manufacturer:'Innova',name:'Boss',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Max distance driver'},
+  {manufacturer:'Innova',name:'Shryke',type:'Distance Driver',speed:13,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Innova',name:'Valkyrie',type:'Distance Driver',speed:9,glide:4,turn:-2,fade:2,notes:'Beginner-friendly understable driver'},
+  {manufacturer:'Innova',name:'Leopard',type:'Fairway Driver',speed:6,glide:5,turn:-2,fade:1,notes:'Understable fairway driver, great for beginners'},
+  {manufacturer:'Innova',name:'Leopard3',type:'Fairway Driver',speed:7,glide:5,turn:-2,fade:1,notes:'Improved leopard'},
+  {manufacturer:'Innova',name:'Teebird',type:'Fairway Driver',speed:7,glide:5,turn:0,fade:2,notes:'Overstable fairway driver'},
+  {manufacturer:'Innova',name:'Teebird3',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Slightly less overstable teebird'},
+  {manufacturer:'Innova',name:'Roc',type:'Midrange',speed:4,glide:4,turn:0,fade:3,notes:'Classic overstable midrange'},
+  {manufacturer:'Innova',name:'Roc3',type:'Midrange',speed:7,glide:4,turn:0,fade:3,notes:'Faster overstable midrange'},
+  {manufacturer:'Innova',name:'Mako3',type:'Midrange',speed:5,glide:5,turn:0,fade:0,notes:'Perfectly straight midrange'},
+  {manufacturer:'Innova',name:'Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Classic putter, most popular in disc golf'},
+  {manufacturer:'Innova',name:'Pro Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'More overstable aviar'},
+  {manufacturer:'Innova',name:'Colt',type:'Putter',speed:3,glide:3,turn:-1,fade:1,notes:'Slightly understable putter'},
+  {manufacturer:'Discraft',name:'Buzzz',type:'Midrange',speed:5,glide:4,turn:-1,fade:1,notes:'Most popular midrange in disc golf'},
+  {manufacturer:'Discraft',name:'Buzzz OS',type:'Midrange',speed:5,glide:4,turn:0,fade:3,notes:'Overstable buzzz'},
+  {manufacturer:'Discraft',name:'Zone',type:'Putter',speed:4,glide:3,turn:0,fade:3,notes:'Very overstable approach disc'},
+  {manufacturer:'Discraft',name:'Undertaker',type:'Distance Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Overstable fairway/distance driver'},
+  {manufacturer:'Discraft',name:'Surge',type:'Distance Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Discraft',name:'Nuke',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Max distance driver'},
+  {manufacturer:'Discraft',name:'Flick',type:'Distance Driver',speed:12,glide:3,turn:1,fade:5,notes:'Extremely overstable, forehand specialist'},
+  {manufacturer:'Discraft',name:'Thrasher',type:'Distance Driver',speed:12,glide:5,turn:-3,fade:1,notes:'Understable distance driver'},
+  {manufacturer:'Discraft',name:'Heat',type:'Fairway Driver',speed:9,glide:6,turn:-3,fade:1,notes:'Understable fairway driver'},
+  {manufacturer:'Discraft',name:'Avenger SS',type:'Distance Driver',speed:10,glide:5,turn:-3,fade:1,notes:'Understable distance driver'},
+  {manufacturer:'Dynamic Discs',name:'Truth',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral straight midrange'},
+  {manufacturer:'Dynamic Discs',name:'Escape',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
+  {manufacturer:'Dynamic Discs',name:'Felon',type:'Distance Driver',speed:9,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
+  {manufacturer:'Dynamic Discs',name:'Maverick',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
+  {manufacturer:'Latitude 64',name:'Flow',type:'Distance Driver',speed:11,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
+  {manufacturer:'Latitude 64',name:'River',type:'Fairway Driver',speed:7,glide:7,turn:-1,fade:1,notes:'High glide understable fairway'},
+  {manufacturer:'Latitude 64',name:'Jade',type:'Distance Driver',speed:11,glide:5,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'MVP',name:'Tesla',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Slightly overstable distance driver'},
+  {manufacturer:'MVP',name:'Relay',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
+  {manufacturer:'Prodigy',name:'D1',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Westside',name:'Hatchet',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Kastaplast',name:'Rask',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
+  {manufacturer:'Kastaplast',name:'Gote',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
+  {manufacturer:'Axiom',name:'Envy',type:'Putter',speed:3,glide:4,turn:-1,fade:1,notes:'Understable putter'},
+  {manufacturer:'Vibram',name:'Obex',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Overstable putter'},
+];
+
+function localDiscSearch(query){
+  const q = query.toLowerCase().replace(/[^a-z0-9]/g,' ').trim();
+  const words = q.split(/\s+/);
+  return DISC_DB.filter(d => {
+    const haystack = (d.manufacturer + ' ' + d.name).toLowerCase();
+    return words.every(w => haystack.includes(w));
+  }).slice(0, 3);
+}
+
+function scheduleDiscLookup(val){
+  clearTimeout(lookupTimer);
+  const status = document.getElementById('lookup-status');
+  const spinner = document.getElementById('lookup-spinner');
+  status.style.display = 'none';
+  document.getElementById('disc-suggestions').style.display = 'none';
+  if(val.trim().length < 3) return;
+
+  // Try local DB first instantly
+  const local = localDiscSearch(val.trim());
+  if(local.length){
+    spinner.style.display = 'none';
+    showDiscMatches(local);
+    if(local.length === 1) { applyDiscMatchData(local[0]); document.getElementById('disc-suggestions').style.display='none'; }
+    return;
+  }
+
+  // Fall back to AI lookup
+  spinner.style.display = 'block';
+  lookupTimer = setTimeout(() => lookupDisc(val.trim()), 700);
+}
+
+function showDiscMatches(matches){
+  const status = document.getElementById('lookup-status');
+  const suggestions = document.getElementById('disc-suggestions');
+
+  if(!matches.length){
+    status.textContent = 'No match found';
+    status.style.cssText = 'display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;background:rgba(244,63,94,.1);color:var(--rose);border:1px solid rgba(244,63,94,.3)';
+    suggestions.style.display = 'none';
+    return;
+  }
+
+  suggestions.style.display = 'block';
+  suggestions.innerHTML = matches.map((m, i) => `
+    <div class="disc-suggestion" onclick="applyDiscMatch(${i})" data-match='${JSON.stringify(m).replace(/'/g,"&#39;")}'>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${m.manufacturer} ${m.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px">${m.type}</div>
+          ${m.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:3px">${m.notes}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;background:var(--ink3);padding:5px 8px;border-radius:6px">
+          <span style="font-family:'Fira Code',monospace;font-size:12px;color:var(--sky)" title="Speed">${m.speed}</span>
+          <span style="color:var(--border)">/</span>
+          <span style="font-family:'Fira Code',monospace;font-size:12px;color:var(--grass)" title="Glide">${m.glide}</span>
+          <span style="color:var(--border)">/</span>
+          <span style="font-family:'Fira Code',monospace;font-size:12px;color:var(--fire)" title="Turn">${m.turn}</span>
+          <span style="color:var(--border)">/</span>
+          <span style="font-family:'Fira Code',monospace;font-size:12px;color:var(--rose)" title="Fade">${m.fade}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  status.textContent = matches.length + ' match' + (matches.length > 1 ? 'es' : '') + ' found';
+  status.style.cssText = 'display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;background:rgba(34,197,94,.1);color:var(--grass);border:1px solid rgba(34,197,94,.3)';
+}
+
+
+  const spinner = document.getElementById('lookup-spinner');
+  const status = document.getElementById('lookup-status');
+  const suggestions = document.getElementById('disc-suggestions');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        messages: [{
+          role: 'user',
+          content: `You are a disc golf equipment database. Return flight numbers for disc golf discs matching "${name}".
+
+Find up to 3 real disc golf discs that match this name. Use your knowledge of actual disc golf equipment.
+
+Respond ONLY with this exact JSON format, no markdown fences, no extra text:
+{"matches":[{"manufacturer":"Innova","name":"Destroyer","type":"Distance Driver","speed":12,"glide":5,"turn":-1,"fade":3,"notes":"Overstable distance driver"}]}
+
+Rules:
+- Only include real discs you are confident about
+- type must be exactly one of: Distance Driver, Fairway Driver, Hybrid Driver, Midrange, Putter
+- flight numbers must be real integers
+- If no match found return: {"matches":[]}`
+        }]
+      })
+    });
+
+    const data = await res.json();
+
+    // Check for API error response
+    if(data.error){
+      console.error('API error:', data.error);
+      throw new Error(data.error.message || 'API error');
+    }
+
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    console.log('Disc lookup raw response:', text);
+
+    let parsed;
+    try {
+      // Strip any accidental markdown fences
+      const clean = text.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      console.error('JSON parse failed:', text);
+      parsed = null;
+    }
+
+    spinner.style.display = 'none';
+
+    if(!parsed || !parsed.matches?.length){
+      showDiscMatches([]);
+      return;
+    }
+
+    showDiscMatches(parsed.matches);
+
+    // Auto-apply if only one exact match
+    if(parsed.matches.length === 1){
+      applyDiscMatchData(parsed.matches[0]);
+      suggestions.style.display = 'none';
+    }
+
+  } catch(e) {
+    console.error('Disc lookup error:', e);
+    spinner.style.display = 'none';
+    status.textContent = e.message?.includes('rate') ? 'Rate limited — try again' : 'Lookup failed: ' + (e.message || 'unknown error');
+    status.style.cssText = 'display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;background:rgba(244,63,94,.1);color:var(--rose);border:1px solid rgba(244,63,94,.3)';
+  }
+}
+
+function applyDiscMatch(idx){
+  const suggestions = document.getElementById('disc-suggestions');
+  const card = suggestions.querySelectorAll('.disc-suggestion')[idx];
+  const m = JSON.parse(card.dataset.match);
+  applyDiscMatchData(m);
+  suggestions.style.display = 'none';
+}
+
+function applyDiscMatchData(m){
+  // Set name
+  document.getElementById('nd-name').value = m.manufacturer + ' ' + m.name;
+  // Set type
+  document.querySelectorAll('.type-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === m.type);
+  });
+  document.getElementById('nd-type').value = m.type;
+  // Set notes if empty
+  if(!document.getElementById('nd-notes').value && m.notes){
+    document.getElementById('nd-notes').value = m.notes;
+  }
+  // Set flight numbers
+  const fields = { speed: m.speed, glide: m.glide, turn: m.turn, fade: m.fade };
+  Object.entries(fields).forEach(([group, val]) => {
+    const btn = document.querySelector(`.fnum-btn[data-group="${group}"][data-val="${val}"]`);
+    if(btn){
+      document.querySelectorAll(`.fnum-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      flightState[group] = val;
+      const valEl = document.getElementById(`nd-${group}-val`);
+      if(valEl) valEl.textContent = val >= 0 && group === 'turn' ? '+'+val : val;
+    }
+  });
+  updateFlightPreview();
+  // Show status
+  const status = document.getElementById('lookup-status');
+  status.textContent = '✓ Auto-filled';
+  status.style.cssText = 'display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:rgba(34,197,94,.12);color:var(--grass);border:1px solid rgba(34,197,94,.3)';
+  toast('✅ Flight numbers loaded for ' + m.manufacturer + ' ' + m.name);
+}
+
+// Close suggestions when clicking outside
+document.addEventListener('click', e => {
+  if(!e.target.closest('#nd-name') && !e.target.closest('#disc-suggestions')){
+    const s = document.getElementById('disc-suggestions');
+    if(s) s.style.display = 'none';
+  }
+});
+
+
+const flightState = { speed: null, glide: null, turn: null, fade: null };
+
+function selectType(btn){
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('nd-type').value = btn.dataset.val;
+}
+
+function selectFlight(btn){
+  const group = btn.dataset.group;
+  const val = parseFloat(btn.dataset.val);
+  // Deselect others in same group
+  document.querySelectorAll(`.fnum-btn[data-group="${group}"]`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  flightState[group] = val;
+  document.getElementById(`nd-${group}-val`).textContent = val >= 0 && group==='turn' ? '+'+val : val;
+  updateFlightPreview();
+}
+
+function updateFlightPreview(){
+  const { speed, glide, turn, fade } = flightState;
+  const preview = document.getElementById('flight-preview');
+  preview.style.display = 'flex';
+  document.getElementById('fp-speed').textContent = speed ?? '—';
+  document.getElementById('fp-glide').textContent = glide ?? '—';
+  document.getElementById('fp-turn').textContent = turn !== null ? (turn >= 0 ? '+'+turn : turn) : '—';
+  document.getElementById('fp-fade').textContent = fade ?? '—';
+
+  // Stability tag
+  const tag = document.getElementById('fp-stability-tag');
+  const desc = document.getElementById('fp-flight-desc');
+  if(turn !== null && fade !== null){
+    const stability = (fade || 0) - Math.abs(turn || 0);
+    if(stability >= 2){ tag.textContent='Overstable'; tag.style.borderColor='var(--rose)'; tag.style.color='var(--rose)'; tag.style.background='rgba(244,63,94,.1)'; desc.textContent='Strong fade finish, fights headwinds well. Great for forehand throws and windy days.'; }
+    else if(stability >= 0){ tag.textContent='Neutral'; tag.style.borderColor='var(--gold)'; tag.style.color='var(--gold)'; tag.style.background='rgba(251,191,36,.1)'; desc.textContent='Predictable straight flight with a reliable fade at the end.'; }
+    else { tag.textContent='Understable'; tag.style.borderColor='var(--sky)'; tag.style.color='var(--sky)'; tag.style.background='rgba(56,189,248,.1)'; desc.textContent='Turns right early in flight (RHBH). Great for hyzer-flips, rollers, and slower arm speeds.'; }
+  }
+}
+
+function clearDiscForm(){
+  document.getElementById('nd-name').value='';
+  document.getElementById('nd-notes').value='';
+  document.getElementById('nd-type').value='Distance Driver';
+  document.querySelectorAll('.type-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('.fnum-btn').forEach(b=>b.classList.remove('active'));
+  ['speed','glide','turn','fade'].forEach(g=>{ flightState[g]=null; const el=document.getElementById(`nd-${g}-val`); if(el) el.textContent='—'; });
+  const fp=document.getElementById('fp-speed'); if(fp){ fp.textContent='—'; document.getElementById('fp-glide').textContent='—'; document.getElementById('fp-turn').textContent='—'; document.getElementById('fp-fade').textContent='—'; }
+  document.getElementById('fp-stability-tag').textContent='';
+  document.getElementById('fp-flight-desc').textContent='';
+}
+
+
+function renderDiscs(){
+  const bag=document.getElementById('disc-bag');
+  document.getElementById('disc-count-sub').textContent=`${S.discs.length} disc${S.discs.length!==1?'s':''} in bag`;
+  if(!S.discs.length){bag.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🥏</div><p>No discs yet.</p></div>';return;}
+  bag.innerHTML=S.discs.map(d=>{
+    const throws=S.throws.filter(t=>t.disc===d.id);
+    const a=throws.length?avg(throws.map(t=>t.score)):null;
+    const typeColor=d.type.includes('Driver')?'var(--rose)':d.type==='Midrange'?'var(--sky)':'var(--grass)';
+    return `<div class="disc-card">
+      <button class="disc-del" onclick="removeDisc('${d.id}')">✕</button>
+      <div class="disc-name">${d.name}</div>
+      <div class="disc-type" style="color:${typeColor}">${d.type}</div>
+      <div class="disc-nums">
+        <span class="dn">S:${d.speed}</span><span class="dn">G:${d.glide}</span>
+        <span class="dn">T:${d.turn}</span><span class="dn">F:${d.fade}</span>
+      </div>
+      ${d.notes?`<div style="font-size:10px;color:var(--muted);margin-top:5px">${d.notes}</div>`:''}
+      <div class="disc-perf">${throws.length?`${throws.length} logged throws · avg ${a.toFixed(2)}`:'No logged throws yet'}</div>
+    </div>`;
+  }).join('');
+}
+
+function addDisc(){
+  const name=document.getElementById('nd-name').value.trim();
+  const type=document.getElementById('nd-type').value;
+  if(!name){toast('⚠️ Enter disc name');return;}
+  if(flightState.speed===null||flightState.glide===null||flightState.turn===null||flightState.fade===null){
+    toast('⚠️ Select all 4 flight numbers');return;
+  }
+  S.discs.push({id:'d'+Date.now(),name,type,speed:flightState.speed,glide:flightState.glide,turn:flightState.turn,fade:flightState.fade,notes:document.getElementById('nd-notes').value});
+  save(); renderDiscs();
+  clearDiscForm();
+  toast('✅ '+name+' added to bag!');
+}
+
+function removeDisc(id){ S.discs=S.discs.filter(d=>d.id!==id); save(); renderDiscs(); toast('🗑️ Disc removed'); }
+
+// ═══════════════════════════════════════════════════════════
+// COURSES
+// ═══════════════════════════════════════════════════════════
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function addCourse(){
+  const name=document.getElementById('nc-name').value.trim();
+  const holes=parseInt(document.getElementById('nc-holes').value)||18;
+  let pars=document.getElementById('nc-pars').value.split(',').map(p=>parseInt(p.trim())).filter(p=>!isNaN(p));
+  while(pars.length<holes) pars.push(3);
+  pars=pars.slice(0,holes);
+  if(!name){toast('⚠️ Enter course name');return;}
+  const id='c_'+Date.now();
+  S.courses.push({id,name,holes,pars});
+  save(); renderSidebar(); closeModal('modal-course');
+  document.getElementById('nc-name').value='';
+  toast('✅ '+name+' added!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CSV IMPORT
+// ═══════════════════════════════════════════════════════════
+function importCSV(input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split(/\r?\n/).filter(l=>l.trim());
+    let imported=0, newCourses=0;
+    const parMap={};
+    lines.slice(1).forEach(line=>{
+      const cols=parseCSVLine(line);
+      if(cols.length<9)return;
+      const name=cols[0].trim(), course=cols[1].trim().replace(/\s+/g,' ');
+      const date=cols[3].trim().substring(0,10);
+      const scores=[];
+      for(let i=8;i<cols.length;i++){
+        const v=cols[i].trim(); if(v==='')break;
+        const n=parseInt(v); if(!isNaN(n)) scores.push(n); else break;
+      }
+      if(name==='Par'){parMap[course]=scores;return;}
+      if(!name.includes('Matt Nelson')||!scores.length)return;
+      let c=S.courses.find(x=>x.name===course);
+      if(!c){
+        const pars=parMap[course]||Array(scores.length).fill(3);
+        c={id:'c_'+Date.now()+'_'+(newCourses++),name:course,holes:scores.length,pars:pars.slice(0,scores.length)};
+        S.courses.push(c);
+      }
+      scores.forEach((sc,i)=>{
+        if(sc<=0)return;
+        const h=i+1;
+        if(!S.throws.find(t=>t.courseId===c.id&&t.hole===h&&t.date===date)){
+          S.throws.push({id:'t'+Date.now()+'_'+imported+'_'+i,courseId:c.id,hole:h,date,disc:'',score:sc,landingX:80,landingY:80,cond:'Calm',shot:'',notes:''});
+          imported++;
+        }
+      });
+    });
+    save(); renderAll();
+    toast(`✅ Imported ${imported} throws!`);
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function parseCSVLine(line){
+  const result=[];let curr='',inQ=false;
+  for(let c of line){ if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){result.push(curr);curr='';}else{curr+=c;} }
+  result.push(curr); return result;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════════
+function renderAll(){
+  renderSidebar();
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MOBILE NAV SYNC
+// ═══════════════════════════════════════════════════════════
+function setMobNav(btn){
+  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Keep mobile nav in sync with desktop nav
+const _origNav = nav;
+window.nav = function(page){
+  _origNav(page);
+  const map = {dashboard:0, caddie:1, log:2, analytics:3, discs:4};
+  const idx = map[page];
+  if(idx !== undefined){
+    const btns = document.querySelectorAll('.mob-nav-btn');
+    btns.forEach((b,i) => b.classList.toggle('active', i === idx));
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// PWA — SERVICE WORKER + INSTALL PROMPT
+// ═══════════════════════════════════════════════════════════
+let deferredInstallPrompt = null;
+
+// Register service worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('CaddyAI SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+// Capture the install prompt (Android Chrome)
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner(){
+  const banner = document.getElementById('install-banner');
+  if(banner) banner.style.display = 'flex';
+}
+
+function installApp(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(result => {
+      if(result.outcome === 'accepted') toast('✅ CaddyAI installed!');
+      deferredInstallPrompt = null;
+      const banner = document.getElementById('install-banner');
+      if(banner) banner.style.display = 'none';
+    });
+  }
+}
+
+function dismissInstallBanner(){
+  const banner = document.getElementById('install-banner');
+  if(banner) banner.style.display = 'none';
+}
+
+// Show iOS install instructions (Safari doesn't support beforeinstallprompt)
+window.addEventListener('load', () => {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  const dismissed = localStorage.getItem('cai_install_dismissed');
+  if(isIOS && !isInStandaloneMode && !dismissed){
+    setTimeout(showIOSInstallTip, 2000);
+  }
+});
+
+function showIOSInstallTip(){
+  const banner = document.getElementById('install-banner');
+  if(!banner) return;
+  banner.style.display = 'flex';
+  banner.innerHTML = `
+    <div class="ib-text">
+      <strong>📱 Install CaddyAI on your iPhone!</strong><br>
+      <span style="font-size:12px;color:var(--muted)">Tap <strong style="color:var(--text)">Share</strong> → <strong style="color:var(--text)">Add to Home Screen</strong> for the full app experience</span>
+    </div>
+    <button class="btn btn-green" style="font-size:12px" onclick="dismissInstallBanner();localStorage.setItem('cai_install_dismissed','1')">Got it</button>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
