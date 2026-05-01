@@ -984,6 +984,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 <div id="toast"></div>
 
 <script>
+const flightState = { speed: null, glide: null, turn: null, fade: null };
 // ═══════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════
@@ -1750,9 +1751,6 @@ function updateThrowSummary(hole, ti){
   updateHoleHeader(hole);
 }
 
-
-  holeData[hole-1].throws[ti][field] = value;
-  // Update throw summary
 function selectToggle(btn){
   const row = btn.closest('.toggle-row');
   row.querySelectorAll('.toggle-btn').forEach(b => b.className = 'toggle-btn');
@@ -2460,7 +2458,6 @@ let lookupTimer = null;
 
 
 
-const flightState = { speed: null, glide: null, turn: null, fade: null };
 
 function selectType(btn){
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
