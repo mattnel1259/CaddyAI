@@ -298,6 +298,24 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 }
 .caddie-rec-title { font-family: 'Archivo Black', sans-serif; font-size: 16px; color: var(--gold); margin-bottom: 10px; }
 
+/* ── THROW CARDS ── */
+.throw-card {
+  background: var(--ink3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.throw-card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; cursor: pointer;
+  user-select: none; transition: background .1s;
+}
+.throw-card-header:hover { background: rgba(255,255,255,.03); }
+.throw-card-body {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+}
+
 /* ── HOLE CARDS ── */
 .hole-log-card {
   background: var(--ink2);
@@ -382,6 +400,25 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 .toggle-btn.selected.ob      { background: rgba(244,63,94,.12); border-color: var(--rose); color: var(--rose); }
 .toggle-btn.selected.circle  { background: rgba(56,189,248,.12); border-color: var(--sky); color: var(--sky); }
 .toggle-btn.selected.basket  { background: rgba(251,191,36,.2); border-color: var(--gold); color: var(--gold); }
+
+/* ── RECOMMENDATIONS ── */
+.rec-badge {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: linear-gradient(135deg, rgba(251,191,36,.08), rgba(34,197,94,.05));
+  border: 1px solid rgba(251,191,36,.25);
+  border-radius: 8px; padding: 10px 12px;
+}
+.rec-badge-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.rec-badge-content { flex: 1; min-width: 0; }
+.rec-badge-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); margin-bottom: 3px; }
+.rec-badge-text { font-size: 12px; line-height: 1.6; color: var(--text); }
+.rec-badge-stat { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.rec-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(251,191,36,.4); color: var(--gold); background: rgba(251,191,36,.08); margin-right: 4px; }
+.rec-confidence { display: inline-flex; gap: 2px; vertical-align: middle; margin-left: 4px; }
+.rec-confidence span { width: 5px; height: 5px; border-radius: 50%; background: var(--border); display: inline-block; }
+.rec-confidence span.on { background: var(--gold); }
+/* Mini version for dashboard hole cards */
+.rec-mini { font-size: 10px; color: var(--gold); margin-top: 5px; line-height: 1.5; }
 
 /* ── SCORECARD ── */
 .sc-score-input {
@@ -784,15 +821,8 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
       <!-- Row 1: Name + Type -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
         <div class="fg">
-          <label style="display:flex;align-items:center;gap:8px">
-            Disc Name
-            <span id="lookup-status" style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;display:none"></span>
-          </label>
-          <div style="position:relative">
-            <input type="text" id="nd-name" placeholder="e.g. Innova Destroyer" oninput="scheduleDiscLookup(this.value)" autocomplete="off">
-            <div id="lookup-spinner" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--grass);border-radius:50%;animation:spin .6s linear infinite"></div>
-          </div>
-          <div id="disc-suggestions" style="display:none;position:absolute;z-index:50;background:var(--ink2);border:1px solid var(--border);border-radius:8px;margin-top:4px;min-width:260px;box-shadow:0 8px 24px rgba(0,0,0,.4);overflow:hidden"></div>
+          <label>Disc Name</label>
+          <input type="text" id="nd-name" placeholder="e.g. Innova Destroyer" autocomplete="off">
         </div>
         <div class="fg"><label>Type</label>
           <div id="nd-type-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
@@ -1039,8 +1069,112 @@ function init(){
 }
 
 // ═══════════════════════════════════════════════════════════
-// HELPERS
+// RECOMMENDATION ENGINE
 // ═══════════════════════════════════════════════════════════
+
+function getHoleRecommendation(courseId, holeNum){
+  // Get all manually logged throws for throw #1 on this hole
+  const teeThrows = S.throws.filter(t =>
+    t.courseId === courseId &&
+    t.hole === holeNum &&
+    t.throwIndex === 0 // tee shot only
+  );
+
+  // Need at least 3 rounds worth of data
+  const allHoleThrows = S.throws.filter(t => t.courseId === courseId && t.hole === holeNum);
+  const roundCount = [...new Set(allHoleThrows.map(t => t.date))].length;
+  if(roundCount < 3) return null;
+
+  // Group tee throws by disc+throwType combo
+  const combos = {};
+  teeThrows.forEach(t => {
+    const disc = S.discs.find(d => d.id === t.disc);
+    if(!disc || !t.throwType) return;
+    const key = `${disc.name}|${t.throwType}`;
+    if(!combos[key]) combos[key] = { disc: disc.name, throwType: t.throwType, scores: [], landings: [] };
+    combos[key].scores.push(t.score);
+    if(t.landing) combos[key].landings.push(t.landing);
+  });
+
+  const comboList = Object.values(combos).filter(c => c.scores.length >= 2);
+  if(!comboList.length) return null;
+
+  // Score each combo
+  comboList.forEach(c => {
+    c.avgScore = c.scores.reduce((a,b)=>a+b,0) / c.scores.length;
+    const goodLandings = ['Fairway','Circle 1','Circle 2','Basket'];
+    c.goodLandingPct = c.landings.length
+      ? Math.round(c.landings.filter(l => goodLandings.includes(l)).length / c.landings.length * 100)
+      : null;
+    c.obPct = c.landings.length
+      ? Math.round(c.landings.filter(l => l === 'OB').length / c.landings.length * 100)
+      : 0;
+    // Combined rating: lower avg score + higher good landing = better
+    c.rating = c.avgScore - (c.goodLandingPct || 0) * 0.02;
+  });
+
+  const best = comboList.sort((a,b) => a.rating - b.rating)[0];
+  const worst = comboList[comboList.length - 1];
+
+  // Confidence based on throws count
+  const confidence = Math.min(3, Math.floor(best.scores.length / 2));
+
+  return {
+    disc: best.disc,
+    throwType: best.throwType,
+    avgScore: best.avgScore.toFixed(2),
+    goodLandingPct: best.goodLandingPct,
+    obPct: best.obPct,
+    throws: best.scores.length,
+    roundCount,
+    confidence, // 1-3
+    // Comparison to worst combo if different
+    vsDisc: worst !== best ? worst.disc : null,
+    vsAvg: worst !== best ? worst.avgScore.toFixed(2) : null,
+  };
+}
+
+function recBadgeHTML(rec, compact=false){
+  if(!rec) return '';
+
+  const confDots = [1,2,3].map(i =>
+    `<span class="${i<=rec.confidence?'on':''}"></span>`
+  ).join('');
+
+  const throwIcon = rec.throwType==='Backhand'?'🤚':rec.throwType==='Forehand'?'✋':rec.throwType==='Roller'?'🔄':'🪃';
+
+  if(compact){
+    // Mini version for dashboard hole cards
+    return `<div class="rec-mini">
+      🎯 <strong style="color:var(--gold)">${rec.disc} ${rec.throwType}</strong>
+      · avg ${rec.avgScore}
+      ${rec.goodLandingPct!==null?`· ${rec.goodLandingPct}% good landing`:''}
+    </div>`;
+  }
+
+  return `<div class="rec-badge">
+    <div class="rec-badge-icon">🎯</div>
+    <div class="rec-badge-content">
+      <div class="rec-badge-title">
+        Caddie Recommendation
+        <span class="rec-confidence">${confDots}</span>
+      </div>
+      <div class="rec-badge-text">
+        Throw <span class="rec-pill">${throwIcon} ${rec.throwType}</span>
+        with your <strong style="color:var(--text)">${rec.disc}</strong>
+        ${rec.goodLandingPct!==null ? `— lands in a good position <strong style="color:var(--grass)">${rec.goodLandingPct}%</strong> of the time` : ''}
+        ${rec.obPct>0 ? `<span style="color:var(--rose)"> · ${rec.obPct}% OB risk</span>` : ''}
+      </div>
+      <div class="rec-badge-stat">
+        Avg score <strong style="color:var(--sky)">${rec.avgScore}</strong> over ${rec.throws} logged throws
+        ${rec.vsDisc && rec.vsAvg ? ` · vs <strong style="color:var(--rose)">${rec.vsAvg}</strong> with ${rec.vsDisc}` : ''}
+        · Based on ${rec.roundCount} rounds
+      </div>
+    </div>
+  </div>`;
+}
+
+
 const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
 const fmtAvg = v => v ? v.toFixed(2) : '—';
 
@@ -1217,6 +1351,9 @@ function renderDashboard(){
       });
     }
 
+    const rec = getHoleRecommendation(c.id, h);
+    const recHTML = rec ? recBadgeHTML(rec, true) : '';
+
     const card = document.createElement('div');
     card.className = `hole-card${isProblem?' problem':isStrength?' strength':''}`;
     card.style.animationDelay = ((h-1)*0.02)+'s';
@@ -1229,6 +1366,7 @@ function renderDashboard(){
       <div class="hc-vs" style="color:${col}">${diff!==null?(diff>=0?'+':'')+diff.toFixed(2)+' vs par':''}</div>
       <div class="hc-trend">${sparkHTML}</div>
       ${s?`<div class="hc-rounds">Best: ${s.best} · Worst: ${s.worst}</div>`:'<div class="hc-rounds" style="color:var(--muted)">No data yet</div>'}
+      ${recHTML}
     `;
     card.onclick=()=>{ S.selectedCourse=c.id; document.getElementById('ai-course').value=c.id; document.getElementById('ai-hole').value=h; nav('analytics'); runAnalysis(); };
     grid.appendChild(card);
@@ -1381,7 +1519,7 @@ document.addEventListener('click', e=>{
 });
 
 // ── HOLE CARD SCORECARD ──
-let holeData = []; // per-hole state: { score, disc, throwType, landing }
+let holeData = []; // per-hole: { hole, par, score, throws: [{disc, throwType, landing}] }
 
 function getScoreClass(score, par){
   if(!score) return '';
@@ -1403,6 +1541,15 @@ function getScoreLabel(score, par){
   return `+${score-par}`;
 }
 
+function getLabelColor(scoreCls){
+  if(scoreCls.includes('ace')||scoreCls.includes('eagle')) return 'var(--gold)';
+  if(scoreCls.includes('birdie')) return 'var(--grass)';
+  if(scoreCls.includes('par')) return 'var(--sky)';
+  if(scoreCls.includes('bogey')) return 'var(--fire)';
+  if(scoreCls.includes('double')) return 'var(--rose)';
+  return 'var(--muted)';
+}
+
 function buildScorecard(){
   if(!activeCourse){ toast('⚠️ Select a course first'); return; }
   const c = activeCourse;
@@ -1410,136 +1557,239 @@ function buildScorecard(){
   document.getElementById('log-step2').style.display='block';
   document.getElementById('sc-course-name').textContent = c.name;
 
-  // Init hole data
+  // Init hole data — each hole starts with one empty throw
   holeData = Array.from({length: c.holes}, (_,i) => ({
     hole: i+1, par: c.pars[i], score: null,
-    disc: '', throwType: '', landing: ''
+    throws: [{ disc:'', throwType:'', landing:'' }]
   }));
 
   renderHoleCards();
   updateStickyTotal();
-
-  // Auto-open first hole
   setTimeout(() => toggleHoleCard(1, true), 100);
 }
 
-function renderHoleCards(){
-  const c = activeCourse;
-  const container = document.getElementById('hole-cards-container');
-  const discOpts = S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+function discOptHTML(){
+  return '<option value="">— disc —</option>' + S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+}
 
+function throwCardHTML(hole, ti, t){
+  const throwNum = ti + 1;
+  const disc = S.discs.find(d=>d.id===t.disc);
+  const labels = ['🏌️ Drive','⛳ Approach','🤛 Putt','↩️ Layup','🔁 Re-tee','6️⃣','7️⃣','8️⃣'];
+  const throwLabel = labels[ti] || `Throw ${throwNum}`;
+
+  // Build summary badges for collapsed state
+  const badges = [];
+  if(disc) badges.push(`<span class="throw-summary-badge has-data">🥏 ${disc.name}</span>`);
+  if(t.throwType){
+    const icon = t.throwType==='Backhand'?'🤚':t.throwType==='Forehand'?'✋':t.throwType==='Roller'?'🔄':'🪃';
+    badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.throwType}</span>`);
+  }
+  if(t.landing){
+    const icon = t.landing==='Fairway'?'🌿':t.landing==='Rough'?'🌾':t.landing==='OB'?'🚫':t.landing==='Circle 1'?'🎯':t.landing==='Circle 2'?'🔵':'⛳';
+    badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.landing}</span>`);
+  }
+  const hasData = badges.length > 0;
+  const summaryHTML = hasData ? badges.join('') : '<span class="throw-summary-badge">tap to log</span>';
+
+  return `<div class="throw-card" id="tc-${hole}-${ti}">
+    <div class="throw-card-header" onclick="toggleThrowCard(${hole},${ti})">
+      <span style="font-size:11px;font-weight:700;color:var(--dim);flex-shrink:0;min-width:70px">${throwLabel}</span>
+      <div id="ts-${hole}-${ti}" style="display:flex;gap:5px;flex-wrap:nowrap;overflow:hidden;flex:1">${summaryHTML}</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        ${ti>0?`<button onclick="event.stopPropagation();removeThrow(${hole},${ti})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px" title="Remove throw">✕</button>`:''}
+        <span id="tchev-${hole}-${ti}" style="color:var(--muted);font-size:10px;transition:transform .2s">▼</span>
+      </div>
+    </div>
+    <div class="throw-card-body" id="tcb-${hole}-${ti}" style="display:none">
+      <!-- Disc -->
+      <div class="throw-detail-section">
+        <div class="throw-detail-label">Disc</div>
+        <select class="throw-disc-sel" onchange="setThrowField(${hole},${ti},'disc',this.value)"
+          style="background:var(--ink2);border:1px solid var(--border);color:var(--text);font-family:Archivo,sans-serif;font-size:13px;padding:7px 10px;border-radius:7px;outline:none;width:100%;max-width:260px">
+          ${discOptHTML()}
+        </select>
+      </div>
+      <!-- Throw type -->
+      <div class="throw-detail-section">
+        <div class="throw-detail-label">Throw Type</div>
+        <div class="toggle-row">
+          ${[['🤚','Backhand','bh'],['✋','Forehand','fh'],['🔄','Roller',''],['🔁','Thumber',''],['🪃','Overhand','']].map(([e,v,c])=>{
+            const sel = t.throwType===v ? `selected ${c||''}` : '';
+            return `<button class="toggle-btn ${sel}" onclick="setThrowField(${hole},${ti},'throwType','${v}');selectToggle(this);updateThrowSummary(${hole},${ti})">${e} ${v}</button>`;
+          }).join('')}
+        </div>
+      </div>
+      <!-- Landing -->
+      <div class="throw-detail-section" style="margin-bottom:0">
+        <div class="throw-detail-label">Landing Zone</div>
+        <div class="toggle-row">
+          ${[['🌿','Fairway','fairway'],['🌾','Rough','rough'],['🚫','OB','ob'],['🎯','Circle 1','circle'],['🔵','Circle 2','circle'],['⛳','Basket','basket']].map(([e,v,c])=>{
+            const sel = t.landing===v ? `selected ${c}` : '';
+            return `<button class="toggle-btn ${sel}" onclick="setThrowField(${hole},${ti},'landing','${v}');selectToggle(this);updateThrowSummary(${hole},${ti})">${e} ${v}</button>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderHoleCards(){
+  const container = document.getElementById('hole-cards-container');
   container.innerHTML = holeData.map(h => {
     const scoreCls = getScoreClass(h.score, h.par);
     const scoreLabel = getScoreLabel(h.score, h.par);
-    const labelColor = scoreCls.includes('ace')||scoreCls.includes('eagle') ? 'var(--gold)' :
-                       scoreCls.includes('birdie') ? 'var(--grass)' :
-                       scoreCls.includes('par') ? 'var(--sky)' :
-                       scoreCls.includes('bogey') ? 'var(--fire)' :
-                       scoreCls.includes('double') ? 'var(--rose)' : 'var(--muted)';
+    const labelColor = getLabelColor(scoreCls);
 
-    // Score buttons: show 1 through par+4
-    const minScore = 1;
+    // Score buttons
     const maxScore = h.par + 4;
     const scoreBtns = Array.from({length: maxScore}, (_,i) => {
       const s = i+1;
       const cls = h.score===s ? getScoreClass(s, h.par) : '';
-      const lbl = s===1 ? 'ACE' : s===h.par-1 ? 'BRD' : s===h.par ? 'PAR' : s===h.par+1 ? 'BOG' : s<=h.par-2 ? 'EGL' : '+'+( s-h.par);
-      return `<button class="score-btn ${cls}" onclick="setScore(${h.hole},${s})" title="${s}">
-        ${s}
-        <span class="score-btn-label">${lbl}</span>
-      </button>`;
+      const lbl = s===1?'ACE':s<=h.par-2?'EGL':s===h.par-1?'BRD':s===h.par?'PAR':s===h.par+1?'BOG':'+'+( s-h.par);
+      return `<button class="score-btn ${cls}" onclick="setScore(${h.hole},${s})">${s}<span class="score-btn-label">${lbl}</span></button>`;
     }).join('');
 
-    // Summary line for collapsed view
-    const disc = S.discs.find(d=>d.id===h.disc);
-    const summaryParts = [];
-    if(disc) summaryParts.push(disc.name);
-    if(h.throwType) summaryParts.push(h.throwType);
-    if(h.landing) summaryParts.push(h.landing);
+    // Collapsed header summary — show first throw disc + last landing
+    const firstDisc = S.discs.find(d=>d.id===h.throws[0]?.disc);
+    const throwsSummary = h.throws
+      .filter(t=>t.disc||t.throwType||t.landing)
+      .map(t=>{ const d=S.discs.find(x=>x.id===t.disc); return d?d.name:t.throwType||''; })
+      .filter(Boolean).join(' → ');
+
+    // Throw cards HTML
+    const throwCardsHTML = h.throws.map((t,ti) => throwCardHTML(h.hole, ti, t)).join('');
 
     return `<div class="hole-log-card ${h.score?'scored':''}" id="hlc-${h.hole}">
+      <!-- Hole header -->
       <div class="hlc-header" onclick="toggleHoleCard(${h.hole})">
         <div class="hlc-num">${h.hole}</div>
-        <div>
-          <div class="hlc-par">Par ${h.par}</div>
-        </div>
-        <div class="hlc-score-display" style="color:${h.score ? labelColor : 'var(--muted)'}">${h.score||'—'}</div>
-        ${h.score ? `<span class="hlc-label" style="border-color:${labelColor};color:${labelColor};background:${labelColor}15">${scoreLabel}</span>` : ''}
-        <div class="hlc-summary">${summaryParts.join(' · ')||''}</div>
+        <div style="flex-shrink:0"><div class="hlc-par">Par ${h.par}</div></div>
+        <div class="hlc-score-display" style="color:${h.score?labelColor:'var(--muted)'}">${h.score||'—'}</div>
+        ${h.score?`<span class="hlc-label" style="border-color:${labelColor};color:${labelColor};background:${labelColor}15;flex-shrink:0">${scoreLabel}</span>`:''}
+        <div class="hlc-summary">${throwsSummary}</div>
         <span class="hlc-chevron" id="chev-${h.hole}">▼</span>
       </div>
+
+      <!-- Hole body -->
       <div class="hlc-body" id="hlcb-${h.hole}">
 
-        <!-- Score buttons -->
+        <!-- Caddie Recommendation (if enough data) -->
+        ${(()=>{ const rec=getHoleRecommendation(activeCourse.id, h.hole); return rec?recBadgeHTML(rec):''; })()}
+
+        <!-- Score -->
         <div class="throw-detail-section">
           <div class="throw-detail-label">Score</div>
           <div class="score-btn-row">${scoreBtns}</div>
         </div>
 
-        <!-- Disc -->
-        <div class="throw-detail-section">
-          <div class="throw-detail-label">Disc Thrown</div>
-          <div class="toggle-row">
-            <select onchange="setHoleField(${h.hole},'disc',this.value)" 
-              style="background:var(--ink3);border:1px solid var(--border);color:var(--text);font-family:Archivo,sans-serif;font-size:13px;padding:7px 10px;border-radius:7px;outline:none;flex:1;max-width:280px">
-              <option value="">— Select disc —</option>
-              ${discOpts}
-            </select>
-          </div>
+        <!-- Throw divider -->
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Throw Detail</div>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <div style="font-size:10px;color:var(--muted)">${h.throws.length} throw${h.throws.length!==1?'s':''}</div>
         </div>
 
-        <!-- Throw type -->
-        <div class="throw-detail-section">
-          <div class="throw-detail-label">Throw Type</div>
-          <div class="toggle-row">
-            ${['🤚 Backhand','✋ Forehand','🦅 Roller','🔄 Thumber','🪃 Overhand'].map(t => {
-              const val = t.split(' ').slice(1).join(' ');
-              const cls = h.throwType===val ? 'selected '+(val==='Backhand'?'bh':'fh') : '';
-              return `<button class="toggle-btn ${cls}" onclick="setHoleField(${h.hole},'throwType','${val}');refreshToggleRow(this,'throwType-${h.hole}')">${t}</button>`;
-            }).join('')}
-          </div>
+        <!-- Individual throw cards -->
+        <div id="throw-cards-${h.hole}" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+          ${throwCardsHTML}
         </div>
 
-        <!-- Landing zone -->
-        <div class="throw-detail-section">
-          <div class="throw-detail-label">Where Did It Land?</div>
-          <div class="toggle-row">
-            ${[
-              {v:'Fairway',   e:'🌿', cls:'fairway'},
-              {v:'Rough',     e:'🌾', cls:'rough'},
-              {v:'OB',        e:'🚫', cls:'ob'},
-              {v:'Circle 1',  e:'🎯', cls:'circle'},
-              {v:'Circle 2',  e:'🔵', cls:'circle'},
-              {v:'Basket',    e:'⛳', cls:'basket'},
-            ].map(({v,e,cls}) => {
-              const sel = h.landing===v ? `selected ${cls}` : '';
-              return `<button class="toggle-btn ${sel}" onclick="setHoleField(${h.hole},'landing','${v}');refreshToggleRow(this,'landing-${h.hole}')">${e} ${v}</button>`;
-            }).join('')}
-          </div>
+        <!-- Add throw button -->
+        <button class="btn btn-ghost" onclick="addThrow(${h.hole})" style="font-size:11px;padding:5px 12px;margin-bottom:14px">
+          + Add Throw
+        </button>
+
+        <!-- Next / Save -->
+        <div style="display:flex;justify-content:flex-end">
+          ${h.hole < activeCourse.holes
+            ? `<button class="btn btn-green" onclick="nextHole(${h.hole})" style="font-size:12px">Next: Hole ${h.hole+1} →</button>`
+            : `<button class="btn btn-green" onclick="saveRound()" style="font-size:12px">💾 Save Round</button>`
+          }
         </div>
-
-        <!-- Next hole button -->
-        ${h.hole < activeCourse.holes ? `
-        <div style="margin-top:4px;display:flex;justify-content:flex-end">
-          <button class="btn btn-green" onclick="nextHole(${h.hole})" style="font-size:12px">
-            Next: Hole ${h.hole+1} →
-          </button>
-        </div>` : `
-        <div style="margin-top:4px;display:flex;justify-content:flex-end">
-          <button class="btn btn-green" onclick="saveRound()" style="font-size:12px">
-            💾 Save Round
-          </button>
-        </div>`}
-
       </div>
     </div>`;
   }).join('');
 
-  // Re-apply disc selections
+  // Restore disc selections
   holeData.forEach(h => {
-    const sel = document.querySelector(`#hlcb-${h.hole} select`);
-    if(sel && h.disc) sel.value = h.disc;
+    h.throws.forEach((t, ti) => {
+      const sel = document.querySelector(`#tc-${h.hole}-${ti} .throw-disc-sel`);
+      if(sel && t.disc) sel.value = t.disc;
+    });
   });
+}
+
+function toggleThrowCard(hole, ti){
+  const body = document.getElementById(`tcb-${hole}-${ti}`);
+  const chev = document.getElementById(`tchev-${hole}-${ti}`);
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if(chev) chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function updateThrowSummary(hole, ti){
+  const t = holeData[hole-1].throws[ti];
+  const disc = S.discs.find(d=>d.id===t.disc);
+  const badges = [];
+  if(disc) badges.push(`<span class="throw-summary-badge has-data">🥏 ${disc.name}</span>`);
+  if(t.throwType){
+    const icon = t.throwType==='Backhand'?'🤚':t.throwType==='Forehand'?'✋':t.throwType==='Roller'?'🔄':'🪃';
+    badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.throwType}</span>`);
+  }
+  if(t.landing){
+    const icon = t.landing==='Fairway'?'🌿':t.landing==='Rough'?'🌾':t.landing==='OB'?'🚫':t.landing==='Circle 1'?'🎯':t.landing==='Circle 2'?'🔵':'⛳';
+    badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.landing}</span>`);
+  }
+  const el = document.getElementById(`ts-${hole}-${ti}`);
+  if(el) el.innerHTML = badges.length ? badges.join('') : '<span class="throw-summary-badge">tap to log</span>';
+  updateHoleHeader(hole);
+}
+
+
+  holeData[hole-1].throws[ti][field] = value;
+  // Update throw summary
+function selectToggle(btn){
+  const row = btn.closest('.toggle-row');
+  row.querySelectorAll('.toggle-btn').forEach(b => b.className = 'toggle-btn');
+  btn.classList.add('selected');
+  const val = btn.textContent.trim().toLowerCase();
+  if(val.includes('backhand')) btn.classList.add('bh');
+  else if(val.includes('forehand')) btn.classList.add('fh');
+  else if(val.includes('fairway')) btn.classList.add('fairway');
+  else if(val.includes('rough')) btn.classList.add('rough');
+  else if(val.includes('ob')) btn.classList.add('ob');
+  else if(val.includes('circle')) btn.classList.add('circle');
+  else if(val.includes('basket')) btn.classList.add('basket');
+}
+
+function addThrow(hole){
+  holeData[hole-1].throws.push({ disc:'', throwType:'', landing:'' });
+  const ti = holeData[hole-1].throws.length - 1;
+  const container = document.getElementById(`throw-cards-${hole}`);
+  const div = document.createElement('div');
+  div.innerHTML = throwCardHTML(hole, ti, { disc:'', throwType:'', landing:'' });
+  container.appendChild(div.firstElementChild);
+  // Update throw count label
+  const countEl = container.previousElementSibling?.querySelector('div:last-child');
+  if(countEl) countEl.textContent = `${ti+1} throws`;
+  // Auto-open the new throw
+  toggleThrowCard(hole, ti);
+}
+
+function removeThrow(hole, ti){
+  if(holeData[hole-1].throws.length <= 1){ toast('⚠️ At least one throw required'); return; }
+  holeData[hole-1].throws.splice(ti, 1);
+  // Re-render just this hole's throw cards
+  const container = document.getElementById(`throw-cards-${hole}`);
+  container.innerHTML = holeData[hole-1].throws.map((t,i) => throwCardHTML(hole, i, t)).join('');
+  // Restore disc values
+  holeData[hole-1].throws.forEach((t,i) => {
+    const sel = document.querySelector(`#tc-${hole}-${i} .throw-disc-sel`);
+    if(sel && t.disc) sel.value = t.disc;
+  });
+  updateHoleHeader(hole);
 }
 
 function toggleHoleCard(hole, forceOpen=false){
@@ -1547,24 +1797,25 @@ function toggleHoleCard(hole, forceOpen=false){
   const chev = document.getElementById(`chev-${hole}`);
   if(!body) return;
   const isOpen = body.classList.contains('open');
-  // Close all
   document.querySelectorAll('.hlc-body').forEach(b=>b.classList.remove('open'));
   document.querySelectorAll('.hlc-chevron').forEach(c=>c.classList.remove('open'));
   document.querySelectorAll('.hole-log-card').forEach(c=>c.classList.remove('active'));
-  // Open target
   if(!isOpen || forceOpen){
     body.classList.add('open');
     chev.classList.add('open');
     document.getElementById(`hlc-${hole}`).classList.add('active');
-    // Scroll into view
-    setTimeout(()=> document.getElementById(`hlc-${hole}`).scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
+    setTimeout(()=>document.getElementById(`hlc-${hole}`).scrollIntoView({behavior:'smooth',block:'nearest'}),50);
   }
 }
 
 function setScore(hole, score){
   const h = holeData[hole-1];
   h.score = score;
-  // Re-render just the score buttons for this hole
+  // Ensure throw count matches score (add throws if score > current throws)
+  while(h.throws.length < score && h.throws.length < 8){
+    h.throws.push({ disc:'', throwType:'', landing:'' });
+  }
+  // Re-render score buttons
   const body = document.getElementById(`hlcb-${hole}`);
   const maxScore = h.par + 4;
   const btnRow = body.querySelector('.score-btn-row');
@@ -1572,36 +1823,20 @@ function setScore(hole, score){
     btnRow.innerHTML = Array.from({length: maxScore}, (_,i) => {
       const s = i+1;
       const cls = s===score ? getScoreClass(s, h.par) : '';
-      const lbl = s===1?'ACE':s===h.par-1?'BRD':s===h.par?'PAR':s===h.par+1?'BOG':s<=h.par-2?'EGL':'+'+( s-h.par);
-      return `<button class="score-btn ${cls}" onclick="setScore(${hole},${s})" title="${s}">${s}<span class="score-btn-label">${lbl}</span></button>`;
+      const lbl = s===1?'ACE':s<=h.par-2?'EGL':s===h.par-1?'BRD':s===h.par?'PAR':s===h.par+1?'BOG':'+'+( s-h.par);
+      return `<button class="score-btn ${cls}" onclick="setScore(${hole},${s})">${s}<span class="score-btn-label">${lbl}</span></button>`;
     }).join('');
   }
-  // Update header display
+  // Re-render throw cards to match score
+  const throwContainer = document.getElementById(`throw-cards-${hole}`);
+  if(throwContainer){
+    throwContainer.innerHTML = h.throws.map((t,ti) => throwCardHTML(hole, ti, t)).join('');
+    h.throws.forEach((t,ti)=>{ const sel=document.querySelector(`#tc-${hole}-${ti} .throw-disc-sel`); if(sel&&t.disc) sel.value=t.disc; });
+    // Auto-open first throw if just scored
+    toggleThrowCard(hole, 0);
+  }
   updateHoleHeader(hole);
   updateStickyTotal();
-}
-
-function setHoleField(hole, field, value){
-  holeData[hole-1][field] = value;
-  updateHoleHeader(hole);
-}
-
-function refreshToggleRow(clickedBtn, groupKey){
-  // Deselect siblings, select clicked
-  const row = clickedBtn.closest('.toggle-row');
-  row.querySelectorAll('.toggle-btn').forEach(b=>{
-    b.className = 'toggle-btn';
-  });
-  clickedBtn.classList.add('selected');
-  // Add color class based on value
-  const val = clickedBtn.textContent.trim().toLowerCase();
-  if(val.includes('backhand')) clickedBtn.classList.add('bh');
-  else if(val.includes('forehand')) clickedBtn.classList.add('fh');
-  else if(val.includes('fairway')) clickedBtn.classList.add('fairway');
-  else if(val.includes('rough')) clickedBtn.classList.add('rough');
-  else if(val.includes('ob')) clickedBtn.classList.add('ob');
-  else if(val.includes('circle')) clickedBtn.classList.add('circle');
-  else if(val.includes('basket')) clickedBtn.classList.add('basket');
 }
 
 function updateHoleHeader(hole){
@@ -1610,39 +1845,34 @@ function updateHoleHeader(hole){
   if(!card) return;
   const scoreCls = getScoreClass(h.score, h.par);
   const scoreLabel = getScoreLabel(h.score, h.par);
-  const labelColor = scoreCls.includes('ace')||scoreCls.includes('eagle') ? 'var(--gold)' :
-                     scoreCls.includes('birdie') ? 'var(--grass)' :
-                     scoreCls.includes('par') ? 'var(--sky)' :
-                     scoreCls.includes('bogey') ? 'var(--fire)' :
-                     scoreCls.includes('double') ? 'var(--rose)' : 'var(--muted)';
+  const labelColor = getLabelColor(scoreCls);
+
   const scoreDisp = card.querySelector('.hlc-score-display');
-  if(scoreDisp){ scoreDisp.textContent = h.score||'—'; scoreDisp.style.color = h.score?labelColor:'var(--muted)'; }
-  // Update label chip
+  if(scoreDisp){ scoreDisp.textContent=h.score||'—'; scoreDisp.style.color=h.score?labelColor:'var(--muted)'; }
+
   const header = card.querySelector('.hlc-header');
-  const existingChip = header.querySelector('.hlc-label');
-  if(existingChip) existingChip.remove();
+  const chip = header.querySelector('.hlc-label');
+  if(chip) chip.remove();
   if(h.score){
-    const chip = document.createElement('span');
-    chip.className='hlc-label';
-    chip.style.cssText=`border-color:${labelColor};color:${labelColor};background:${labelColor}15`;
-    chip.textContent=scoreLabel;
-    scoreDisp.after(chip);
+    const c = document.createElement('span');
+    c.className='hlc-label';
+    c.style.cssText=`border-color:${labelColor};color:${labelColor};background:${labelColor}15;flex-shrink:0`;
+    c.textContent=scoreLabel;
+    scoreDisp.after(c);
   }
-  // Update summary
-  const disc = S.discs.find(d=>d.id===h.disc);
-  const summaryParts=[];
-  if(disc) summaryParts.push(disc.name);
-  if(h.throwType) summaryParts.push(h.throwType);
-  if(h.landing) summaryParts.push(h.landing);
+
+  // Summary: chain of disc names
+  const throwsSummary = h.throws
+    .filter(t=>t.disc||t.throwType||t.landing)
+    .map(t=>{ const d=S.discs.find(x=>x.id===t.disc); return d?d.name:t.throwType||''; })
+    .filter(Boolean).join(' → ');
   const sumEl = header.querySelector('.hlc-summary');
-  if(sumEl) sumEl.textContent = summaryParts.join(' · ');
-  // Scored class
+  if(sumEl) sumEl.textContent = throwsSummary;
+
   card.classList.toggle('scored', !!h.score);
 }
 
-function nextHole(currentHole){
-  toggleHoleCard(currentHole+1, true);
-}
+function nextHole(currentHole){ toggleHoleCard(currentHole+1, true); }
 
 function updateStickyTotal(){
   let total=0, scored=0, eagles=0, birdies=0, bogeys=0, parSoFar=0;
@@ -1655,10 +1885,10 @@ function updateStickyTotal(){
     }
   });
   const diff=total-parSoFar;
-  document.getElementById('sc-total-display').textContent = scored ? total : '—';
+  document.getElementById('sc-total-display').textContent=scored?total:'—';
   const vsEl=document.getElementById('sc-vspar-display');
-  vsEl.textContent = scored ? (diff>=0?'+':'')+diff : '—';
-  vsEl.style.color = !scored?'var(--muted)':diff<0?'var(--grass)':diff===0?'var(--sky)':'var(--rose)';
+  vsEl.textContent=scored?(diff>=0?'+':'')+diff:'—';
+  vsEl.style.color=!scored?'var(--muted)':diff<0?'var(--grass)':diff===0?'var(--sky)':'var(--rose)';
   document.getElementById('sc-eagles').textContent=eagles;
   document.getElementById('sc-birdies').textContent=birdies;
   document.getElementById('sc-bogeys').textContent=bogeys;
@@ -1671,16 +1901,15 @@ function saveRound(){
   const cond = document.getElementById('log-cond').value;
   const partners = document.getElementById('log-partners').value;
   const notes = document.getElementById('log-round-notes').value;
-
   const scored = holeData.filter(h=>h.score);
   if(!scored.length){ toast('⚠️ Enter at least one score'); return; }
   if(!date){ toast('⚠️ Select a date'); return; }
 
-  const scores = holeData.map(h=>h.score||0);
-  const pars = c.pars;
-  const total = scores.reduce((a,b)=>a+b,0);
-  const totalPar = pars.slice(0,c.holes).reduce((a,b)=>a+b,0);
-  const pm = total-totalPar;
+  const scores=holeData.map(h=>h.score||0);
+  const pars=c.pars;
+  const total=scores.reduce((a,b)=>a+b,0);
+  const totalPar=pars.slice(0,c.holes).reduce((a,b)=>a+b,0);
+  const pm=total-totalPar;
   const birdies=scored.filter(h=>h.score<h.par).length;
   const eagles=scored.filter(h=>h.score<=h.par-2).length;
   const bogeys=scored.filter(h=>h.score===h.par+1).length;
@@ -1690,29 +1919,32 @@ function saveRound(){
   const round={
     id:'r'+Date.now(), courseId:c.id, courseName:c.name,
     date, cond, partners, notes, scores,
-    discs:holeData.map(h=>h.disc),
-    throwTypes:holeData.map(h=>h.throwType),
-    landings:holeData.map(h=>h.landing),
+    throwData: holeData.map(h=>h.throws),
     total, pm, birdies, eagles, bogeys, doubles, pars:parsCount, holes:c.holes
   };
   if(!S.rounds) S.rounds=[];
   S.rounds.push(round);
 
-  // Save individual throws for analytics
-  holeData.forEach((h,i)=>{
-    if(h.score){
+  // Save individual throws for analytics — one entry per throw per hole
+  holeData.forEach(h=>{
+    if(!h.score) return;
+    h.throws.forEach((t, ti) => {
       S.throws.push({
-        id:'t'+Date.now()+'_'+i, courseId:c.id, hole:h.hole,
-        date, disc:h.disc, score:h.score, cond,
-        throwType:h.throwType, landing:h.landing, notes:''
+        id:'t'+Date.now()+'_'+h.hole+'_'+ti,
+        courseId:c.id, hole:h.hole,
+        date, disc:t.disc, score:h.score, cond,
+        throwType:t.throwType, landing:t.landing,
+        throwIndex:ti, // 0=drive, 1=approach, 2=putt, etc.
+        notes:''
       });
-    }
+    });
   });
 
   save(); renderRecentRounds(); renderSidebar();
   toast(`✅ Round saved! ${pm>=0?'+':''}${pm} vs par · ${birdies} birdies`);
   resetLog();
 }
+
 
 
 function renderRecentRounds(){
@@ -2222,475 +2454,7 @@ Be direct, specific, and reference actual hole stats. Sound like a real caddie.`
 // ═══════════════════════════════════════════════════════════
 let lookupTimer = null;
 
-// Local fallback database of popular discs
-const DISC_DB = [
-  // ── INNOVA ──
-  {manufacturer:'Innova',name:'Destroyer',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver, workhorse for experienced players'},
-  {manufacturer:'Innova',name:'Wraith',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Slightly understable, very popular distance driver'},
-  {manufacturer:'Innova',name:'Boss',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Max distance driver'},
-  {manufacturer:'Innova',name:'Shryke',type:'Distance Driver',speed:13,glide:6,turn:-2,fade:2,notes:'Understable distance driver, great for long anhyzer shots'},
-  {manufacturer:'Innova',name:'Valkyrie',type:'Distance Driver',speed:9,glide:4,turn:-2,fade:2,notes:'Beginner-friendly understable driver'},
-  {manufacturer:'Innova',name:'Eagle',type:'Fairway Driver',speed:7,glide:4,turn:-1,fade:3,notes:'Overstable fairway driver'},
-  {manufacturer:'Innova',name:'Leopard',type:'Fairway Driver',speed:6,glide:5,turn:-2,fade:1,notes:'Understable fairway driver, great for beginners'},
-  {manufacturer:'Innova',name:'Leopard3',type:'Fairway Driver',speed:7,glide:5,turn:-2,fade:1,notes:'Improved Leopard, great understable fairway'},
-  {manufacturer:'Innova',name:'Teebird',type:'Fairway Driver',speed:7,glide:5,turn:0,fade:2,notes:'Classic overstable fairway driver'},
-  {manufacturer:'Innova',name:'Teebird3',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Slightly less overstable Teebird'},
-  {manufacturer:'Innova',name:'Firebird',type:'Fairway Driver',speed:9,glide:3,turn:0,fade:4,notes:'Very overstable, great in wind'},
-  {manufacturer:'Innova',name:'Thunderbird',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
-  {manufacturer:'Innova',name:'Sidewinder',type:'Distance Driver',speed:9,glide:5,turn:-3,fade:1,notes:'Very understable driver, great for rollers'},
-  {manufacturer:'Innova',name:'Tern',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Fast understable distance driver'},
-  {manufacturer:'Innova',name:'Katana',type:'Distance Driver',speed:13,glide:5,turn:-3,fade:2,notes:'Understable max distance driver'},
-  {manufacturer:'Innova',name:'Colossus',type:'Distance Driver',speed:13,glide:6,turn:-3,fade:2,notes:'High speed understable driver'},
-  {manufacturer:'Innova',name:'Corvette',type:'Distance Driver',speed:14,glide:5,turn:-2,fade:2,notes:'Max speed distance driver'},
-  {manufacturer:'Innova',name:'Star Destroyer',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Star plastic Destroyer'},
-  {manufacturer:'Innova',name:'Roc',type:'Midrange',speed:4,glide:4,turn:0,fade:3,notes:'Classic overstable midrange'},
-  {manufacturer:'Innova',name:'Roc3',type:'Midrange',speed:7,glide:4,turn:0,fade:3,notes:'Faster overstable midrange'},
-  {manufacturer:'Innova',name:'Mako3',type:'Midrange',speed:5,glide:5,turn:0,fade:0,notes:'Perfectly neutral straight midrange'},
-  {manufacturer:'Innova',name:'Shark',type:'Midrange',speed:4,glide:4,turn:0,fade:2,notes:'Overstable beginner midrange'},
-  {manufacturer:'Innova',name:'Rhyno',type:'Putter',speed:2,glide:3,turn:0,fade:3,notes:'Very overstable putter'},
-  {manufacturer:'Innova',name:'Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Most popular putter in disc golf'},
-  {manufacturer:'Innova',name:'Pro Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'More overstable Aviar'},
-  {manufacturer:'Innova',name:'Aviar3',type:'Putter',speed:3,glide:3,turn:0,fade:2,notes:'Slightly faster Aviar'},
-  {manufacturer:'Innova',name:'Colt',type:'Putter',speed:3,glide:3,turn:-1,fade:1,notes:'Understable putter'},
-  {manufacturer:'Innova',name:'KC Pro Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Ken Climo signature Aviar'},
-  {manufacturer:'Innova',name:'Polecat',type:'Putter',speed:2,glide:5,turn:0,fade:0,notes:'Very neutral high-glide putter'},
-  {manufacturer:'Innova',name:'Dragon',type:'Fairway Driver',speed:7,glide:7,turn:-2,fade:1,notes:'High glide understable fairway'},
-  {manufacturer:'Innova',name:'Atlas',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Neutral midrange'},
-  {manufacturer:'Innova',name:'Phantom',type:'Distance Driver',speed:11,glide:5,turn:0,fade:2,notes:'Overstable distance driver'},
-  {manufacturer:'Innova',name:'Beast',type:'Distance Driver',speed:10,glide:5,turn:-2,fade:2,notes:'Beginner-friendly distance driver'},
-  {manufacturer:'Innova',name:'Charger',type:'Distance Driver',speed:12,glide:5,turn:-0.5,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Innova',name:'Corvid',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
 
-  // ── DISCRAFT ──
-  {manufacturer:'Discraft',name:'Buzzz',type:'Midrange',speed:5,glide:4,turn:-1,fade:1,notes:'Most popular midrange in disc golf, very straight'},
-  {manufacturer:'Discraft',name:'Buzzz OS',type:'Midrange',speed:5,glide:4,turn:0,fade:3,notes:'Overstable Buzzz'},
-  {manufacturer:'Discraft',name:'Buzzz GT',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Slightly overstable Buzzz'},
-  {manufacturer:'Discraft',name:'Zone',type:'Putter',speed:4,glide:3,turn:0,fade:3,notes:'Very overstable approach disc, great in wind'},
-  {manufacturer:'Discraft',name:'Zone OS',type:'Putter',speed:4,glide:3,turn:0,fade:4,notes:'Extra overstable Zone'},
-  {manufacturer:'Discraft',name:'Luna',type:'Putter',speed:3,glide:3,turn:0,fade:2,notes:'Paul McBeth signature putter'},
-  {manufacturer:'Discraft',name:'Malta',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Paul McBeth signature midrange'},
-  {manufacturer:'Discraft',name:'Undertaker',type:'Distance Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Overstable fairway/distance driver, Paul McBeth'},
-  {manufacturer:'Discraft',name:'Zeus',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Paul McBeth signature distance driver'},
-  {manufacturer:'Discraft',name:'Nuke',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Classic max distance driver'},
-  {manufacturer:'Discraft',name:'Nuke OS',type:'Distance Driver',speed:13,glide:5,turn:0,fade:3,notes:'Overstable Nuke'},
-  {manufacturer:'Discraft',name:'Flick',type:'Distance Driver',speed:12,glide:3,turn:1,fade:5,notes:'Extremely overstable, forehand specialist'},
-  {manufacturer:'Discraft',name:'Thrasher',type:'Distance Driver',speed:12,glide:5,turn:-3,fade:1,notes:'Very understable distance driver'},
-  {manufacturer:'Discraft',name:'Heat',type:'Fairway Driver',speed:9,glide:6,turn:-3,fade:1,notes:'Understable fairway driver, great for beginners'},
-  {manufacturer:'Discraft',name:'Avenger SS',type:'Distance Driver',speed:10,glide:5,turn:-3,fade:1,notes:'Understable distance driver'},
-  {manufacturer:'Discraft',name:'Roach',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Discraft',name:'Banger GT',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Overstable putter'},
-  {manufacturer:'Discraft',name:'Comet',type:'Midrange',speed:4,glide:5,turn:-2,fade:1,notes:'Understable midrange, good for turnover shots'},
-  {manufacturer:'Discraft',name:'Force',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Discraft',name:'Surge',type:'Distance Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Neutral to understable driver'},
-  {manufacturer:'Discraft',name:'Hades',type:'Distance Driver',speed:12,glide:6,turn:-3,fade:2,notes:'Paul McBeth signature understable driver'},
-  {manufacturer:'Discraft',name:'Scorch',type:'Distance Driver',speed:12,glide:5,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Discraft',name:'Vulture',type:'Distance Driver',speed:10,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Discraft',name:'Raptor',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
-  {manufacturer:'Discraft',name:'Sol',type:'Midrange',speed:5,glide:6,turn:-2,fade:1,notes:'Understable midrange'},
-  {manufacturer:'Discraft',name:'Wasp',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Overstable midrange'},
-  {manufacturer:'Discraft',name:'Archer',type:'Fairway Driver',speed:7,glide:5,turn:-2,fade:1,notes:'Understable fairway driver'},
-  {manufacturer:'Discraft',name:'Crank',type:'Distance Driver',speed:13,glide:5,turn:-2,fade:2,notes:'Max distance understable driver'},
-  {manufacturer:'Discraft',name:'Stalker',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
-  {manufacturer:'Discraft',name:'Ringer',type:'Putter',speed:3,glide:3,turn:0,fade:3,notes:'Overstable approach putter'},
-
-  // ── DYNAMIC DISCS ──
-  {manufacturer:'Dynamic Discs',name:'Truth',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral straight midrange'},
-  {manufacturer:'Dynamic Discs',name:'Verdict',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Overstable midrange'},
-  {manufacturer:'Dynamic Discs',name:'Escape',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver, great S-curve'},
-  {manufacturer:'Dynamic Discs',name:'Suspect',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Dynamic Discs',name:'Emac Truth',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Slightly more overstable Truth'},
-  {manufacturer:'Dynamic Discs',name:'Felon',type:'Distance Driver',speed:9,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
-  {manufacturer:'Dynamic Discs',name:'Maverick',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
-  {manufacturer:'Dynamic Discs',name:'Trespass',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Dynamic Discs',name:'Freedom',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Neutral distance driver'},
-  {manufacturer:'Dynamic Discs',name:'Enforcer',type:'Distance Driver',speed:11,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
-  {manufacturer:'Dynamic Discs',name:'Renegade',type:'Distance Driver',speed:13,glide:6,turn:-2,fade:2,notes:'Understable max distance driver'},
-  {manufacturer:'Dynamic Discs',name:'Raider',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
-  {manufacturer:'Dynamic Discs',name:'Lucid Felon',type:'Distance Driver',speed:9,glide:4,turn:0,fade:4,notes:'Lucid plastic Felon'},
-  {manufacturer:'Dynamic Discs',name:'Warden',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Dynamic Discs',name:'Deputy',type:'Putter',speed:2,glide:4,turn:-1,fade:1,notes:'Understable putter'},
-  {manufacturer:'Dynamic Discs',name:'Bounty',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter/approach'},
-  {manufacturer:'Dynamic Discs',name:'Westside Discs',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Westside partner brand'},
-
-  // ── LATITUDE 64 ──
-  {manufacturer:'Latitude 64',name:'Flow',type:'Distance Driver',speed:11,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
-  {manufacturer:'Latitude 64',name:'River',type:'Fairway Driver',speed:7,glide:7,turn:-1,fade:1,notes:'High glide understable fairway'},
-  {manufacturer:'Latitude 64',name:'Jade',type:'Distance Driver',speed:11,glide:5,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Latitude 64',name:'Saint',type:'Distance Driver',speed:11,glide:6,turn:-1,fade:2,notes:'Versatile distance driver'},
-  {manufacturer:'Latitude 64',name:'Saint Pro',type:'Distance Driver',speed:11,glide:5,turn:0,fade:3,notes:'More overstable Saint'},
-  {manufacturer:'Latitude 64',name:'Ballista',type:'Distance Driver',speed:14,glide:5,turn:-1,fade:3,notes:'Max speed distance driver'},
-  {manufacturer:'Latitude 64',name:'Ballista Pro',type:'Distance Driver',speed:14,glide:5,turn:0,fade:3,notes:'Overstable Ballista'},
-  {manufacturer:'Latitude 64',name:'Pure',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Latitude 64',name:'Dagger',type:'Putter',speed:3,glide:4,turn:0,fade:3,notes:'Overstable putter'},
-  {manufacturer:'Latitude 64',name:'Mercy',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Latitude 64',name:'Brave',type:'Putter',speed:2,glide:4,turn:0,fade:2,notes:'Slightly overstable putter'},
-  {manufacturer:'Latitude 64',name:'Fuse',type:'Midrange',speed:5,glide:6,turn:-1,fade:1,notes:'Understable midrange, high glide'},
-  {manufacturer:'Latitude 64',name:'Claymore',type:'Distance Driver',speed:11,glide:5,turn:0,fade:4,notes:'Very overstable distance driver'},
-  {manufacturer:'Latitude 64',name:'Raketen',type:'Distance Driver',speed:14,glide:4,turn:0,fade:4,notes:'Overstable max distance driver'},
-  {manufacturer:'Latitude 64',name:'Trust',type:'Putter',speed:3,glide:5,turn:0,fade:1,notes:'Neutral putt and approach'},
-  {manufacturer:'Latitude 64',name:'Sapphire',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Latitude 64',name:'Royal Grand Tursas',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Overstable fairway driver'},
-
-  // ── MVP / AXIOM / STREAMLINE ──
-  {manufacturer:'MVP',name:'Tesla',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Slightly overstable distance driver'},
-  {manufacturer:'MVP',name:'Orbital',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'MVP',name:'Relay',type:'Midrange',speed:5,glide:5,turn:-1,fare:1,notes:'Neutral midrange'},
-  {manufacturer:'MVP',name:'Disc Volt',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
-  {manufacturer:'MVP',name:'Amp',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Neutral fairway driver'},
-  {manufacturer:'MVP',name:'Servo',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:2,notes:'Neutral fairway driver'},
-  {manufacturer:'MVP',name:'Spin',type:'Putter',speed:3,glide:3,turn:0,fade:2,notes:'Overstable putter'},
-  {manufacturer:'MVP',name:'Atom',type:'Putter',speed:3,glide:3,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'MVP',name:'Deflector',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'MVP',name:'Dimension',type:'Distance Driver',speed:14,glide:5,turn:0,fade:3,notes:'Overstable max distance driver'},
-  {manufacturer:'Axiom',name:'Envy',type:'Putter',speed:3,glide:4,turn:-1,fade:1,notes:'Understable putter'},
-  {manufacturer:'Axiom',name:'Proxy',type:'Putter',speed:3,glide:5,turn:-1,fade:1,notes:'Understable putter, high glide'},
-  {manufacturer:'Axiom',name:'Hex',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Neutral midrange'},
-  {manufacturer:'Axiom',name:'Crave',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Neutral fairway driver'},
-  {manufacturer:'Axiom',name:'Insanity',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Axiom',name:'Defy',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Axiom',name:'Tantrum',type:'Distance Driver',speed:11,glide:6,turn:-3,fade:2,notes:'Very understable distance driver'},
-  {manufacturer:'Streamline',name:'Drift',type:'Fairway Driver',speed:7,glide:7,turn:-2,fade:1,notes:'High glide understable fairway'},
-  {manufacturer:'Streamline',name:'Trace',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Neutral fairway driver'},
-
-  // ── KASTAPLAST ──
-  {manufacturer:'Kastaplast',name:'Berg',type:'Putter',speed:1,glide:1,turn:0,fade:2,notes:'Very overstable putter, great for approaches'},
-  {manufacturer:'Kastaplast',name:'Rask',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
-  {manufacturer:'Kastaplast',name:'Gote',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
-  {manufacturer:'Kastaplast',name:'Stal',type:'Fairway Driver',speed:8,glide:4,turn:0,fade:3,notes:'Overstable fairway driver'},
-  {manufacturer:'Kastaplast',name:'Lots',type:'Distance Driver',speed:13,glide:6,turn:-1,fade:2,notes:'Distance driver'},
-  {manufacturer:'Kastaplast',name:'Grym',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Kastaplast',name:'Grym X',type:'Distance Driver',speed:12,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
-  {manufacturer:'Kastaplast',name:'Falk',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
-  {manufacturer:'Kastaplast',name:'Kaxe',type:'Midrange',speed:6,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
-  {manufacturer:'Kastaplast',name:'Kaxe Z',type:'Midrange',speed:6,glide:4,turn:0,fade:3,notes:'More overstable Kaxe'},
-  {manufacturer:'Kastaplast',name:'Kolf',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-
-  // ── PRODIGY ──
-  {manufacturer:'Prodigy',name:'D1',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Prodigy',name:'D1 Max',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Max distance driver'},
-  {manufacturer:'Prodigy',name:'D2',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Neutral distance driver'},
-  {manufacturer:'Prodigy',name:'D3',type:'Distance Driver',speed:12,glide:6,turn:-3,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Prodigy',name:'D4',type:'Distance Driver',speed:10,glide:5,turn:-2,fade:2,notes:'Beginner-friendly distance driver'},
-  {manufacturer:'Prodigy',name:'F1',type:'Fairway Driver',speed:7,glide:5,turn:0,fade:2,notes:'Overstable fairway driver'},
-  {manufacturer:'Prodigy',name:'F3',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
-  {manufacturer:'Prodigy',name:'F5',type:'Fairway Driver',speed:9,glide:5,turn:-3,fade:2,notes:'Very understable fairway driver'},
-  {manufacturer:'Prodigy',name:'M2',type:'Midrange',speed:5,glide:5,turn:-2,fade:1,notes:'Understable midrange'},
-  {manufacturer:'Prodigy',name:'M3',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
-  {manufacturer:'Prodigy',name:'M4',type:'Midrange',speed:5,glide:5,turn:-2,fade:1,notes:'Understable midrange'},
-  {manufacturer:'Prodigy',name:'PA-1',type:'Putter',speed:3,glide:3,turn:0,fade:2,notes:'Overstable putter'},
-  {manufacturer:'Prodigy',name:'PA-2',type:'Putter',speed:3,glide:3,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Prodigy',name:'PA-3',type:'Putter',speed:3,glide:4,turn:-1,fade:1,notes:'Understable putter'},
-  {manufacturer:'Prodigy',name:'PA-4',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-
-  // ── WESTSIDE DISCS ──
-  {manufacturer:'Westside',name:'Hatchet',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Westside',name:'Sword',type:'Distance Driver',speed:11,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
-  {manufacturer:'Westside',name:'Underworld',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Westside',name:'Stag',type:'Fairway Driver',speed:8,glide:7,turn:-2,fade:1,notes:'Understable high-glide fairway'},
-  {manufacturer:'Westside',name:'Warship',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
-  {manufacturer:'Westside',name:'World',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Westside',name:'Tournament',type:'Putter',speed:2,glide:4,turn:0,fade:2,notes:'Neutral putter'},
-  {manufacturer:'Westside',name:'Tursas',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Overstable fairway driver'},
-  {manufacturer:'Westside',name:'Queen',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-
-  // ── DISCMANIA ──
-  {manufacturer:'Discmania',name:'PD',type:'Distance Driver',speed:10,glide:4,turn:0,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Discmania',name:'PD2',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Discmania',name:'FD',type:'Fairway Driver',speed:7,glide:6,turn:-1,fade:1,notes:'Understable fairway driver'},
-  {manufacturer:'Discmania',name:'FD3',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:2,notes:'Neutral fairway driver'},
-  {manufacturer:'Discmania',name:'CD',type:'Distance Driver',speed:11,glide:5,turn:-2,fade:2,notes:'Neutral distance driver'},
-  {manufacturer:'Discmania',name:'CD2',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Discmania',name:'CD3',type:'Distance Driver',speed:12,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
-  {manufacturer:'Discmania',name:'P1',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Discmania',name:'P2',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Overstable putter'},
-  {manufacturer:'Discmania',name:'MD',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Overstable midrange'},
-  {manufacturer:'Discmania',name:'MD3',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
-  {manufacturer:'Discmania',name:'Tactic',type:'Midrange',speed:5,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
-  {manufacturer:'Discmania',name:'Instinct',type:'Fairway Driver',speed:9,glide:6,turn:-2,fade:1,notes:'Understable fairway driver'},
-  {manufacturer:'Discmania',name:'Essence',type:'Putter',speed:2,glide:5,turn:0,fade:1,notes:'High glide neutral putter'},
-  {manufacturer:'Discmania',name:'Psycho',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Discmania',name:'Sky God',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Neutral distance driver'},
-  {manufacturer:'Discmania',name:'Sensei',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Discmania',name:'Link',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Discmania',name:'Active Driver',type:'Fairway Driver',speed:9,glide:6,turn:-2,fade:2,notes:'Understable fairway driver'},
-  {manufacturer:'Discmania',name:'Active Driver 2',type:'Distance Driver',speed:10,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
-
-  // ── THOUGHT SPACE ATHLETICS ──
-  {manufacturer:'Thought Space Athletics',name:'Synapse',type:'Distance Driver',speed:12,glide:6,turn:-3,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Thought Space Athletics',name:'Animus',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Thought Space Athletics',name:'Votum',type:'Fairway Driver',speed:9,glide:6,turn:-1,fade:2,notes:'Neutral fairway driver'},
-  {manufacturer:'Thought Space Athletics',name:'Omen',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
-  {manufacturer:'Thought Space Athletics',name:'Mantra',type:'Midrange',speed:5,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
-  {manufacturer:'Thought Space Athletics',name:'Aura',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Thought Space Athletics',name:'Construct',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
-
-  // ── BIRDIE ──
-  {manufacturer:'Birdie',name:'Thunderchief',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
-
-  // ── EV-7 ──
-  {manufacturer:'EV-7',name:'Phi',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'EV-7',name:'Opto Phi',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Opto plastic Phi'},
-  {manufacturer:'EV-7',name:'Penrose',type:'Midrange',speed:4,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
-  {manufacturer:'EV-7',name:'Nomad',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Versatile midrange'},
-  {manufacturer:'EV-7',name:'OG',type:'Fairway Driver',speed:8,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
-
-  // ── GATEWAY ──
-  {manufacturer:'Gateway',name:'Wizard',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Classic neutral putter'},
-  {manufacturer:'Gateway',name:'Diamond',type:'Putter',speed:1,glide:2,turn:0,fade:3,notes:'Very overstable putter'},
-  {manufacturer:'Gateway',name:'Illusion',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Gateway',name:'Voodoo',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
-
-  // ── DAREDEVIL ──
-  {manufacturer:'Daredevil',name:'Fiend',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-
-  // ── RPM DISCS ──
-  {manufacturer:'RPM',name:'Tui',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'RPM',name:'Kotuku',type:'Fairway Driver',speed:9,glide:6,turn:-2,fade:2,notes:'Understable fairway driver'},
-  {manufacturer:'RPM',name:'Huia',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
-
-  // ── LØFT DISCS ──
-  {manufacturer:'Løft',name:'Ræven',type:'Fairway Driver',speed:8,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
-  {manufacturer:'Løft',name:'Vrede',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-
-  // ── YIKUN ──
-  {manufacturer:'Yikun',name:'Tiger',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
-  {manufacturer:'Yikun',name:'Wing',type:'Fairway Driver',speed:8,glide:5,turn:-1,fade:2,notes:'Neutral fairway driver'},
-
-  // ── INFINITE DISCS ──
-  {manufacturer:'Infinite Discs',name:'Pharaoh',type:'Distance Driver',speed:13,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
-  {manufacturer:'Infinite Discs',name:'Sphinx',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Infinite Discs',name:'Myth',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
-  {manufacturer:'Infinite Discs',name:'Emperor',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Infinite Discs',name:'Slab',type:'Distance Driver',speed:12,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
-  {manufacturer:'Infinite Discs',name:'Alpaca',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Infinite Discs',name:'Hound',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
-  {manufacturer:'Infinite Discs',name:'Exodus',type:'Fairway Driver',speed:7,glide:5,turn:-2,fade:1,notes:'Understable fairway driver'},
-
-  // ── CLASH DISCS ──
-  {manufacturer:'Clash',name:'Popcorn',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-  {manufacturer:'Clash',name:'Mint',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
-  {manufacturer:'Clash',name:'Spice',type:'Midrange',speed:5,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
-  {manufacturer:'Clash',name:'Pepper',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-  {manufacturer:'Clash',name:'Berry',type:'Putter',speed:2,glide:4,turn:-1,fade:1,notes:'Understable putter'},
-  {manufacturer:'Clash',name:'Mango',type:'Fairway Driver',speed:9,glide:6,turn:-2,fade:2,notes:'Understable fairway driver'},
-
-  // ── HERO DISCS ──
-  {manufacturer:'Hero',name:'Aces',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
-
-  // ── MILLENIUM ──
-  {manufacturer:'Millennium',name:'Omega',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Neutral putter'},
-  {manufacturer:'Millennium',name:'Polaris LS',type:'Fairway Driver',speed:9,glide:5,turn:-3,fade:1,notes:'Very understable fairway driver'},
-  {manufacturer:'Millennium',name:'Orion LS',type:'Distance Driver',speed:11,glide:5,turn:-3,fade:1,notes:'Very understable distance driver'},
-  {manufacturer:'Millennium',name:'Quasar',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
-
-  // ── VIBRAM ──
-  {manufacturer:'Vibram',name:'Obex',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Overstable putter'},
-  {manufacturer:'Vibram',name:'Summit',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Neutral midrange'},
-  {manufacturer:'Vibram',name:'Ridge',type:'Fairway Driver',speed:7,glide:5,turn:0,fade:2,notes:'Overstable fairway driver'},
-];
-
-function localDiscSearch(query){
-  const q = query.toLowerCase().replace(/[^a-z0-9\s]/g,' ').trim();
-  const words = q.split(/\s+/).filter(Boolean);
-  
-  const results = DISC_DB.map(d => {
-    const haystack = (d.manufacturer + ' ' + d.name).toLowerCase();
-    const nameOnly = d.name.toLowerCase();
-    let score = 0;
-    // Exact name match = highest priority
-    if(nameOnly === q) score = 100;
-    // Name starts with query
-    else if(nameOnly.startsWith(q)) score = 80;
-    // All words match
-    else if(words.every(w => haystack.includes(w))) score = 60;
-    // Name contains any word
-    else if(words.some(w => nameOnly.includes(w))) score = 40;
-    // Manufacturer + any word
-    else if(words.some(w => haystack.includes(w))) score = 20;
-    return { disc: d, score };
-  }).filter(r => r.score > 0)
-    .sort((a,b) => b.score - a.score)
-    .slice(0, 6)
-    .map(r => r.disc);
-
-  return results;
-}
-
-function scheduleDiscLookup(val){
-  clearTimeout(lookupTimer);
-  const status = document.getElementById('lookup-status');
-  const spinner = document.getElementById('lookup-spinner');
-  status.style.display = 'none';
-  document.getElementById('disc-suggestions').style.display = 'none';
-  if(val.trim().length < 3) return;
-
-  // Try local DB first instantly
-  const local = localDiscSearch(val.trim());
-  if(local.length){
-    spinner.style.display = 'none';
-    showDiscMatches(local);
-    return;
-  }
-
-  // Fall back to AI lookup
-  spinner.style.display = 'block';
-  lookupTimer = setTimeout(() => lookupDisc(val.trim()), 900);
-}
-
-function showDiscMatches(matches){
-  const status = document.getElementById('lookup-status');
-  const suggestions = document.getElementById('disc-suggestions');
-
-  if(!matches.length){
-    status.textContent = 'No match found';
-    status.style.cssText = 'display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;background:rgba(244,63,94,.1);color:var(--rose);border:1px solid rgba(244,63,94,.3)';
-    suggestions.style.display = 'none';
-    return;
-  }
-
-  suggestions.style.display = 'block';
-  suggestions.innerHTML = matches.map((m, i) => `
-    <div class="disc-suggestion" onclick="applyDiscMatch(${i})" data-match='${JSON.stringify(m).replace(/'/g,"&#39;")}'>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">${m.manufacturer} ${m.name}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:1px">${m.type}</div>
-          ${m.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:3px">${m.notes}</div>` : ''}
-        </div>
-        <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;background:var(--ink3);padding:5px 8px;border-radius:6px">
-          <span style="font-family:'Fira Code',monospace;font-size:12px;color:var(--sky)" title="Speed">${m.speed}</span>
-          <span style="color:var(--border)">/</span>
-          <span style="font-family:'Fira Code',monospace;font-size:12px;color:var(--grass)" title="Glide">${m.glide}</span>
-          <span style="color:var(--border)">/</span>
-          <span style="font-family:'Fira Code',monospace;font-size:12px;color:var(--fire)" title="Turn">${m.turn}</span>
-          <span style="color:var(--border)">/</span>
-          <span style="font-family:'Fira Code',monospace;font-size:12px;color:var(--rose)" title="Fade">${m.fade}</span>
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  status.textContent = matches.length + ' match' + (matches.length > 1 ? 'es' : '') + ' found';
-  status.style.cssText = 'display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;background:rgba(34,197,94,.1);color:var(--grass);border:1px solid rgba(34,197,94,.3)';
-}
-
-
-async function lookupDisc(name){
-  const spinner = document.getElementById('lookup-spinner');
-  const status = document.getElementById('lookup-status');
-  const suggestions = document.getElementById('disc-suggestions');
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 600,
-        messages: [{
-          role: 'user',
-          content: `You are a disc golf equipment database. Return flight numbers for disc golf discs matching "${name}".
-
-Find up to 3 real disc golf discs that match this name. Use your knowledge of actual disc golf equipment.
-
-Respond ONLY with this exact JSON format, no markdown fences, no extra text:
-{"matches":[{"manufacturer":"Innova","name":"Destroyer","type":"Distance Driver","speed":12,"glide":5,"turn":-1,"fade":3,"notes":"Overstable distance driver"}]}
-
-Rules:
-- Only include real discs you are confident about
-- type must be exactly one of: Distance Driver, Fairway Driver, Hybrid Driver, Midrange, Putter
-- flight numbers must be real integers
-- If no match found return: {"matches":[]}`
-        }]
-      })
-    });
-
-    const data = await res.json();
-
-    // Check for API error response
-    if(data.error){
-      console.error('API error:', data.error);
-      throw new Error(data.error.message || 'API error');
-    }
-
-    const text = data.content?.find(b => b.type === 'text')?.text || '';
-    console.log('Disc lookup raw response:', text);
-
-    let parsed;
-    try {
-      // Strip any accidental markdown fences
-      const clean = text.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
-      parsed = JSON.parse(clean);
-    } catch(e) {
-      console.error('JSON parse failed:', text);
-      parsed = null;
-    }
-
-    spinner.style.display = 'none';
-
-    if(!parsed || !parsed.matches?.length){
-      showDiscMatches([]);
-      return;
-    }
-
-    showDiscMatches(parsed.matches);
-
-    // Never auto-apply — always let user click to confirm
-
-  } catch(e) {
-    console.error('Disc lookup error:', e);
-    spinner.style.display = 'none';
-    status.textContent = e.message?.includes('rate') ? 'Rate limited — try again' : 'Lookup failed: ' + (e.message || 'unknown error');
-    status.style.cssText = 'display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;background:rgba(244,63,94,.1);color:var(--rose);border:1px solid rgba(244,63,94,.3)';
-  }
-}
-
-function applyDiscMatch(idx){
-  const suggestions = document.getElementById('disc-suggestions');
-  const card = suggestions.querySelectorAll('.disc-suggestion')[idx];
-  const m = JSON.parse(card.dataset.match);
-  applyDiscMatchData(m);
-  suggestions.style.display = 'none';
-}
-
-function applyDiscMatchData(m){
-  // Set name
-  document.getElementById('nd-name').value = m.manufacturer + ' ' + m.name;
-  // Set type
-  document.querySelectorAll('.type-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.val === m.type);
-  });
-  document.getElementById('nd-type').value = m.type;
-  // Set notes if empty
-  if(!document.getElementById('nd-notes').value && m.notes){
-    document.getElementById('nd-notes').value = m.notes;
-  }
-  // Set flight numbers
-  const fields = { speed: m.speed, glide: m.glide, turn: m.turn, fade: m.fade };
-  Object.entries(fields).forEach(([group, val]) => {
-    const btn = document.querySelector(`.fnum-btn[data-group="${group}"][data-val="${val}"]`);
-    if(btn){
-      document.querySelectorAll(`.fnum-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      flightState[group] = val;
-      const valEl = document.getElementById(`nd-${group}-val`);
-      if(valEl) valEl.textContent = val >= 0 && group === 'turn' ? '+'+val : val;
-    }
-  });
-  updateFlightPreview();
-  // Show status
-  const status = document.getElementById('lookup-status');
-  status.textContent = '✓ Auto-filled';
-  status.style.cssText = 'display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:rgba(34,197,94,.12);color:var(--grass);border:1px solid rgba(34,197,94,.3)';
-  toast('✅ Flight numbers loaded for ' + m.manufacturer + ' ' + m.name);
-}
-
-// Close suggestions when clicking outside
-document.addEventListener('click', e => {
-  if(!e.target.closest('#nd-name') && !e.target.closest('#disc-suggestions')){
-    const s = document.getElementById('disc-suggestions');
-    if(s) s.style.display = 'none';
-  }
-});
 
 
 const flightState = { speed: null, glide: null, turn: null, fade: null };
