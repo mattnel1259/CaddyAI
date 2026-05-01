@@ -966,34 +966,46 @@ let S = { courses:[], discs:[], throws:[], holeStats:{}, selectedCourse:null, la
 
 function save(){
   try{
-    localStorage.setItem('cai3', JSON.stringify({
-      courses: S.courses,
+    // Only save user-generated data — UDISC courses/holeStats are embedded in the file
+    // Don't save S.courses (always rebuilt from UDISC on init)
+    const payload = {
       discs: S.discs,
-      throws: S.throws,
-      rounds: S.rounds||[],
+      throws: S.throws.slice(-500), // cap at 500 most recent throws
+      rounds: (S.rounds||[]).slice(-200), // cap at 200 rounds
       selectedCourse: S.selectedCourse
-    }));
-  } catch(e){ console.error('Save failed:', e); }
+    };
+    localStorage.setItem('cai3', JSON.stringify(payload));
+  } catch(e){
+    console.error('Save failed:', e);
+    // If quota exceeded, trim throws and try again
+    if(e.name === 'QuotaExceededError'){
+      try{
+        const payload = {
+          discs: S.discs,
+          throws: S.throws.slice(-100),
+          rounds: (S.rounds||[]).slice(-50),
+          selectedCourse: S.selectedCourse
+        };
+        localStorage.setItem('cai3', JSON.stringify(payload));
+        console.log('Saved with trimmed data due to storage quota');
+      } catch(e2){ console.error('Save failed even after trim:', e2); }
+    }
+  }
 }
 
 function load(){
   try{
-    // Try current key first
     let raw = localStorage.getItem('cai3');
-
-    // Migrate from older keys if present
     if(!raw) raw = localStorage.getItem('caddyai_state');
     if(!raw) raw = localStorage.getItem('disciq_state');
 
     if(raw){
       const d = JSON.parse(raw);
-      S.courses = d.courses || [];
+      // Only load user data — never load courses from localStorage
       S.discs = d.discs || [];
       S.throws = d.throws || [];
       S.rounds = d.rounds || [];
       S.selectedCourse = d.selectedCourse || null;
-
-      // If migrated from old key, save under new key
       if(!localStorage.getItem('cai3')) save();
     }
   } catch(e){ console.error('Load failed:', e); }
