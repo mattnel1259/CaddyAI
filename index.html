@@ -1218,7 +1218,8 @@ function deleteThrow(id){ S.throws=S.throws.filter(t=>t.id!==id); save(); render
 // Helper: get rounds from UDISC.rounds array, filtered
 // round = [date, courseId, plusMinus, rating, birdies, eagles, pars, bogeys, doubles]
 function getRounds(courseId, year){
-  return (UDISC.rounds || []).filter(r => {
+  if(!UDISC || !UDISC.rounds) return [];
+  return UDISC.rounds.filter(r => {
     if(courseId && r[1] !== courseId) return false;
     if(year && !r[0].startsWith(year)) return false;
     return true;
@@ -1226,6 +1227,7 @@ function getRounds(courseId, year){
 }
 
 function renderAnalytics(){
+  try {
   const courseId = document.getElementById('an-course').value;
   const year = document.getElementById('an-year').value;
 
@@ -1261,6 +1263,7 @@ function renderAnalytics(){
   renderCourseBreakdown(year);
   renderHeatmap();
   renderStrengthsWeaknesses();
+  } catch(e){ console.error('renderAnalytics error:', e); }
 }
 
 function renderAnKPIs(rounds, courseId, year){
@@ -2092,10 +2095,10 @@ function setMobNav(btn){
   btn.classList.add('active');
 }
 
-// Keep mobile nav in sync with desktop nav
+// Keep mobile nav in sync with desktop nav - safe override
 const _origNav = nav;
 window.nav = function(page){
-  _origNav(page);
+  try { _origNav(page); } catch(e){ console.error('nav error:', e); }
   const map = {dashboard:0, caddie:1, log:2, analytics:3, discs:4};
   const idx = map[page];
   if(idx !== undefined){
