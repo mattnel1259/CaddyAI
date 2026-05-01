@@ -298,6 +298,91 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 }
 .caddie-rec-title { font-family: 'Archivo Black', sans-serif; font-size: 16px; color: var(--gold); margin-bottom: 10px; }
 
+/* ── HOLE CARDS ── */
+.hole-log-card {
+  background: var(--ink2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.hole-log-card.active { border-color: var(--grass); }
+.hole-log-card.scored { border-color: var(--border); opacity: .85; }
+
+.hlc-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.hlc-num {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 28px; color: var(--muted); line-height: 1;
+  width: 36px; flex-shrink: 0;
+}
+.hlc-par { font-size: 11px; color: var(--muted); }
+.hlc-score-display {
+  font-family: 'Fira Code', monospace;
+  font-size: 22px; font-weight: 600;
+  width: 44px; text-align: center;
+}
+.hlc-label {
+  font-size: 11px; font-weight: 600;
+  padding: 2px 7px; border-radius: 20px;
+  border: 1px solid;
+}
+.hlc-summary { font-size: 11px; color: var(--muted); margin-left: auto; text-align: right; line-height: 1.6; }
+.hlc-chevron { color: var(--muted); font-size: 12px; margin-left: 8px; transition: transform .2s; }
+.hlc-chevron.open { transform: rotate(180deg); }
+
+.hlc-body {
+  border-top: 1px solid var(--border);
+  padding: 16px;
+  display: none;
+}
+.hlc-body.open { display: block; }
+
+/* Score buttons */
+.score-btn-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.score-btn {
+  width: 44px; height: 44px;
+  background: var(--ink3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--muted);
+  font-family: 'Fira Code', monospace; font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: all .12s;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 1px;
+}
+.score-btn:hover { border-color: var(--muted); color: var(--text); transform: scale(1.05); }
+.score-btn.selected-ace    { background: rgba(251,191,36,.2); border-color: var(--gold); color: var(--gold); transform: scale(1.1); }
+.score-btn.selected-eagle  { background: rgba(251,191,36,.15); border-color: var(--gold); color: var(--gold); transform: scale(1.08); }
+.score-btn.selected-birdie { background: rgba(34,197,94,.15); border-color: var(--grass); color: var(--grass); transform: scale(1.08); }
+.score-btn.selected-par    { background: rgba(56,189,248,.12); border-color: var(--sky); color: var(--sky); transform: scale(1.05); }
+.score-btn.selected-bogey  { background: rgba(251,146,60,.12); border-color: var(--fire); color: var(--fire); transform: scale(1.05); }
+.score-btn.selected-double { background: rgba(244,63,94,.12); border-color: var(--rose); color: var(--rose); transform: scale(1.05); }
+.score-btn-label { font-size: 7px; font-family: 'Archivo', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .7; }
+
+/* Throw detail toggles */
+.throw-detail-section { margin-bottom: 14px; }
+.throw-detail-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 7px; }
+.toggle-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.toggle-btn {
+  background: var(--ink3); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'Archivo', sans-serif;
+  font-size: 12px; font-weight: 500;
+  padding: 6px 12px; border-radius: 7px;
+  cursor: pointer; transition: all .12s; white-space: nowrap;
+}
+.toggle-btn:hover { border-color: var(--muted); color: var(--text); }
+.toggle-btn.selected { background: rgba(56,189,248,.12); border-color: var(--sky); color: var(--sky); font-weight: 600; }
+.toggle-btn.selected.bh { background: rgba(34,197,94,.12); border-color: var(--grass); color: var(--grass); }
+.toggle-btn.selected.fh { background: rgba(251,191,36,.12); border-color: var(--gold); color: var(--gold); }
+.toggle-btn.selected.fairway { background: rgba(34,197,94,.12); border-color: var(--grass); color: var(--grass); }
+.toggle-btn.selected.rough   { background: rgba(251,146,60,.12); border-color: var(--fire); color: var(--fire); }
+.toggle-btn.selected.ob      { background: rgba(244,63,94,.12); border-color: var(--rose); color: var(--rose); }
+.toggle-btn.selected.circle  { background: rgba(56,189,248,.12); border-color: var(--sky); color: var(--sky); }
+.toggle-btn.selected.basket  { background: rgba(251,191,36,.2); border-color: var(--gold); color: var(--gold); }
+
 /* ── SCORECARD ── */
 .sc-score-input {
   width: 44px; height: 36px;
@@ -560,30 +645,38 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 
     <!-- Step 2: Scorecard -->
     <div id="log-step2" style="display:none">
-      <div class="panel" style="padding:0;overflow:hidden">
-        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <div class="panel-title" style="margin:0">② Enter Your Scores</div>
-          <div id="sc-running-total" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--muted)">Total: —</div>
-          <div id="sc-vs-par" style="font-size:12px;font-weight:600"></div>
-          <div class="fg" style="margin-left:auto;margin-bottom:0">
-            <label style="font-size:10px">Disc Used (default)</label>
-            <select id="sc-default-disc" style="font-size:12px;padding:5px 8px">
-              <option value="">— varies per hole —</option>
-            </select>
+
+      <!-- Sticky header bar -->
+      <div style="position:sticky;top:52px;z-index:20;background:var(--ink);padding:10px 0;margin-bottom:12px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:11px;color:var(--muted)">Course</div>
+            <div style="font-size:13px;font-weight:600" id="sc-course-name"></div>
           </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table class="tbl" id="scorecard-table">
-            <thead id="sc-head"></thead>
-            <tbody id="sc-body"></tbody>
-          </table>
+          <div style="width:1px;height:32px;background:var(--border)"></div>
+          <div>
+            <div style="font-size:11px;color:var(--muted)">Total</div>
+            <div style="font-family:'Fira Code',monospace;font-size:18px;font-weight:600" id="sc-total-display">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted)">vs Par</div>
+            <div style="font-family:'Fira Code',monospace;font-size:18px;font-weight:600" id="sc-vspar-display">—</div>
+          </div>
+          <div style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
+            <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="color:var(--gold)">●</span><span id="sc-eagles">0</span> Eagles</div>
+            <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="color:var(--grass)">●</span><span id="sc-birdies">0</span> Birdies</div>
+            <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="color:var(--rose)">●</span><span id="sc-bogeys">0</span> Bogeys</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-green" onclick="saveRound()">💾 Save Round</button>
+            <button class="btn btn-ghost" onclick="resetLog()">← Back</button>
+          </div>
         </div>
       </div>
 
-      <div style="display:flex;gap:10px;margin-bottom:24px">
-        <button class="btn btn-green" onclick="saveRound()">💾 Save Round</button>
-        <button class="btn btn-ghost" onclick="resetLog()">← Back</button>
-      </div>
+      <!-- Hole cards container -->
+      <div id="hole-cards-container" style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px"></div>
+
     </div>
 
     <!-- Recent rounds -->
@@ -1275,96 +1368,288 @@ document.addEventListener('click', e=>{
   }
 });
 
-// ── SCORECARD BUILDER ──
+// ── HOLE CARD SCORECARD ──
+let holeData = []; // per-hole state: { score, disc, throwType, landing }
+
+function getScoreClass(score, par){
+  if(!score) return '';
+  if(score===1) return 'selected-ace';
+  if(score<=par-2) return 'selected-eagle';
+  if(score===par-1) return 'selected-birdie';
+  if(score===par) return 'selected-par';
+  if(score===par+1) return 'selected-bogey';
+  return 'selected-double';
+}
+
+function getScoreLabel(score, par){
+  if(!score) return '';
+  if(score===1) return '🎯 ACE';
+  if(score<=par-2) return 'EAGLE';
+  if(score===par-1) return 'BIRDIE';
+  if(score===par) return 'PAR';
+  if(score===par+1) return 'BOGEY';
+  return `+${score-par}`;
+}
+
 function buildScorecard(){
   if(!activeCourse){ toast('⚠️ Select a course first'); return; }
+  const c = activeCourse;
   document.getElementById('log-step1').style.display='none';
   document.getElementById('log-step2').style.display='block';
+  document.getElementById('sc-course-name').textContent = c.name;
 
-  const c = activeCourse;
-  const discOpts = '<option value="">—</option>' + S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  // Init hole data
+  holeData = Array.from({length: c.holes}, (_,i) => ({
+    hole: i+1, par: c.pars[i], score: null,
+    disc: '', throwType: '', landing: ''
+  }));
 
-  // Build header rows (split into 2 rows of 9 for wide courses)
-  const chunks = [];
-  for(let i=0;i<c.holes;i+=9) chunks.push(c.pars.slice(i,i+9).map((p,j)=>({h:i+j+1,p})));
+  renderHoleCards();
+  updateStickyTotal();
 
-  let headHTML='', bodyHTML='';
-  chunks.forEach((chunk, ci) => {
-    const label = chunks.length>1 ? (ci===0?'OUT':'IN') : '';
-    headHTML += `<tr>
-      <th class="sc-hole-hdr" style="text-align:left;padding-left:10px">${ci===0?'Hole':''}</th>
-      ${chunk.map(h=>`<th class="sc-hole-hdr">${h.h}</th>`).join('')}
-      ${label?`<th class="sc-hole-hdr">${label}</th>`:''}
-    </tr>
-    <tr>
-      <td class="sc-par-cell" style="text-align:left;padding-left:10px;color:var(--muted);font-size:10px">Par</td>
-      ${chunk.map(h=>`<td class="sc-par-cell">${h.p}</td>`).join('')}
-      ${label?`<td class="sc-par-cell">${chunk.reduce((a,h)=>a+h.p,0)}</td>`:''}
-    </tr>`;
-
-    bodyHTML += `<tr>
-      <td style="padding:6px 10px;font-size:11px;color:var(--muted);white-space:nowrap">Score</td>
-      ${chunk.map(h=>`<td style="padding:4px 3px;text-align:center">
-        <input class="sc-score-input" type="number" min="1" max="15" id="sc-h${h.h}"
-          oninput="colorScore(this,${h.p});updateTotal()" placeholder="${h.p}">
-      </td>`).join('')}
-      ${label?`<td style="padding:4px 6px;font-family:'Fira Code',monospace;font-size:12px;color:var(--muted)" id="sc-sub${ci}">—</td>`:''}
-    </tr>
-    <tr>
-      <td style="padding:2px 10px;font-size:10px;color:var(--muted)">Disc</td>
-      ${chunk.map(h=>`<td style="padding:2px 3px;text-align:center">
-        <select class="sc-disc-sel" id="sc-disc${h.h}">${discOpts}</select>
-      </td>`).join('')}
-      ${label?`<td></td>`:''}
-    </tr>`;
-  });
-
-  document.getElementById('sc-head').innerHTML = headHTML;
-  document.getElementById('sc-body').innerHTML = bodyHTML;
-  updateTotal();
+  // Auto-open first hole
+  setTimeout(() => toggleHoleCard(1, true), 100);
 }
 
-function colorScore(input, par){
-  const v = parseInt(input.value);
-  input.className = 'sc-score-input';
-  if(!v) return;
-  if(v===1)     input.classList.add('ace');
-  else if(v<=par-2) input.classList.add('eagle');
-  else if(v===par-1) input.classList.add('birdie');
-  else if(v===par)   input.classList.add('par');
-  else if(v===par+1) input.classList.add('bogey');
-  else              input.classList.add('double');
+function renderHoleCards(){
+  const c = activeCourse;
+  const container = document.getElementById('hole-cards-container');
+  const discOpts = S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+
+  container.innerHTML = holeData.map(h => {
+    const scoreCls = getScoreClass(h.score, h.par);
+    const scoreLabel = getScoreLabel(h.score, h.par);
+    const labelColor = scoreCls.includes('ace')||scoreCls.includes('eagle') ? 'var(--gold)' :
+                       scoreCls.includes('birdie') ? 'var(--grass)' :
+                       scoreCls.includes('par') ? 'var(--sky)' :
+                       scoreCls.includes('bogey') ? 'var(--fire)' :
+                       scoreCls.includes('double') ? 'var(--rose)' : 'var(--muted)';
+
+    // Score buttons: show 1 through par+4
+    const minScore = 1;
+    const maxScore = h.par + 4;
+    const scoreBtns = Array.from({length: maxScore}, (_,i) => {
+      const s = i+1;
+      const cls = h.score===s ? getScoreClass(s, h.par) : '';
+      const lbl = s===1 ? 'ACE' : s===h.par-1 ? 'BRD' : s===h.par ? 'PAR' : s===h.par+1 ? 'BOG' : s<=h.par-2 ? 'EGL' : '+'+( s-h.par);
+      return `<button class="score-btn ${cls}" onclick="setScore(${h.hole},${s})" title="${s}">
+        ${s}
+        <span class="score-btn-label">${lbl}</span>
+      </button>`;
+    }).join('');
+
+    // Summary line for collapsed view
+    const disc = S.discs.find(d=>d.id===h.disc);
+    const summaryParts = [];
+    if(disc) summaryParts.push(disc.name);
+    if(h.throwType) summaryParts.push(h.throwType);
+    if(h.landing) summaryParts.push(h.landing);
+
+    return `<div class="hole-log-card ${h.score?'scored':''}" id="hlc-${h.hole}">
+      <div class="hlc-header" onclick="toggleHoleCard(${h.hole})">
+        <div class="hlc-num">${h.hole}</div>
+        <div>
+          <div class="hlc-par">Par ${h.par}</div>
+        </div>
+        <div class="hlc-score-display" style="color:${h.score ? labelColor : 'var(--muted)'}">${h.score||'—'}</div>
+        ${h.score ? `<span class="hlc-label" style="border-color:${labelColor};color:${labelColor};background:${labelColor}15">${scoreLabel}</span>` : ''}
+        <div class="hlc-summary">${summaryParts.join(' · ')||''}</div>
+        <span class="hlc-chevron" id="chev-${h.hole}">▼</span>
+      </div>
+      <div class="hlc-body" id="hlcb-${h.hole}">
+
+        <!-- Score buttons -->
+        <div class="throw-detail-section">
+          <div class="throw-detail-label">Score</div>
+          <div class="score-btn-row">${scoreBtns}</div>
+        </div>
+
+        <!-- Disc -->
+        <div class="throw-detail-section">
+          <div class="throw-detail-label">Disc Thrown</div>
+          <div class="toggle-row">
+            <select onchange="setHoleField(${h.hole},'disc',this.value)" 
+              style="background:var(--ink3);border:1px solid var(--border);color:var(--text);font-family:Archivo,sans-serif;font-size:13px;padding:7px 10px;border-radius:7px;outline:none;flex:1;max-width:280px">
+              <option value="">— Select disc —</option>
+              ${discOpts}
+            </select>
+          </div>
+        </div>
+
+        <!-- Throw type -->
+        <div class="throw-detail-section">
+          <div class="throw-detail-label">Throw Type</div>
+          <div class="toggle-row">
+            ${['🤚 Backhand','✋ Forehand','🦅 Roller','🔄 Thumber','🪃 Overhand'].map(t => {
+              const val = t.split(' ').slice(1).join(' ');
+              const cls = h.throwType===val ? 'selected '+(val==='Backhand'?'bh':'fh') : '';
+              return `<button class="toggle-btn ${cls}" onclick="setHoleField(${h.hole},'throwType','${val}');refreshToggleRow(this,'throwType-${h.hole}')">${t}</button>`;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Landing zone -->
+        <div class="throw-detail-section">
+          <div class="throw-detail-label">Where Did It Land?</div>
+          <div class="toggle-row">
+            ${[
+              {v:'Fairway',   e:'🌿', cls:'fairway'},
+              {v:'Rough',     e:'🌾', cls:'rough'},
+              {v:'OB',        e:'🚫', cls:'ob'},
+              {v:'Circle 1',  e:'🎯', cls:'circle'},
+              {v:'Circle 2',  e:'🔵', cls:'circle'},
+              {v:'Basket',    e:'⛳', cls:'basket'},
+            ].map(({v,e,cls}) => {
+              const sel = h.landing===v ? `selected ${cls}` : '';
+              return `<button class="toggle-btn ${sel}" onclick="setHoleField(${h.hole},'landing','${v}');refreshToggleRow(this,'landing-${h.hole}')">${e} ${v}</button>`;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Next hole button -->
+        ${h.hole < activeCourse.holes ? `
+        <div style="margin-top:4px;display:flex;justify-content:flex-end">
+          <button class="btn btn-green" onclick="nextHole(${h.hole})" style="font-size:12px">
+            Next: Hole ${h.hole+1} →
+          </button>
+        </div>` : `
+        <div style="margin-top:4px;display:flex;justify-content:flex-end">
+          <button class="btn btn-green" onclick="saveRound()" style="font-size:12px">
+            💾 Save Round
+          </button>
+        </div>`}
+
+      </div>
+    </div>`;
+  }).join('');
+
+  // Re-apply disc selections
+  holeData.forEach(h => {
+    const sel = document.querySelector(`#hlcb-${h.hole} select`);
+    if(sel && h.disc) sel.value = h.disc;
+  });
 }
 
-function updateTotal(){
-  if(!activeCourse) return;
-  const c = activeCourse;
-  let total=0, totalPar=0, filled=0;
-
-  // Subtotals per 9
-  const chunks = [];
-  for(let i=0;i<c.holes;i+=9) chunks.push(c.pars.slice(i,i+9).map((p,j)=>({h:i+j+1,p})));
-
-  chunks.forEach((chunk,ci)=>{
-    let sub=0;
-    chunk.forEach(h=>{
-      const v=parseInt(document.getElementById(`sc-h${h.h}`)?.value)||0;
-      total+=v; totalPar+=h.p; if(v) filled++;
-      sub+=v;
-    });
-    const subEl=document.getElementById(`sc-sub${ci}`);
-    if(subEl) subEl.textContent=sub||'—';
-  });
-
-  const totalEl=document.getElementById('sc-running-total');
-  const vsEl=document.getElementById('sc-vs-par');
-  if(totalEl) totalEl.textContent=`Total: ${total||'—'} (${filled}/${c.holes} holes)`;
-  if(vsEl && filled>0){
-    const parSoFar = chunks.flat().slice(0,filled).reduce((a,h)=>a+h.p,0);
-    const diff = total - parSoFar;
-    vsEl.textContent = (diff>=0?'+':'')+diff+' vs par';
-    vsEl.style.color = diff<0?'var(--grass)':diff===0?'var(--sky)':'var(--rose)';
+function toggleHoleCard(hole, forceOpen=false){
+  const body = document.getElementById(`hlcb-${hole}`);
+  const chev = document.getElementById(`chev-${hole}`);
+  if(!body) return;
+  const isOpen = body.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.hlc-body').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.hlc-chevron').forEach(c=>c.classList.remove('open'));
+  document.querySelectorAll('.hole-log-card').forEach(c=>c.classList.remove('active'));
+  // Open target
+  if(!isOpen || forceOpen){
+    body.classList.add('open');
+    chev.classList.add('open');
+    document.getElementById(`hlc-${hole}`).classList.add('active');
+    // Scroll into view
+    setTimeout(()=> document.getElementById(`hlc-${hole}`).scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
   }
+}
+
+function setScore(hole, score){
+  const h = holeData[hole-1];
+  h.score = score;
+  // Re-render just the score buttons for this hole
+  const body = document.getElementById(`hlcb-${hole}`);
+  const maxScore = h.par + 4;
+  const btnRow = body.querySelector('.score-btn-row');
+  if(btnRow){
+    btnRow.innerHTML = Array.from({length: maxScore}, (_,i) => {
+      const s = i+1;
+      const cls = s===score ? getScoreClass(s, h.par) : '';
+      const lbl = s===1?'ACE':s===h.par-1?'BRD':s===h.par?'PAR':s===h.par+1?'BOG':s<=h.par-2?'EGL':'+'+( s-h.par);
+      return `<button class="score-btn ${cls}" onclick="setScore(${hole},${s})" title="${s}">${s}<span class="score-btn-label">${lbl}</span></button>`;
+    }).join('');
+  }
+  // Update header display
+  updateHoleHeader(hole);
+  updateStickyTotal();
+}
+
+function setHoleField(hole, field, value){
+  holeData[hole-1][field] = value;
+  updateHoleHeader(hole);
+}
+
+function refreshToggleRow(clickedBtn, groupKey){
+  // Deselect siblings, select clicked
+  const row = clickedBtn.closest('.toggle-row');
+  row.querySelectorAll('.toggle-btn').forEach(b=>{
+    b.className = 'toggle-btn';
+  });
+  clickedBtn.classList.add('selected');
+  // Add color class based on value
+  const val = clickedBtn.textContent.trim().toLowerCase();
+  if(val.includes('backhand')) clickedBtn.classList.add('bh');
+  else if(val.includes('forehand')) clickedBtn.classList.add('fh');
+  else if(val.includes('fairway')) clickedBtn.classList.add('fairway');
+  else if(val.includes('rough')) clickedBtn.classList.add('rough');
+  else if(val.includes('ob')) clickedBtn.classList.add('ob');
+  else if(val.includes('circle')) clickedBtn.classList.add('circle');
+  else if(val.includes('basket')) clickedBtn.classList.add('basket');
+}
+
+function updateHoleHeader(hole){
+  const h = holeData[hole-1];
+  const card = document.getElementById(`hlc-${hole}`);
+  if(!card) return;
+  const scoreCls = getScoreClass(h.score, h.par);
+  const scoreLabel = getScoreLabel(h.score, h.par);
+  const labelColor = scoreCls.includes('ace')||scoreCls.includes('eagle') ? 'var(--gold)' :
+                     scoreCls.includes('birdie') ? 'var(--grass)' :
+                     scoreCls.includes('par') ? 'var(--sky)' :
+                     scoreCls.includes('bogey') ? 'var(--fire)' :
+                     scoreCls.includes('double') ? 'var(--rose)' : 'var(--muted)';
+  const scoreDisp = card.querySelector('.hlc-score-display');
+  if(scoreDisp){ scoreDisp.textContent = h.score||'—'; scoreDisp.style.color = h.score?labelColor:'var(--muted)'; }
+  // Update label chip
+  const header = card.querySelector('.hlc-header');
+  const existingChip = header.querySelector('.hlc-label');
+  if(existingChip) existingChip.remove();
+  if(h.score){
+    const chip = document.createElement('span');
+    chip.className='hlc-label';
+    chip.style.cssText=`border-color:${labelColor};color:${labelColor};background:${labelColor}15`;
+    chip.textContent=scoreLabel;
+    scoreDisp.after(chip);
+  }
+  // Update summary
+  const disc = S.discs.find(d=>d.id===h.disc);
+  const summaryParts=[];
+  if(disc) summaryParts.push(disc.name);
+  if(h.throwType) summaryParts.push(h.throwType);
+  if(h.landing) summaryParts.push(h.landing);
+  const sumEl = header.querySelector('.hlc-summary');
+  if(sumEl) sumEl.textContent = summaryParts.join(' · ');
+  // Scored class
+  card.classList.toggle('scored', !!h.score);
+}
+
+function nextHole(currentHole){
+  toggleHoleCard(currentHole+1, true);
+}
+
+function updateStickyTotal(){
+  let total=0, scored=0, eagles=0, birdies=0, bogeys=0, parSoFar=0;
+  holeData.forEach(h=>{
+    if(h.score){
+      total+=h.score; scored++; parSoFar+=h.par;
+      if(h.score<=h.par-2) eagles++;
+      else if(h.score===h.par-1) birdies++;
+      else if(h.score>=h.par+1) bogeys++;
+    }
+  });
+  const diff=total-parSoFar;
+  document.getElementById('sc-total-display').textContent = scored ? total : '—';
+  const vsEl=document.getElementById('sc-vspar-display');
+  vsEl.textContent = scored ? (diff>=0?'+':'')+diff : '—';
+  vsEl.style.color = !scored?'var(--muted)':diff<0?'var(--grass)':diff===0?'var(--sky)':'var(--rose)';
+  document.getElementById('sc-eagles').textContent=eagles;
+  document.getElementById('sc-birdies').textContent=birdies;
+  document.getElementById('sc-bogeys').textContent=bogeys;
 }
 
 function saveRound(){
@@ -1374,58 +1659,49 @@ function saveRound(){
   const cond = document.getElementById('log-cond').value;
   const partners = document.getElementById('log-partners').value;
   const notes = document.getElementById('log-round-notes').value;
-  const defaultDisc = document.getElementById('sc-default-disc').value;
 
-  const scores=[], discs=[];
-  let anyScore=false;
-  for(let h=1;h<=c.holes;h++){
-    const v=parseInt(document.getElementById(`sc-h${h}`)?.value)||0;
-    const d=document.getElementById(`sc-disc${h}`)?.value||defaultDisc;
-    scores.push(v);
-    discs.push(d);
-    if(v>0) anyScore=true;
-  }
-  if(!anyScore){ toast('⚠️ Enter at least one score'); return; }
+  const scored = holeData.filter(h=>h.score);
+  if(!scored.length){ toast('⚠️ Enter at least one score'); return; }
   if(!date){ toast('⚠️ Select a date'); return; }
 
-  // Calculate stats
-  const pars=c.pars;
-  const total=scores.reduce((a,b)=>a+b,0);
-  const totalPar=pars.slice(0,c.holes).reduce((a,b)=>a+b,0);
-  const pm=total-totalPar;
-  const birdies=scores.filter((s,i)=>s>0&&s<pars[i]).length;
-  const eagles=scores.filter((s,i)=>s>0&&s<=pars[i]-2).length;
-  const bogeys=scores.filter((s,i)=>s>0&&s===pars[i]+1).length;
-  const doubles=scores.filter((s,i)=>s>0&&s>=pars[i]+2).length;
-  const parsCount=scores.filter((s,i)=>s>0&&s===pars[i]).length;
+  const scores = holeData.map(h=>h.score||0);
+  const pars = c.pars;
+  const total = scores.reduce((a,b)=>a+b,0);
+  const totalPar = pars.slice(0,c.holes).reduce((a,b)=>a+b,0);
+  const pm = total-totalPar;
+  const birdies=scored.filter(h=>h.score<h.par).length;
+  const eagles=scored.filter(h=>h.score<=h.par-2).length;
+  const bogeys=scored.filter(h=>h.score===h.par+1).length;
+  const doubles=scored.filter(h=>h.score>=h.par+2).length;
+  const parsCount=scored.filter(h=>h.score===h.par).length;
 
-  // Save as a round
-  const round = {
+  const round={
     id:'r'+Date.now(), courseId:c.id, courseName:c.name,
-    date, cond, partners, notes, scores, discs,
-    total, pm, birdies, eagles, bogeys, doubles, pars:parsCount,
-    holes:c.holes
+    date, cond, partners, notes, scores,
+    discs:holeData.map(h=>h.disc),
+    throwTypes:holeData.map(h=>h.throwType),
+    landings:holeData.map(h=>h.landing),
+    total, pm, birdies, eagles, bogeys, doubles, pars:parsCount, holes:c.holes
   };
   if(!S.rounds) S.rounds=[];
   S.rounds.push(round);
 
-  // Also save individual throws for hole analytics
-  scores.forEach((score,i)=>{
-    if(score>0){
+  // Save individual throws for analytics
+  holeData.forEach((h,i)=>{
+    if(h.score){
       S.throws.push({
-        id:'t'+Date.now()+'_'+i, courseId:c.id, hole:i+1,
-        date, disc:discs[i]||defaultDisc, score,
-        cond, notes:'', landingX:80, landingY:80
+        id:'t'+Date.now()+'_'+i, courseId:c.id, hole:h.hole,
+        date, disc:h.disc, score:h.score, cond,
+        throwType:h.throwType, landing:h.landing, notes:''
       });
     }
   });
 
-  save();
-  renderRecentRounds();
-  renderSidebar();
+  save(); renderRecentRounds(); renderSidebar();
   toast(`✅ Round saved! ${pm>=0?'+':''}${pm} vs par · ${birdies} birdies`);
   resetLog();
 }
+
 
 function renderRecentRounds(){
   const tbody = document.getElementById('recent-rounds-tbody');
@@ -1936,7 +2212,272 @@ let lookupTimer = null;
 
 // Local fallback database of popular discs
 const DISC_DB = [
-  {manufacturer:'Innova',name:'Destroyer',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver, great for experienced players'},
+  // ── INNOVA ──
+  {manufacturer:'Innova',name:'Destroyer',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver, workhorse for experienced players'},
+  {manufacturer:'Innova',name:'Wraith',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Slightly understable, very popular distance driver'},
+  {manufacturer:'Innova',name:'Boss',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Max distance driver'},
+  {manufacturer:'Innova',name:'Shryke',type:'Distance Driver',speed:13,glide:6,turn:-2,fade:2,notes:'Understable distance driver, great for long anhyzer shots'},
+  {manufacturer:'Innova',name:'Valkyrie',type:'Distance Driver',speed:9,glide:4,turn:-2,fade:2,notes:'Beginner-friendly understable driver'},
+  {manufacturer:'Innova',name:'Eagle',type:'Fairway Driver',speed:7,glide:4,turn:-1,fade:3,notes:'Overstable fairway driver'},
+  {manufacturer:'Innova',name:'Leopard',type:'Fairway Driver',speed:6,glide:5,turn:-2,fade:1,notes:'Understable fairway driver, great for beginners'},
+  {manufacturer:'Innova',name:'Leopard3',type:'Fairway Driver',speed:7,glide:5,turn:-2,fade:1,notes:'Improved Leopard, great understable fairway'},
+  {manufacturer:'Innova',name:'Teebird',type:'Fairway Driver',speed:7,glide:5,turn:0,fade:2,notes:'Classic overstable fairway driver'},
+  {manufacturer:'Innova',name:'Teebird3',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Slightly less overstable Teebird'},
+  {manufacturer:'Innova',name:'Firebird',type:'Fairway Driver',speed:9,glide:3,turn:0,fade:4,notes:'Very overstable, great in wind'},
+  {manufacturer:'Innova',name:'Thunderbird',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
+  {manufacturer:'Innova',name:'Sidewinder',type:'Distance Driver',speed:9,glide:5,turn:-3,fade:1,notes:'Very understable driver, great for rollers'},
+  {manufacturer:'Innova',name:'Tern',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Fast understable distance driver'},
+  {manufacturer:'Innova',name:'Katana',type:'Distance Driver',speed:13,glide:5,turn:-3,fade:2,notes:'Understable max distance driver'},
+  {manufacturer:'Innova',name:'Colossus',type:'Distance Driver',speed:13,glide:6,turn:-3,fade:2,notes:'High speed understable driver'},
+  {manufacturer:'Innova',name:'Corvette',type:'Distance Driver',speed:14,glide:5,turn:-2,fade:2,notes:'Max speed distance driver'},
+  {manufacturer:'Innova',name:'Star Destroyer',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Star plastic Destroyer'},
+  {manufacturer:'Innova',name:'Roc',type:'Midrange',speed:4,glide:4,turn:0,fade:3,notes:'Classic overstable midrange'},
+  {manufacturer:'Innova',name:'Roc3',type:'Midrange',speed:7,glide:4,turn:0,fade:3,notes:'Faster overstable midrange'},
+  {manufacturer:'Innova',name:'Mako3',type:'Midrange',speed:5,glide:5,turn:0,fade:0,notes:'Perfectly neutral straight midrange'},
+  {manufacturer:'Innova',name:'Shark',type:'Midrange',speed:4,glide:4,turn:0,fade:2,notes:'Overstable beginner midrange'},
+  {manufacturer:'Innova',name:'Rhyno',type:'Putter',speed:2,glide:3,turn:0,fade:3,notes:'Very overstable putter'},
+  {manufacturer:'Innova',name:'Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Most popular putter in disc golf'},
+  {manufacturer:'Innova',name:'Pro Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'More overstable Aviar'},
+  {manufacturer:'Innova',name:'Aviar3',type:'Putter',speed:3,glide:3,turn:0,fade:2,notes:'Slightly faster Aviar'},
+  {manufacturer:'Innova',name:'Colt',type:'Putter',speed:3,glide:3,turn:-1,fade:1,notes:'Understable putter'},
+  {manufacturer:'Innova',name:'KC Pro Aviar',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Ken Climo signature Aviar'},
+  {manufacturer:'Innova',name:'Polecat',type:'Putter',speed:2,glide:5,turn:0,fade:0,notes:'Very neutral high-glide putter'},
+  {manufacturer:'Innova',name:'Dragon',type:'Fairway Driver',speed:7,glide:7,turn:-2,fade:1,notes:'High glide understable fairway'},
+  {manufacturer:'Innova',name:'Atlas',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Neutral midrange'},
+  {manufacturer:'Innova',name:'Phantom',type:'Distance Driver',speed:11,glide:5,turn:0,fade:2,notes:'Overstable distance driver'},
+  {manufacturer:'Innova',name:'Beast',type:'Distance Driver',speed:10,glide:5,turn:-2,fade:2,notes:'Beginner-friendly distance driver'},
+  {manufacturer:'Innova',name:'Charger',type:'Distance Driver',speed:12,glide:5,turn:-0.5,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Innova',name:'Corvid',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
+
+  // ── DISCRAFT ──
+  {manufacturer:'Discraft',name:'Buzzz',type:'Midrange',speed:5,glide:4,turn:-1,fade:1,notes:'Most popular midrange in disc golf, very straight'},
+  {manufacturer:'Discraft',name:'Buzzz OS',type:'Midrange',speed:5,glide:4,turn:0,fade:3,notes:'Overstable Buzzz'},
+  {manufacturer:'Discraft',name:'Buzzz GT',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Slightly overstable Buzzz'},
+  {manufacturer:'Discraft',name:'Zone',type:'Putter',speed:4,glide:3,turn:0,fade:3,notes:'Very overstable approach disc, great in wind'},
+  {manufacturer:'Discraft',name:'Zone OS',type:'Putter',speed:4,glide:3,turn:0,fade:4,notes:'Extra overstable Zone'},
+  {manufacturer:'Discraft',name:'Luna',type:'Putter',speed:3,glide:3,turn:0,fade:2,notes:'Paul McBeth signature putter'},
+  {manufacturer:'Discraft',name:'Malta',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Paul McBeth signature midrange'},
+  {manufacturer:'Discraft',name:'Undertaker',type:'Distance Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Overstable fairway/distance driver, Paul McBeth'},
+  {manufacturer:'Discraft',name:'Zeus',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Paul McBeth signature distance driver'},
+  {manufacturer:'Discraft',name:'Nuke',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Classic max distance driver'},
+  {manufacturer:'Discraft',name:'Nuke OS',type:'Distance Driver',speed:13,glide:5,turn:0,fade:3,notes:'Overstable Nuke'},
+  {manufacturer:'Discraft',name:'Flick',type:'Distance Driver',speed:12,glide:3,turn:1,fade:5,notes:'Extremely overstable, forehand specialist'},
+  {manufacturer:'Discraft',name:'Thrasher',type:'Distance Driver',speed:12,glide:5,turn:-3,fade:1,notes:'Very understable distance driver'},
+  {manufacturer:'Discraft',name:'Heat',type:'Fairway Driver',speed:9,glide:6,turn:-3,fade:1,notes:'Understable fairway driver, great for beginners'},
+  {manufacturer:'Discraft',name:'Avenger SS',type:'Distance Driver',speed:10,glide:5,turn:-3,fade:1,notes:'Understable distance driver'},
+  {manufacturer:'Discraft',name:'Roach',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Discraft',name:'Banger GT',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Overstable putter'},
+  {manufacturer:'Discraft',name:'Comet',type:'Midrange',speed:4,glide:5,turn:-2,fade:1,notes:'Understable midrange, good for turnover shots'},
+  {manufacturer:'Discraft',name:'Force',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Discraft',name:'Surge',type:'Distance Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Neutral to understable driver'},
+  {manufacturer:'Discraft',name:'Hades',type:'Distance Driver',speed:12,glide:6,turn:-3,fade:2,notes:'Paul McBeth signature understable driver'},
+  {manufacturer:'Discraft',name:'Scorch',type:'Distance Driver',speed:12,glide:5,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Discraft',name:'Vulture',type:'Distance Driver',speed:10,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Discraft',name:'Raptor',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
+  {manufacturer:'Discraft',name:'Sol',type:'Midrange',speed:5,glide:6,turn:-2,fade:1,notes:'Understable midrange'},
+  {manufacturer:'Discraft',name:'Wasp',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Overstable midrange'},
+  {manufacturer:'Discraft',name:'Archer',type:'Fairway Driver',speed:7,glide:5,turn:-2,fade:1,notes:'Understable fairway driver'},
+  {manufacturer:'Discraft',name:'Crank',type:'Distance Driver',speed:13,glide:5,turn:-2,fade:2,notes:'Max distance understable driver'},
+  {manufacturer:'Discraft',name:'Stalker',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
+  {manufacturer:'Discraft',name:'Ringer',type:'Putter',speed:3,glide:3,turn:0,fade:3,notes:'Overstable approach putter'},
+
+  // ── DYNAMIC DISCS ──
+  {manufacturer:'Dynamic Discs',name:'Truth',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral straight midrange'},
+  {manufacturer:'Dynamic Discs',name:'Verdict',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Overstable midrange'},
+  {manufacturer:'Dynamic Discs',name:'Escape',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver, great S-curve'},
+  {manufacturer:'Dynamic Discs',name:'Suspect',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Dynamic Discs',name:'Emac Truth',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Slightly more overstable Truth'},
+  {manufacturer:'Dynamic Discs',name:'Felon',type:'Distance Driver',speed:9,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
+  {manufacturer:'Dynamic Discs',name:'Maverick',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
+  {manufacturer:'Dynamic Discs',name:'Trespass',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Dynamic Discs',name:'Freedom',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Neutral distance driver'},
+  {manufacturer:'Dynamic Discs',name:'Enforcer',type:'Distance Driver',speed:11,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
+  {manufacturer:'Dynamic Discs',name:'Renegade',type:'Distance Driver',speed:13,glide:6,turn:-2,fade:2,notes:'Understable max distance driver'},
+  {manufacturer:'Dynamic Discs',name:'Raider',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
+  {manufacturer:'Dynamic Discs',name:'Lucid Felon',type:'Distance Driver',speed:9,glide:4,turn:0,fade:4,notes:'Lucid plastic Felon'},
+  {manufacturer:'Dynamic Discs',name:'Warden',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Dynamic Discs',name:'Deputy',type:'Putter',speed:2,glide:4,turn:-1,fade:1,notes:'Understable putter'},
+  {manufacturer:'Dynamic Discs',name:'Bounty',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter/approach'},
+  {manufacturer:'Dynamic Discs',name:'Westside Discs',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Westside partner brand'},
+
+  // ── LATITUDE 64 ──
+  {manufacturer:'Latitude 64',name:'Flow',type:'Distance Driver',speed:11,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
+  {manufacturer:'Latitude 64',name:'River',type:'Fairway Driver',speed:7,glide:7,turn:-1,fade:1,notes:'High glide understable fairway'},
+  {manufacturer:'Latitude 64',name:'Jade',type:'Distance Driver',speed:11,glide:5,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Latitude 64',name:'Saint',type:'Distance Driver',speed:11,glide:6,turn:-1,fade:2,notes:'Versatile distance driver'},
+  {manufacturer:'Latitude 64',name:'Saint Pro',type:'Distance Driver',speed:11,glide:5,turn:0,fade:3,notes:'More overstable Saint'},
+  {manufacturer:'Latitude 64',name:'Ballista',type:'Distance Driver',speed:14,glide:5,turn:-1,fade:3,notes:'Max speed distance driver'},
+  {manufacturer:'Latitude 64',name:'Ballista Pro',type:'Distance Driver',speed:14,glide:5,turn:0,fade:3,notes:'Overstable Ballista'},
+  {manufacturer:'Latitude 64',name:'Pure',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Latitude 64',name:'Dagger',type:'Putter',speed:3,glide:4,turn:0,fade:3,notes:'Overstable putter'},
+  {manufacturer:'Latitude 64',name:'Mercy',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Latitude 64',name:'Brave',type:'Putter',speed:2,glide:4,turn:0,fade:2,notes:'Slightly overstable putter'},
+  {manufacturer:'Latitude 64',name:'Fuse',type:'Midrange',speed:5,glide:6,turn:-1,fade:1,notes:'Understable midrange, high glide'},
+  {manufacturer:'Latitude 64',name:'Claymore',type:'Distance Driver',speed:11,glide:5,turn:0,fade:4,notes:'Very overstable distance driver'},
+  {manufacturer:'Latitude 64',name:'Raketen',type:'Distance Driver',speed:14,glide:4,turn:0,fade:4,notes:'Overstable max distance driver'},
+  {manufacturer:'Latitude 64',name:'Trust',type:'Putter',speed:3,glide:5,turn:0,fade:1,notes:'Neutral putt and approach'},
+  {manufacturer:'Latitude 64',name:'Sapphire',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Latitude 64',name:'Royal Grand Tursas',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Overstable fairway driver'},
+
+  // ── MVP / AXIOM / STREAMLINE ──
+  {manufacturer:'MVP',name:'Tesla',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Slightly overstable distance driver'},
+  {manufacturer:'MVP',name:'Orbital',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'MVP',name:'Relay',type:'Midrange',speed:5,glide:5,turn:-1,fare:1,notes:'Neutral midrange'},
+  {manufacturer:'MVP',name:'Disc Volt',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
+  {manufacturer:'MVP',name:'Amp',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Neutral fairway driver'},
+  {manufacturer:'MVP',name:'Servo',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:2,notes:'Neutral fairway driver'},
+  {manufacturer:'MVP',name:'Spin',type:'Putter',speed:3,glide:3,turn:0,fade:2,notes:'Overstable putter'},
+  {manufacturer:'MVP',name:'Atom',type:'Putter',speed:3,glide:3,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'MVP',name:'Deflector',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'MVP',name:'Dimension',type:'Distance Driver',speed:14,glide:5,turn:0,fade:3,notes:'Overstable max distance driver'},
+  {manufacturer:'Axiom',name:'Envy',type:'Putter',speed:3,glide:4,turn:-1,fade:1,notes:'Understable putter'},
+  {manufacturer:'Axiom',name:'Proxy',type:'Putter',speed:3,glide:5,turn:-1,fade:1,notes:'Understable putter, high glide'},
+  {manufacturer:'Axiom',name:'Hex',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Neutral midrange'},
+  {manufacturer:'Axiom',name:'Crave',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Neutral fairway driver'},
+  {manufacturer:'Axiom',name:'Insanity',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Axiom',name:'Defy',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Axiom',name:'Tantrum',type:'Distance Driver',speed:11,glide:6,turn:-3,fade:2,notes:'Very understable distance driver'},
+  {manufacturer:'Streamline',name:'Drift',type:'Fairway Driver',speed:7,glide:7,turn:-2,fade:1,notes:'High glide understable fairway'},
+  {manufacturer:'Streamline',name:'Trace',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Neutral fairway driver'},
+
+  // ── KASTAPLAST ──
+  {manufacturer:'Kastaplast',name:'Berg',type:'Putter',speed:1,glide:1,turn:0,fade:2,notes:'Very overstable putter, great for approaches'},
+  {manufacturer:'Kastaplast',name:'Rask',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
+  {manufacturer:'Kastaplast',name:'Gote',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
+  {manufacturer:'Kastaplast',name:'Stal',type:'Fairway Driver',speed:8,glide:4,turn:0,fade:3,notes:'Overstable fairway driver'},
+  {manufacturer:'Kastaplast',name:'Lots',type:'Distance Driver',speed:13,glide:6,turn:-1,fade:2,notes:'Distance driver'},
+  {manufacturer:'Kastaplast',name:'Grym',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Kastaplast',name:'Grym X',type:'Distance Driver',speed:12,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
+  {manufacturer:'Kastaplast',name:'Falk',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
+  {manufacturer:'Kastaplast',name:'Kaxe',type:'Midrange',speed:6,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
+  {manufacturer:'Kastaplast',name:'Kaxe Z',type:'Midrange',speed:6,glide:4,turn:0,fade:3,notes:'More overstable Kaxe'},
+  {manufacturer:'Kastaplast',name:'Kolf',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+
+  // ── PRODIGY ──
+  {manufacturer:'Prodigy',name:'D1',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Prodigy',name:'D1 Max',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Max distance driver'},
+  {manufacturer:'Prodigy',name:'D2',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Neutral distance driver'},
+  {manufacturer:'Prodigy',name:'D3',type:'Distance Driver',speed:12,glide:6,turn:-3,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Prodigy',name:'D4',type:'Distance Driver',speed:10,glide:5,turn:-2,fade:2,notes:'Beginner-friendly distance driver'},
+  {manufacturer:'Prodigy',name:'F1',type:'Fairway Driver',speed:7,glide:5,turn:0,fade:2,notes:'Overstable fairway driver'},
+  {manufacturer:'Prodigy',name:'F3',type:'Fairway Driver',speed:9,glide:5,turn:-2,fade:2,notes:'Understable fairway driver'},
+  {manufacturer:'Prodigy',name:'F5',type:'Fairway Driver',speed:9,glide:5,turn:-3,fade:2,notes:'Very understable fairway driver'},
+  {manufacturer:'Prodigy',name:'M2',type:'Midrange',speed:5,glide:5,turn:-2,fade:1,notes:'Understable midrange'},
+  {manufacturer:'Prodigy',name:'M3',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
+  {manufacturer:'Prodigy',name:'M4',type:'Midrange',speed:5,glide:5,turn:-2,fade:1,notes:'Understable midrange'},
+  {manufacturer:'Prodigy',name:'PA-1',type:'Putter',speed:3,glide:3,turn:0,fade:2,notes:'Overstable putter'},
+  {manufacturer:'Prodigy',name:'PA-2',type:'Putter',speed:3,glide:3,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Prodigy',name:'PA-3',type:'Putter',speed:3,glide:4,turn:-1,fade:1,notes:'Understable putter'},
+  {manufacturer:'Prodigy',name:'PA-4',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+
+  // ── WESTSIDE DISCS ──
+  {manufacturer:'Westside',name:'Hatchet',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Westside',name:'Sword',type:'Distance Driver',speed:11,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
+  {manufacturer:'Westside',name:'Underworld',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Westside',name:'Stag',type:'Fairway Driver',speed:8,glide:7,turn:-2,fade:1,notes:'Understable high-glide fairway'},
+  {manufacturer:'Westside',name:'Warship',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
+  {manufacturer:'Westside',name:'World',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Westside',name:'Tournament',type:'Putter',speed:2,glide:4,turn:0,fade:2,notes:'Neutral putter'},
+  {manufacturer:'Westside',name:'Tursas',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Overstable fairway driver'},
+  {manufacturer:'Westside',name:'Queen',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+
+  // ── DISCMANIA ──
+  {manufacturer:'Discmania',name:'PD',type:'Distance Driver',speed:10,glide:4,turn:0,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Discmania',name:'PD2',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Discmania',name:'FD',type:'Fairway Driver',speed:7,glide:6,turn:-1,fade:1,notes:'Understable fairway driver'},
+  {manufacturer:'Discmania',name:'FD3',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:2,notes:'Neutral fairway driver'},
+  {manufacturer:'Discmania',name:'CD',type:'Distance Driver',speed:11,glide:5,turn:-2,fade:2,notes:'Neutral distance driver'},
+  {manufacturer:'Discmania',name:'CD2',type:'Distance Driver',speed:12,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Discmania',name:'CD3',type:'Distance Driver',speed:12,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
+  {manufacturer:'Discmania',name:'P1',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Discmania',name:'P2',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Overstable putter'},
+  {manufacturer:'Discmania',name:'MD',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Overstable midrange'},
+  {manufacturer:'Discmania',name:'MD3',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
+  {manufacturer:'Discmania',name:'Tactic',type:'Midrange',speed:5,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
+  {manufacturer:'Discmania',name:'Instinct',type:'Fairway Driver',speed:9,glide:6,turn:-2,fade:1,notes:'Understable fairway driver'},
+  {manufacturer:'Discmania',name:'Essence',type:'Putter',speed:2,glide:5,turn:0,fade:1,notes:'High glide neutral putter'},
+  {manufacturer:'Discmania',name:'Psycho',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Discmania',name:'Sky God',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Neutral distance driver'},
+  {manufacturer:'Discmania',name:'Sensei',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Discmania',name:'Link',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Discmania',name:'Active Driver',type:'Fairway Driver',speed:9,glide:6,turn:-2,fade:2,notes:'Understable fairway driver'},
+  {manufacturer:'Discmania',name:'Active Driver 2',type:'Distance Driver',speed:10,glide:6,turn:-1,fade:2,notes:'Neutral distance driver'},
+
+  // ── THOUGHT SPACE ATHLETICS ──
+  {manufacturer:'Thought Space Athletics',name:'Synapse',type:'Distance Driver',speed:12,glide:6,turn:-3,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Thought Space Athletics',name:'Animus',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Thought Space Athletics',name:'Votum',type:'Fairway Driver',speed:9,glide:6,turn:-1,fade:2,notes:'Neutral fairway driver'},
+  {manufacturer:'Thought Space Athletics',name:'Omen',type:'Fairway Driver',speed:7,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
+  {manufacturer:'Thought Space Athletics',name:'Mantra',type:'Midrange',speed:5,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
+  {manufacturer:'Thought Space Athletics',name:'Aura',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Thought Space Athletics',name:'Construct',type:'Distance Driver',speed:12,glide:5,turn:0,fade:3,notes:'Overstable distance driver'},
+
+  // ── BIRDIE ──
+  {manufacturer:'Birdie',name:'Thunderchief',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
+
+  // ── EV-7 ──
+  {manufacturer:'EV-7',name:'Phi',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'EV-7',name:'Opto Phi',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Opto plastic Phi'},
+  {manufacturer:'EV-7',name:'Penrose',type:'Midrange',speed:4,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
+  {manufacturer:'EV-7',name:'Nomad',type:'Midrange',speed:5,glide:5,turn:-1,fade:2,notes:'Versatile midrange'},
+  {manufacturer:'EV-7',name:'OG',type:'Fairway Driver',speed:8,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
+
+  // ── GATEWAY ──
+  {manufacturer:'Gateway',name:'Wizard',type:'Putter',speed:2,glide:3,turn:0,fade:1,notes:'Classic neutral putter'},
+  {manufacturer:'Gateway',name:'Diamond',type:'Putter',speed:1,glide:2,turn:0,fade:3,notes:'Very overstable putter'},
+  {manufacturer:'Gateway',name:'Illusion',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Gateway',name:'Voodoo',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
+
+  // ── DAREDEVIL ──
+  {manufacturer:'Daredevil',name:'Fiend',type:'Distance Driver',speed:11,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+
+  // ── RPM DISCS ──
+  {manufacturer:'RPM',name:'Tui',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'RPM',name:'Kotuku',type:'Fairway Driver',speed:9,glide:6,turn:-2,fade:2,notes:'Understable fairway driver'},
+  {manufacturer:'RPM',name:'Huia',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
+
+  // ── LØFT DISCS ──
+  {manufacturer:'Løft',name:'Ræven',type:'Fairway Driver',speed:8,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
+  {manufacturer:'Løft',name:'Vrede',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+
+  // ── YIKUN ──
+  {manufacturer:'Yikun',name:'Tiger',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:2,notes:'Versatile distance driver'},
+  {manufacturer:'Yikun',name:'Wing',type:'Fairway Driver',speed:8,glide:5,turn:-1,fade:2,notes:'Neutral fairway driver'},
+
+  // ── INFINITE DISCS ──
+  {manufacturer:'Infinite Discs',name:'Pharaoh',type:'Distance Driver',speed:13,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
+  {manufacturer:'Infinite Discs',name:'Sphinx',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Infinite Discs',name:'Myth',type:'Fairway Driver',speed:9,glide:5,turn:-1,fade:2,notes:'Versatile fairway driver'},
+  {manufacturer:'Infinite Discs',name:'Emperor',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Infinite Discs',name:'Slab',type:'Distance Driver',speed:12,glide:4,turn:0,fade:4,notes:'Very overstable distance driver'},
+  {manufacturer:'Infinite Discs',name:'Alpaca',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Infinite Discs',name:'Hound',type:'Fairway Driver',speed:9,glide:5,turn:0,fade:3,notes:'Overstable fairway driver'},
+  {manufacturer:'Infinite Discs',name:'Exodus',type:'Fairway Driver',speed:7,glide:5,turn:-2,fade:1,notes:'Understable fairway driver'},
+
+  // ── CLASH DISCS ──
+  {manufacturer:'Clash',name:'Popcorn',type:'Putter',speed:2,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+  {manufacturer:'Clash',name:'Mint',type:'Midrange',speed:5,glide:5,turn:-1,fade:1,notes:'Neutral midrange'},
+  {manufacturer:'Clash',name:'Spice',type:'Midrange',speed:5,glide:5,turn:0,fade:2,notes:'Overstable midrange'},
+  {manufacturer:'Clash',name:'Pepper',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+  {manufacturer:'Clash',name:'Berry',type:'Putter',speed:2,glide:4,turn:-1,fade:1,notes:'Understable putter'},
+  {manufacturer:'Clash',name:'Mango',type:'Fairway Driver',speed:9,glide:6,turn:-2,fade:2,notes:'Understable fairway driver'},
+
+  // ── HERO DISCS ──
+  {manufacturer:'Hero',name:'Aces',type:'Putter',speed:3,glide:4,turn:0,fade:1,notes:'Neutral putter'},
+
+  // ── MILLENIUM ──
+  {manufacturer:'Millennium',name:'Omega',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Neutral putter'},
+  {manufacturer:'Millennium',name:'Polaris LS',type:'Fairway Driver',speed:9,glide:5,turn:-3,fade:1,notes:'Very understable fairway driver'},
+  {manufacturer:'Millennium',name:'Orion LS',type:'Distance Driver',speed:11,glide:5,turn:-3,fade:1,notes:'Very understable distance driver'},
+  {manufacturer:'Millennium',name:'Quasar',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Overstable distance driver'},
+
+  // ── VIBRAM ──
+  {manufacturer:'Vibram',name:'Obex',type:'Putter',speed:2,glide:3,turn:0,fade:2,notes:'Overstable putter'},
+  {manufacturer:'Vibram',name:'Summit',type:'Midrange',speed:5,glide:4,turn:0,fade:2,notes:'Neutral midrange'},
+  {manufacturer:'Vibram',name:'Ridge',type:'Fairway Driver',speed:7,glide:5,turn:0,fade:2,notes:'Overstable fairway driver'},
+];
+
+
   {manufacturer:'Innova',name:'Wraith',type:'Distance Driver',speed:11,glide:5,turn:-1,fade:3,notes:'Slightly understable destroyer, very popular'},
   {manufacturer:'Innova',name:'Boss',type:'Distance Driver',speed:13,glide:5,turn:-1,fade:3,notes:'Max distance driver'},
   {manufacturer:'Innova',name:'Shryke',type:'Distance Driver',speed:13,glide:6,turn:-2,fade:2,notes:'Understable distance driver'},
@@ -1979,12 +2520,30 @@ const DISC_DB = [
 ];
 
 function localDiscSearch(query){
-  const q = query.toLowerCase().replace(/[^a-z0-9]/g,' ').trim();
-  const words = q.split(/\s+/);
-  return DISC_DB.filter(d => {
+  const q = query.toLowerCase().replace(/[^a-z0-9\s]/g,' ').trim();
+  const words = q.split(/\s+/).filter(Boolean);
+  
+  const results = DISC_DB.map(d => {
     const haystack = (d.manufacturer + ' ' + d.name).toLowerCase();
-    return words.every(w => haystack.includes(w));
-  }).slice(0, 3);
+    const nameOnly = d.name.toLowerCase();
+    let score = 0;
+    // Exact name match = highest priority
+    if(nameOnly === q) score = 100;
+    // Name starts with query
+    else if(nameOnly.startsWith(q)) score = 80;
+    // All words match
+    else if(words.every(w => haystack.includes(w))) score = 60;
+    // Name contains any word
+    else if(words.some(w => nameOnly.includes(w))) score = 40;
+    // Manufacturer + any word
+    else if(words.some(w => haystack.includes(w))) score = 20;
+    return { disc: d, score };
+  }).filter(r => r.score > 0)
+    .sort((a,b) => b.score - a.score)
+    .slice(0, 6)
+    .map(r => r.disc);
+
+  return results;
 }
 
 function scheduleDiscLookup(val){
