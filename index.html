@@ -890,11 +890,12 @@ function load(){
 
 function init(){
   load();
-  // Merge UDISC courses (don't duplicate)
-  UDISC.courses.forEach(c=>{
-    if(!S.courses.find(x=>x.id===c.id)) S.courses.push(c);
-  });
+
+  // ALWAYS use UDISC embedded data as source of truth for courses + stats
+  // Clear any stale courses from old localStorage versions
+  S.courses = UDISC.courses.slice();
   S.holeStats = UDISC.holeStats;
+
   if(!S.discs.length){
     S.discs=[
       {id:'d1',name:'Innova Destroyer',type:'Distance Driver',speed:12,glide:5,turn:-1,fade:3,notes:'Champion'},
@@ -904,10 +905,12 @@ function init(){
       {id:'d5',name:'Latitude 64 Flow',type:'Fairway Driver',speed:9,glide:6,turn:-1,fade:2,notes:''},
     ];
   }
+
   // Restore selected course, default to Lighthouse
   if(!S.selectedCourse || !S.courses.find(c=>c.id===S.selectedCourse)){
     S.selectedCourse = S.courses.find(c=>c.id==='c_lighthouse_at_como_l')?.id || S.courses[0]?.id;
   }
+
   save();
   renderAll();
 }
@@ -1799,6 +1802,7 @@ function showDiscMatches(matches){
 }
 
 
+async function lookupDisc(name){
   const spinner = document.getElementById('lookup-spinner');
   const status = document.getElementById('lookup-status');
   const suggestions = document.getElementById('disc-suggestions');
