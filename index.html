@@ -298,6 +298,30 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 }
 .caddie-rec-title { font-family: 'Archivo Black', sans-serif; font-size: 16px; color: var(--gold); margin-bottom: 10px; }
 
+/* ── SCORECARD ── */
+.sc-score-input {
+  width: 44px; height: 36px;
+  background: var(--ink3); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text);
+  font-family: 'Fira Code', monospace; font-size: 15px; font-weight: 600;
+  text-align: center; outline: none; transition: border-color .15s;
+}
+.sc-score-input:focus { border-color: var(--grass); }
+.sc-score-input.ace    { background: rgba(251,191,36,.15); border-color: var(--gold); color: var(--gold); }
+.sc-score-input.eagle  { background: rgba(251,191,36,.1);  border-color: var(--gold); color: var(--gold); }
+.sc-score-input.birdie { background: rgba(34,197,94,.12);  border-color: var(--grass); color: var(--grass); }
+.sc-score-input.par    { background: rgba(56,189,248,.1);  border-color: var(--sky);   color: var(--sky); }
+.sc-score-input.bogey  { background: rgba(251,146,60,.1);  border-color: var(--fire);  color: var(--fire); }
+.sc-score-input.double { background: rgba(244,63,94,.12);  border-color: var(--rose);  color: var(--rose); }
+.sc-hole-hdr { font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; padding: 8px 6px 4px; }
+.sc-par-cell { font-size: 11px; font-family: 'Fira Code',monospace; color: var(--muted); text-align: center; padding: 4px 6px; }
+.sc-disc-sel { width: 90px; font-size: 11px; background: var(--ink3); border: 1px solid var(--border); border-radius: 5px; color: var(--dim); padding: 3px 4px; outline: none; }
+.course-suggestion { padding: 10px 14px; cursor: pointer; transition: background .1s; border-bottom: 1px solid var(--border); }
+.course-suggestion:last-child { border-bottom: none; }
+.course-suggestion:hover { background: var(--ink3); }
+.course-suggestion.known { border-left: 3px solid var(--grass); }
+.course-suggestion.ai-result { border-left: 3px solid var(--sky); }
+
 .disc-suggestion {
   padding: 10px 14px; cursor: pointer; transition: background .1s;
   border-bottom: 1px solid var(--border);
@@ -485,97 +509,89 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 
   <!-- LOG ROUND -->
   <div id="page-log" class="page">
-    <div class="sec-head"><div class="sec-title">Log a Throw</div></div>
-    <div class="panel">
-      <div class="form-grid">
-        <div class="fg"><label>Course</label><select id="log-course" onchange="logUpdateHoles()"><option value="">— Select —</option></select></div>
-        <div class="fg"><label>Hole</label><select id="log-hole"><option value="">— Select course —</option></select></div>
-        <div class="fg"><label>Date</label><input type="date" id="log-date"></div>
-        <div class="fg"><label>Disc Thrown</label><select id="log-disc"><option value="">— Select —</option></select></div>
-        <div class="fg"><label>Score</label>
-          <select id="log-score">
-            <option value="1">1 — Ace 🎯</option>
-            <option value="2">2</option><option value="3" selected>3</option>
-            <option value="4">4</option><option value="5">5</option>
-            <option value="6">6</option><option value="7">7</option><option value="8">8+</option>
-          </select>
+    <div class="sec-head"><div class="sec-title">Log a Round</div><div class="sec-sub">Enter a full scorecard at once</div></div>
+
+    <!-- Step 1: Course Selection -->
+    <div class="panel" id="log-step1">
+      <div class="panel-title">① Select Course & Date</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div class="fg">
+          <label style="display:flex;align-items:center;gap:8px">
+            Course
+            <span id="course-lookup-status" style="display:none;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px"></span>
+          </label>
+          <div style="position:relative">
+            <input type="text" id="log-course-search" placeholder="Search your courses or type a new one..." oninput="scheduleCourseSearch(this.value)" autocomplete="off">
+            <div id="course-lookup-spinner" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--grass);border-radius:50%;animation:spin .6s linear infinite"></div>
+          </div>
+          <div id="course-suggestions" style="display:none;position:absolute;z-index:50;background:var(--ink2);border:1px solid var(--border);border-radius:8px;margin-top:4px;min-width:320px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
         </div>
-        <div class="fg"><label>Shot Type</label>
-          <select id="log-shot">
-            <option value="Drive">Drive (tee shot)</option>
-            <option value="Approach">Approach</option>
-            <option value="Putt">Putt / Upshot</option>
-            <option value="Layup">Layup</option>
-          </select>
+        <div class="fg">
+          <label>Date Played</label>
+          <input type="date" id="log-date">
         </div>
-        <div class="fg"><label>Conditions</label>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="fg">
+          <label>Conditions</label>
           <select id="log-cond">
             <option>Calm</option><option>Windy</option><option>Rainy</option><option>Cold</option><option>Hot</option>
           </select>
         </div>
-        <div class="fg"><label>Notes</label><input type="text" id="log-notes" placeholder="e.g. hit tree, headwind"></div>
-      </div>
-
-      <!-- Landing Zone -->
-      <div style="margin-top:14px">
-        <div class="fg" style="flex-direction:row;gap:20px;align-items:flex-start;flex-wrap:wrap">
-          <div class="lz-wrap">
-            <label class="fg" style="padding-bottom:5px">Landing Zone <span style="color:var(--muted);font-size:10px">(click to mark)</span></label>
-            <svg id="lz-svg" viewBox="0 0 160 160">
-              <defs>
-                <radialGradient id="fwGrad" cx="50%" cy="60%" r="55%">
-                  <stop offset="0%" stop-color="#1a3d1a"/>
-                  <stop offset="100%" stop-color="#0d2010"/>
-                </radialGradient>
-              </defs>
-              <rect width="160" height="160" fill="#0a1410" rx="7"/>
-              <!-- Rough -->
-              <ellipse cx="80" cy="85" rx="58" ry="66" fill="#0d1e0f"/>
-              <!-- Fairway -->
-              <ellipse cx="80" cy="88" rx="38" ry="55" fill="url(#fwGrad)" stroke="#2a4a2a" stroke-width="1"/>
-              <!-- Guide rings -->
-              <ellipse cx="80" cy="88" rx="18" ry="22" fill="none" stroke="#1a2f1a" stroke-width="1" stroke-dasharray="3,3"/>
-              <ellipse cx="80" cy="88" rx="32" ry="40" fill="none" stroke="#1a2f1a" stroke-width="1" stroke-dasharray="3,3"/>
-              <!-- Tee -->
-              <rect x="69" y="130" width="22" height="13" rx="3" fill="#162616" stroke="#2d4a2d" stroke-width="1"/>
-              <text x="80" y="140" text-anchor="middle" fill="#4a7a4a" font-size="7" font-family="sans-serif" font-weight="600">TEE</text>
-              <!-- Basket -->
-              <circle cx="80" cy="22" r="8" fill="#162616" stroke="#22c55e" stroke-width="1.5"/>
-              <text x="80" y="26" text-anchor="middle" fill="#22c55e" font-size="8" font-family="sans-serif">⛳</text>
-              <!-- OB markers -->
-              <text x="6" y="80" fill="#2a1a1a" font-size="7" font-family="sans-serif" transform="rotate(-90,6,80)">OB</text>
-              <text x="154" y="80" fill="#2a1a1a" font-size="7" font-family="sans-serif" transform="rotate(90,154,80)">OB</text>
-              <!-- Historical dots -->
-              <g id="lz-history"></g>
-              <!-- New dot -->
-              <circle id="lz-new" cx="-20" cy="-20" r="6" fill="#fb923c" stroke="white" stroke-width="1.5" opacity=".9"/>
-            </svg>
-            <div class="lz-legend">
-              <div class="lz-li"><div class="lz-dot" style="background:var(--grass)"></div>Birdie+</div>
-              <div class="lz-li"><div class="lz-dot" style="background:var(--sky)"></div>Par</div>
-              <div class="lz-li"><div class="lz-dot" style="background:var(--rose)"></div>Bogey+</div>
-            </div>
-          </div>
-          <div style="flex:1;min-width:200px">
-            <div class="fg" style="margin-bottom:10px"><label>Landing Zone Notes</label><textarea id="log-lz-notes" rows="3" placeholder="e.g. landed in rough left, bounced OB..."></textarea></div>
-            <div style="font-size:11px;color:var(--muted);line-height:1.7">
-              💡 <strong style="color:var(--dim)">Tip:</strong> Click anywhere on the fairway map to mark where your disc landed. Historical throws for this hole show automatically so you can see your patterns.
-            </div>
-          </div>
+        <div class="fg">
+          <label>Playing Partners</label>
+          <input type="text" id="log-partners" placeholder="e.g. Mark, Trevor">
+        </div>
+        <div class="fg">
+          <label>Notes</label>
+          <input type="text" id="log-round-notes" placeholder="e.g. first round of season">
         </div>
       </div>
 
-      <div class="form-actions">
-        <button class="btn btn-green" onclick="saveThrow()">Save Throw</button>
-        <button class="btn btn-ghost" onclick="clearLog()">Clear</button>
+      <!-- Selected course info banner -->
+      <div id="selected-course-banner" style="display:none;margin-top:14px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px 16px;display:none;align-items:center;gap:16px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:14px;font-weight:600" id="scb-name"></div>
+          <div style="font-size:11px;color:var(--muted)" id="scb-meta"></div>
+        </div>
+        <button class="btn btn-green" style="margin-left:auto" onclick="buildScorecard()">Build Scorecard →</button>
       </div>
     </div>
 
-    <div class="sec-head"><div class="sec-title">Recent Throws</div></div>
+    <!-- Step 2: Scorecard -->
+    <div id="log-step2" style="display:none">
+      <div class="panel" style="padding:0;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="panel-title" style="margin:0">② Enter Your Scores</div>
+          <div id="sc-running-total" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--muted)">Total: —</div>
+          <div id="sc-vs-par" style="font-size:12px;font-weight:600"></div>
+          <div class="fg" style="margin-left:auto;margin-bottom:0">
+            <label style="font-size:10px">Disc Used (default)</label>
+            <select id="sc-default-disc" style="font-size:12px;padding:5px 8px">
+              <option value="">— varies per hole —</option>
+            </select>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl" id="scorecard-table">
+            <thead id="sc-head"></thead>
+            <tbody id="sc-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-bottom:24px">
+        <button class="btn btn-green" onclick="saveRound()">💾 Save Round</button>
+        <button class="btn btn-ghost" onclick="resetLog()">← Back</button>
+      </div>
+    </div>
+
+    <!-- Recent rounds -->
+    <div class="sec-head"><div class="sec-title">Recent Rounds</div></div>
     <div class="panel" style="padding:0;overflow:hidden">
-      <table class="tbl" id="recent-tbl">
-        <thead><tr><th>Date</th><th>Course</th><th>Hole</th><th>Disc</th><th>Type</th><th>Score</th><th>Cond.</th><th>Notes</th><th></th></tr></thead>
-        <tbody id="recent-tbody"></tbody>
+      <table class="tbl">
+        <thead><tr><th>Date</th><th>Course</th><th>Score</th><th>+/-</th><th>Holes</th><th>Conditions</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="recent-rounds-tbody"></tbody>
       </table>
     </div>
   </div>
@@ -861,6 +877,7 @@ function save(){
       courses: S.courses,
       discs: S.discs,
       throws: S.throws,
+      rounds: S.rounds||[],
       selectedCourse: S.selectedCourse
     }));
   } catch(e){ console.error('Save failed:', e); }
@@ -880,6 +897,7 @@ function load(){
       S.courses = d.courses || [];
       S.discs = d.discs || [];
       S.throws = d.throws || [];
+      S.rounds = d.rounds || [];
       S.selectedCourse = d.selectedCourse || null;
 
       // If migrated from old key, save under new key
@@ -1113,106 +1131,333 @@ function renderDashboard(){
 }
 
 // ═══════════════════════════════════════════════════════════
-// LOG ROUND
+// LOG ROUND — SCORECARD STYLE
 // ═══════════════════════════════════════════════════════════
+let activeCourse = null; // { id, name, holes, pars, distances }
+let courseSearchTimer = null;
+
 function renderLog(){
-  const cs=document.getElementById('log-course');
-  cs.innerHTML='<option value="">— Select —</option>'+S.courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  if(S.selectedCourse) cs.value=S.selectedCourse;
-  logUpdateHoles();
-  const ds=document.getElementById('log-disc');
-  ds.innerHTML='<option value="">— Select —</option>'+S.discs.map(d=>`<option value="${d.id}">${d.name} (${d.type})</option>`).join('');
-  document.getElementById('log-date').value=new Date().toISOString().split('T')[0];
-  renderRecentThrows();
-  renderLZHistory();
+  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+  // Populate default disc select
+  const dd = document.getElementById('sc-default-disc');
+  if(dd) dd.innerHTML = '<option value="">— varies per hole —</option>' +
+    S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  renderRecentRounds();
 }
 
-function logUpdateHoles(){
-  const cid=document.getElementById('log-course').value;
-  const c=getCourse(cid);
-  const sel=document.getElementById('log-hole');
-  if(!c){sel.innerHTML='<option>— Select course first —</option>';return;}
-  sel.innerHTML=Array.from({length:c.holes},(_,i)=>`<option value="${i+1}">Hole ${i+1} (Par ${c.pars[i]})</option>`).join('');
-  renderLZHistory();
+function resetLog(){
+  activeCourse = null;
+  document.getElementById('log-step2').style.display = 'none';
+  document.getElementById('log-step1').style.display = 'block';
+  document.getElementById('log-course-search').value = '';
+  document.getElementById('selected-course-banner').style.display = 'none';
+  document.getElementById('course-suggestions').style.display = 'none';
 }
 
-function renderLZHistory(){
-  const cid=document.getElementById('log-course')?.value;
-  const hole=parseInt(document.getElementById('log-hole')?.value);
-  const g=document.getElementById('lz-history'); if(!g)return;
-  const throws=S.throws.filter(t=>t.courseId===cid&&t.hole===hole&&t.landingX);
-  const c=getCourse(cid);
-  g.innerHTML=throws.slice(-20).map(t=>{
-    const par=c?c.pars[t.hole-1]:3;
-    const col=t.score<par?'var(--grass)':t.score===par?'var(--sky)':'var(--rose)';
-    return `<circle cx="${t.landingX}" cy="${t.landingY}" r="4" fill="${col}" opacity=".55"/>`;
+// ── COURSE SEARCH ──
+function scheduleCourseSearch(val){
+  clearTimeout(courseSearchTimer);
+  const spinner = document.getElementById('course-lookup-spinner');
+  const status = document.getElementById('course-lookup-status');
+  status.style.display = 'none';
+  document.getElementById('course-suggestions').style.display = 'none';
+  if(val.trim().length < 2) return;
+
+  // Search known courses first
+  const q = val.toLowerCase();
+  const known = S.courses.filter(c => c.name.toLowerCase().includes(q));
+  if(known.length){
+    showCourseSuggestions(known.map(c=>({...c, known:true})));
+    return;
+  }
+
+  // AI lookup for unknown courses
+  spinner.style.display = 'block';
+  courseSearchTimer = setTimeout(() => lookupCourse(val.trim()), 900);
+}
+
+function showCourseSuggestions(courses){
+  const el = document.getElementById('course-suggestions');
+  const status = document.getElementById('course-lookup-status');
+  document.getElementById('course-lookup-spinner').style.display = 'none';
+
+  if(!courses.length){
+    status.textContent = 'No match found';
+    status.style.cssText = 'display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(244,63,94,.1);color:var(--rose);border:1px solid rgba(244,63,94,.3)';
+    el.style.display = 'none';
+    return;
+  }
+
+  el.style.display = 'block';
+  el.innerHTML = courses.map((c,i) => {
+    const parSum = c.pars ? c.pars.reduce((a,b)=>a+b,0) : '?';
+    const src = c.known ? '📍 Your courses' : '🤖 AI lookup';
+    const cls = c.known ? 'known' : 'ai-result';
+    return `<div class="course-suggestion ${cls}" onclick="selectLogCourse(${i})" data-course='${JSON.stringify(c).replace(/'/g,"&#39;")}'>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${c.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.holes} holes · Par ${parSum} · ${src}</div>
+        </div>
+        ${c.known ? '<span style="font-size:10px;color:var(--grass)">✓ Known</span>' : '<span style="font-size:10px;color:var(--sky)">AI</span>'}
+      </div>
+    </div>`;
   }).join('');
 }
 
-document.addEventListener('change',e=>{
-  if(e.target.id==='log-hole'||e.target.id==='log-course') renderLZHistory();
-});
+function selectLogCourse(idx){
+  const el = document.getElementById('course-suggestions');
+  const cards = el.querySelectorAll('.course-suggestion');
+  const c = JSON.parse(cards[idx].dataset.course);
+  el.style.display = 'none';
+  document.getElementById('log-course-search').value = c.name;
+  activeCourse = c;
 
-document.getElementById('lz-svg').addEventListener('click',function(e){
-  const r=this.getBoundingClientRect();
-  const sc=160/r.width;
-  const x=(e.clientX-r.left)*sc, y=(e.clientY-r.top)*sc;
-  S.landingX=x; S.landingY=y;
-  const d=document.getElementById('lz-new');
-  d.setAttribute('cx',x); d.setAttribute('cy',y);
-});
+  // Add to S.courses if new
+  if(!S.courses.find(x=>x.id===c.id)){
+    S.courses.push(c);
+    save();
+  }
 
-function saveThrow(){
-  const cid=document.getElementById('log-course').value;
-  const hole=parseInt(document.getElementById('log-hole').value);
-  const disc=document.getElementById('log-disc').value;
-  const score=parseInt(document.getElementById('log-score').value);
-  const date=document.getElementById('log-date').value;
-  const cond=document.getElementById('log-cond').value;
-  const shot=document.getElementById('log-shot').value;
-  const notes=document.getElementById('log-notes').value;
-  const lzNotes=document.getElementById('log-lz-notes').value;
-  if(!cid||!hole||!disc){toast('⚠️ Please fill in Course, Hole, and Disc');return;}
-  S.throws.push({id:'t'+Date.now(),courseId:cid,hole,disc,score,date,cond,shot,notes,lzNotes,landingX:S.landingX||80,landingY:S.landingY||80});
-  S.landingX=null; S.landingY=null;
-  document.getElementById('lz-new').setAttribute('cx',-20);
-  document.getElementById('lz-new').setAttribute('cy',-20);
-  save(); renderRecentThrows(); renderLZHistory(); renderSidebar();
-  toast('✅ Throw saved!');
+  // Show banner
+  const banner = document.getElementById('selected-course-banner');
+  const parSum = c.pars ? c.pars.reduce((a,b)=>a+b,0) : '?';
+  document.getElementById('scb-name').textContent = c.name;
+  document.getElementById('scb-meta').textContent = `${c.holes} holes · Par ${parSum}`;
+  banner.style.display = 'flex';
 }
 
-function clearLog(){
-  ['log-disc','log-notes','log-lz-notes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('log-score').value='3';
-  S.landingX=null; S.landingY=null;
-  document.getElementById('lz-new').setAttribute('cx',-20);
-  document.getElementById('lz-new').setAttribute('cy',-20);
+async function lookupCourse(name){
+  const spinner = document.getElementById('course-lookup-spinner');
+  const status = document.getElementById('course-lookup-status');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        messages:[{role:'user', content:`You are a disc golf course database. Find disc golf courses matching "${name}".
+
+Return up to 3 matching real disc golf courses with their hole-by-hole par information.
+
+Respond ONLY with this exact JSON, no markdown:
+{"courses":[{"id":"c_unique_id","name":"Full Course Name","holes":18,"pars":[3,4,3,3,3,4,3,3,3,3,3,3,4,3,3,3,3,3],"city":"City","state":"ST"}]}
+
+Rules:
+- Only real disc golf courses you are confident about
+- pars array must have exactly 'holes' number of elements
+- Each par must be 3, 4, or 5
+- id should be c_ followed by lowercase course name with underscores
+- If no match return: {"courses":[]}`
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b=>b.type==='text')?.text||'';
+    let parsed;
+    try{ parsed=JSON.parse(text.replace(/```json|```/g,'').trim()); }catch(e){ parsed=null; }
+    spinner.style.display='none';
+    if(!parsed||!parsed.courses?.length){ showCourseSuggestions([]); return; }
+    showCourseSuggestions(parsed.courses.map(c=>({...c, known:false})));
+  } catch(e){
+    spinner.style.display='none';
+    status.textContent='Lookup failed';
+    status.style.cssText='display:inline-block;font-size:10px;color:var(--muted)';
+  }
 }
 
-function renderRecentThrows(){
-  const tbody=document.getElementById('recent-tbody');
-  const recent=[...S.throws].reverse().slice(0,25);
-  if(!recent.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No throws logged yet</td></tr>';return;}
-  tbody.innerHTML=recent.map(t=>{
-    const c=getCourse(t.courseId);
-    const par=c?c.pars[t.hole-1]:3;
-    const sv=scoreVsPar(t.score,par);
-    const d=S.discs.find(x=>x.id===t.disc);
+// Close suggestions on outside click
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#log-course-search')&&!e.target.closest('#course-suggestions')){
+    const s=document.getElementById('course-suggestions');
+    if(s) s.style.display='none';
+  }
+});
+
+// ── SCORECARD BUILDER ──
+function buildScorecard(){
+  if(!activeCourse){ toast('⚠️ Select a course first'); return; }
+  document.getElementById('log-step1').style.display='none';
+  document.getElementById('log-step2').style.display='block';
+
+  const c = activeCourse;
+  const discOpts = '<option value="">—</option>' + S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+
+  // Build header rows (split into 2 rows of 9 for wide courses)
+  const chunks = [];
+  for(let i=0;i<c.holes;i+=9) chunks.push(c.pars.slice(i,i+9).map((p,j)=>({h:i+j+1,p})));
+
+  let headHTML='', bodyHTML='';
+  chunks.forEach((chunk, ci) => {
+    const label = chunks.length>1 ? (ci===0?'OUT':'IN') : '';
+    headHTML += `<tr>
+      <th class="sc-hole-hdr" style="text-align:left;padding-left:10px">${ci===0?'Hole':''}</th>
+      ${chunk.map(h=>`<th class="sc-hole-hdr">${h.h}</th>`).join('')}
+      ${label?`<th class="sc-hole-hdr">${label}</th>`:''}
+    </tr>
+    <tr>
+      <td class="sc-par-cell" style="text-align:left;padding-left:10px;color:var(--muted);font-size:10px">Par</td>
+      ${chunk.map(h=>`<td class="sc-par-cell">${h.p}</td>`).join('')}
+      ${label?`<td class="sc-par-cell">${chunk.reduce((a,h)=>a+h.p,0)}</td>`:''}
+    </tr>`;
+
+    bodyHTML += `<tr>
+      <td style="padding:6px 10px;font-size:11px;color:var(--muted);white-space:nowrap">Score</td>
+      ${chunk.map(h=>`<td style="padding:4px 3px;text-align:center">
+        <input class="sc-score-input" type="number" min="1" max="15" id="sc-h${h.h}"
+          oninput="colorScore(this,${h.p});updateTotal()" placeholder="${h.p}">
+      </td>`).join('')}
+      ${label?`<td style="padding:4px 6px;font-family:'Fira Code',monospace;font-size:12px;color:var(--muted)" id="sc-sub${ci}">—</td>`:''}
+    </tr>
+    <tr>
+      <td style="padding:2px 10px;font-size:10px;color:var(--muted)">Disc</td>
+      ${chunk.map(h=>`<td style="padding:2px 3px;text-align:center">
+        <select class="sc-disc-sel" id="sc-disc${h.h}">${discOpts}</select>
+      </td>`).join('')}
+      ${label?`<td></td>`:''}
+    </tr>`;
+  });
+
+  document.getElementById('sc-head').innerHTML = headHTML;
+  document.getElementById('sc-body').innerHTML = bodyHTML;
+  updateTotal();
+}
+
+function colorScore(input, par){
+  const v = parseInt(input.value);
+  input.className = 'sc-score-input';
+  if(!v) return;
+  if(v===1)     input.classList.add('ace');
+  else if(v<=par-2) input.classList.add('eagle');
+  else if(v===par-1) input.classList.add('birdie');
+  else if(v===par)   input.classList.add('par');
+  else if(v===par+1) input.classList.add('bogey');
+  else              input.classList.add('double');
+}
+
+function updateTotal(){
+  if(!activeCourse) return;
+  const c = activeCourse;
+  let total=0, totalPar=0, filled=0;
+
+  // Subtotals per 9
+  const chunks = [];
+  for(let i=0;i<c.holes;i+=9) chunks.push(c.pars.slice(i,i+9).map((p,j)=>({h:i+j+1,p})));
+
+  chunks.forEach((chunk,ci)=>{
+    let sub=0;
+    chunk.forEach(h=>{
+      const v=parseInt(document.getElementById(`sc-h${h.h}`)?.value)||0;
+      total+=v; totalPar+=h.p; if(v) filled++;
+      sub+=v;
+    });
+    const subEl=document.getElementById(`sc-sub${ci}`);
+    if(subEl) subEl.textContent=sub||'—';
+  });
+
+  const totalEl=document.getElementById('sc-running-total');
+  const vsEl=document.getElementById('sc-vs-par');
+  if(totalEl) totalEl.textContent=`Total: ${total||'—'} (${filled}/${c.holes} holes)`;
+  if(vsEl && filled>0){
+    const parSoFar = chunks.flat().slice(0,filled).reduce((a,h)=>a+h.p,0);
+    const diff = total - parSoFar;
+    vsEl.textContent = (diff>=0?'+':'')+diff+' vs par';
+    vsEl.style.color = diff<0?'var(--grass)':diff===0?'var(--sky)':'var(--rose)';
+  }
+}
+
+function saveRound(){
+  if(!activeCourse){ toast('⚠️ No course selected'); return; }
+  const c = activeCourse;
+  const date = document.getElementById('log-date').value;
+  const cond = document.getElementById('log-cond').value;
+  const partners = document.getElementById('log-partners').value;
+  const notes = document.getElementById('log-round-notes').value;
+  const defaultDisc = document.getElementById('sc-default-disc').value;
+
+  const scores=[], discs=[];
+  let anyScore=false;
+  for(let h=1;h<=c.holes;h++){
+    const v=parseInt(document.getElementById(`sc-h${h}`)?.value)||0;
+    const d=document.getElementById(`sc-disc${h}`)?.value||defaultDisc;
+    scores.push(v);
+    discs.push(d);
+    if(v>0) anyScore=true;
+  }
+  if(!anyScore){ toast('⚠️ Enter at least one score'); return; }
+  if(!date){ toast('⚠️ Select a date'); return; }
+
+  // Calculate stats
+  const pars=c.pars;
+  const total=scores.reduce((a,b)=>a+b,0);
+  const totalPar=pars.slice(0,c.holes).reduce((a,b)=>a+b,0);
+  const pm=total-totalPar;
+  const birdies=scores.filter((s,i)=>s>0&&s<pars[i]).length;
+  const eagles=scores.filter((s,i)=>s>0&&s<=pars[i]-2).length;
+  const bogeys=scores.filter((s,i)=>s>0&&s===pars[i]+1).length;
+  const doubles=scores.filter((s,i)=>s>0&&s>=pars[i]+2).length;
+  const parsCount=scores.filter((s,i)=>s>0&&s===pars[i]).length;
+
+  // Save as a round
+  const round = {
+    id:'r'+Date.now(), courseId:c.id, courseName:c.name,
+    date, cond, partners, notes, scores, discs,
+    total, pm, birdies, eagles, bogeys, doubles, pars:parsCount,
+    holes:c.holes
+  };
+  if(!S.rounds) S.rounds=[];
+  S.rounds.push(round);
+
+  // Also save individual throws for hole analytics
+  scores.forEach((score,i)=>{
+    if(score>0){
+      S.throws.push({
+        id:'t'+Date.now()+'_'+i, courseId:c.id, hole:i+1,
+        date, disc:discs[i]||defaultDisc, score,
+        cond, notes:'', landingX:80, landingY:80
+      });
+    }
+  });
+
+  save();
+  renderRecentRounds();
+  renderSidebar();
+  toast(`✅ Round saved! ${pm>=0?'+':''}${pm} vs par · ${birdies} birdies`);
+  resetLog();
+}
+
+function renderRecentRounds(){
+  const tbody = document.getElementById('recent-rounds-tbody');
+  if(!tbody) return;
+  const rounds = [...(S.rounds||[])].reverse().slice(0,20);
+  if(!rounds.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No rounds logged yet — log your first round above!</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rounds.map(r=>{
+    const pm = r.pm;
+    const pmCol = pm<0?'var(--grass)':pm===0?'var(--sky)':'var(--rose)';
     return `<tr>
-      <td class="mono" style="color:var(--muted)">${t.date}</td>
-      <td style="font-size:12px">${c?c.name:t.courseId}</td>
-      <td class="mono">H${t.hole}</td>
-      <td style="font-size:12px">${d?d.name:'—'}</td>
-      <td style="font-size:11px;color:var(--muted)">${t.shot||'—'}</td>
-      <td><span style="font-family:'Fira Code',monospace;font-size:13px;font-weight:500;color:${t.score<par?'var(--grass)':t.score===par?'var(--sky)':'var(--rose)'}">${t.score}</span> <span class="chip ${sv.cls}" style="font-size:9px">${sv.label}</span></td>
-      <td style="font-size:11px;color:var(--muted)">${t.cond||'—'}</td>
-      <td style="font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>
-      <td><button onclick="deleteThrow('${t.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px" title="Delete">✕</button></td>
+      <td class="mono" style="color:var(--muted);font-size:11px">${r.date}</td>
+      <td style="font-size:12px;font-weight:500">${r.courseName||r.courseId}</td>
+      <td class="mono" style="font-weight:600">${r.total||'—'}</td>
+      <td class="mono" style="color:${pmCol};font-weight:700">${pm!=null?(pm>=0?'+':'')+pm:'—'}</td>
+      <td class="mono">${r.holes}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.cond||'—'}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes||r.partners||'—'}</td>
+      <td><button onclick="deleteRound('${r.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">✕</button></td>
     </tr>`;
   }).join('');
 }
 
-function deleteThrow(id){ S.throws=S.throws.filter(t=>t.id!==id); save(); renderRecentThrows(); toast('🗑️ Removed'); }
+function deleteRound(id){
+  S.rounds=(S.rounds||[]).filter(r=>r.id!==id);
+  save(); renderRecentRounds(); toast('🗑️ Round removed');
+}
+
+function deleteThrow(id){ S.throws=S.throws.filter(t=>t.id!==id); save(); toast('🗑️ Removed'); }
+
 
 // ═══════════════════════════════════════════════════════════
 // ANALYTICS — REAL DATA
@@ -1755,13 +2000,12 @@ function scheduleDiscLookup(val){
   if(local.length){
     spinner.style.display = 'none';
     showDiscMatches(local);
-    if(local.length === 1) { applyDiscMatchData(local[0]); document.getElementById('disc-suggestions').style.display='none'; }
     return;
   }
 
   // Fall back to AI lookup
   spinner.style.display = 'block';
-  lookupTimer = setTimeout(() => lookupDisc(val.trim()), 700);
+  lookupTimer = setTimeout(() => lookupDisc(val.trim()), 900);
 }
 
 function showDiscMatches(matches){
@@ -1861,11 +2105,7 @@ Rules:
 
     showDiscMatches(parsed.matches);
 
-    // Auto-apply if only one exact match
-    if(parsed.matches.length === 1){
-      applyDiscMatchData(parsed.matches[0]);
-      suggestions.style.display = 'none';
-    }
+    // Never auto-apply — always let user click to confirm
 
   } catch(e) {
     console.error('Disc lookup error:', e);
