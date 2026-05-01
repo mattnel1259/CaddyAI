@@ -1031,11 +1031,14 @@ function load(){
 
     if(raw){
       const d = JSON.parse(raw);
-      // Only load user data — never load courses from localStorage
       S.discs = d.discs || [];
       S.throws = d.throws || [];
       S.rounds = d.rounds || [];
       S.selectedCourse = d.selectedCourse || null;
+      // Reset if stored ID doesn't match current UDISC data
+      if(S.selectedCourse && !UDISC.courses.find(c=>c.id===S.selectedCourse)){
+        S.selectedCourse = null;
+      }
       if(!localStorage.getItem('cai3')) save();
     }
   } catch(e){ console.error('Load failed:', e); }
@@ -2535,10 +2538,15 @@ function addDisc(){
   const name=document.getElementById('nd-name').value.trim();
   const type=document.getElementById('nd-type').value;
   if(!name){toast('⚠️ Enter disc name');return;}
-  if(flightState.speed===null||flightState.glide===null||flightState.turn===null||flightState.fade===null){
-    toast('⚠️ Select all 4 flight numbers');return;
-  }
-  S.discs.push({id:'d'+Date.now(),name,type,speed:flightState.speed,glide:flightState.glide,turn:flightState.turn,fade:flightState.fade,notes:document.getElementById('nd-notes').value});
+  // Flight numbers are optional — use null if not selected
+  S.discs.push({
+    id:'d'+Date.now(), name, type,
+    speed: flightState.speed,
+    glide: flightState.glide,
+    turn: flightState.turn,
+    fade: flightState.fade,
+    notes: document.getElementById('nd-notes').value
+  });
   save(); renderDiscs();
   clearDiscForm();
   toast('✅ '+name+' added to bag!');
