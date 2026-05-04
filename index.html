@@ -326,7 +326,169 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   border-top: 1px solid var(--border);
 }
 
-/* ── HOLE CARDS ── */
+/* ── MOBILE HOLE SCORER ── */
+.hole-scorer {
+  background: var(--ink2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.hole-scorer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--ink3);
+  border-bottom: 1px solid var(--border);
+}
+.hole-num-big {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 32px; color: var(--text); line-height: 1;
+}
+.hole-par-info { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Score stepper */
+.score-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; padding: 16px;
+}
+.btn-score-adj {
+  width: 64px; height: 64px;
+  border: none; border-radius: 12px;
+  font-size: 32px; font-weight: 300;
+  cursor: pointer; transition: all .1s;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.btn-score-adj.minus {
+  background: rgba(244,63,94,.15); color: var(--rose);
+  border-radius: 12px 0 0 12px;
+}
+.btn-score-adj.minus:active { background: rgba(244,63,94,.35); transform: scale(.93); }
+.btn-score-adj.plus {
+  background: rgba(45,106,45,.2); color: var(--pine-light);
+  border-radius: 0 12px 12px 0;
+}
+.btn-score-adj.plus:active { background: rgba(45,106,45,.4); transform: scale(.93); }
+.score-center {
+  min-width: 90px; height: 64px;
+  background: var(--ink); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+}
+.score-big {
+  font-family: 'Fira Code', monospace;
+  font-size: 30px; font-weight: 700; line-height: 1;
+}
+.score-tag {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* Throw rows */
+.throw-rows { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+.throw-row {
+  background: var(--ink3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.throw-row-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;
+}
+
+/* Disc pills - horizontal scroll */
+.disc-pills {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
+  scrollbar-width: none; -ms-overflow-style: none;
+  margin-bottom: 8px;
+}
+.disc-pills::-webkit-scrollbar { display: none; }
+.disc-pill {
+  flex-shrink: 0;
+  padding: 7px 14px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--ink2); color: var(--muted);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .12s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.disc-pill:active { transform: scale(.95); }
+.disc-pill.selected {
+  background: rgba(45,106,45,.2);
+  border-color: var(--pine-light);
+  color: var(--pine-light); font-weight: 700;
+}
+
+/* Throw type buttons - always visible, 2 rows if needed */
+.throw-type-row { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.tt-btn {
+  flex: 1; min-width: 60px; padding: 9px 6px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--ink2); color: var(--muted);
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: all .12s; text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.tt-btn:active { transform: scale(.95); }
+.tt-btn.selected { background: rgba(45,106,45,.2); border-color: var(--pine-light); color: var(--pine-light); font-weight: 700; }
+.tt-btn.selected.fh { background: rgba(245,200,66,.12); border-color: var(--yellow); color: var(--yellow); }
+
+/* Landing zone grid - 3x2, always visible */
+.landing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.lz-btn {
+  padding: 10px 4px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--ink2); color: var(--muted);
+  font-size: 11px; font-weight: 500; cursor: pointer;
+  text-align: center; transition: all .12s;
+  -webkit-tap-highlight-color: transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.lz-btn .lz-icon { font-size: 18px; }
+.lz-btn:active { transform: scale(.95); }
+.lz-btn.selected { font-weight: 700; }
+.lz-btn.selected.fairway { background: rgba(45,106,45,.2); border-color: var(--pine-light); color: var(--pine-light); }
+.lz-btn.selected.rough   { background: rgba(251,146,60,.12); border-color: var(--fire); color: var(--fire); }
+.lz-btn.selected.ob      { background: rgba(244,63,94,.12); border-color: var(--rose); color: var(--rose); }
+.lz-btn.selected.circle  { background: rgba(125,216,248,.12); border-color: var(--blue); color: var(--blue); }
+.lz-btn.selected.basket  { background: rgba(245,200,66,.15); border-color: var(--yellow); color: var(--yellow); }
+
+/* Add throw button */
+.add-throw-btn {
+  width: 100%; padding: 10px; margin: 8px 0 0;
+  background: none; border: 1px dashed var(--border);
+  color: var(--muted); border-radius: 8px; font-size: 12px;
+  cursor: pointer; transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.add-throw-btn:active { border-color: var(--pine-light); color: var(--pine-light); }
+
+/* Progress dots */
+.hole-dot {
+  height: 6px; border-radius: 3px;
+  background: var(--border); cursor: pointer;
+  transition: all .15s; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.hole-dot.active { background: var(--pine-light); }
+.hole-dot.done-eagle { background: var(--yellow); }
+.hole-dot.done-birdie { background: var(--pine-light); }
+.hole-dot.done-par { background: var(--blue); }
+.hole-dot.done-bogey { background: var(--fire); }
+.hole-dot.done-double { background: var(--rose); }
+
+/* Caddie rec in scorer */
+.scorer-rec {
+  margin: 0 12px 10px;
+  background: rgba(245,200,66,.06);
+  border: 1px solid rgba(245,200,66,.2);
+  border-radius: 8px; padding: 8px 12px;
+  font-size: 12px; color: var(--dim); line-height: 1.5;
+}
+.scorer-rec strong { color: var(--yellow); }
+
+/* ── SCORECARD ── */
 .hole-log-card {
   background: var(--ink2);
   border: 1px solid var(--border);
@@ -685,98 +847,145 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 
   <!-- LOG ROUND -->
   <div id="page-log" class="page">
-    <div class="sec-head"><div class="sec-title">Log a Round</div><div class="sec-sub">Enter a full scorecard at once</div></div>
 
-    <!-- Step 1: Course Selection -->
-    <div class="panel" id="log-step1">
-      <div class="panel-title">① Select Course & Date</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div class="fg">
-          <label style="display:flex;align-items:center;gap:8px">
-            Course
-            <span id="course-lookup-status" style="display:none;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px"></span>
-          </label>
-          <div style="position:relative">
-            <input type="text" id="log-course-search" placeholder="Search your courses or type a new one..." oninput="scheduleCourseSearch(this.value)" autocomplete="off">
-            <div id="course-lookup-spinner" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--grass);border-radius:50%;animation:spin .6s linear infinite"></div>
+    <!-- STEP 1: Course + Layout + Round Info -->
+    <div id="log-step1">
+      <div class="sec-head"><div class="sec-title">Log a Round</div><div class="sec-sub">Select course, layout, and conditions first</div></div>
+      <div class="panel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+
+          <!-- Course search -->
+          <div class="fg" style="position:relative">
+            <label>Course
+              <span id="course-lookup-status" style="display:none;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;margin-left:6px"></span>
+            </label>
+            <div style="position:relative">
+              <input type="text" id="log-course-search" placeholder="Search courses..." oninput="scheduleCourseSearch(this.value)" autocomplete="off">
+              <div id="course-lookup-spinner" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--pine-light);border-radius:50%;animation:spin .6s linear infinite"></div>
+            </div>
+            <div id="course-suggestions" style="display:none;position:absolute;z-index:50;background:var(--ink2);border:1px solid var(--border);border-radius:8px;margin-top:4px;width:100%;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
           </div>
-          <div id="course-suggestions" style="display:none;position:absolute;z-index:50;background:var(--ink2);border:1px solid var(--border);border-radius:8px;margin-top:4px;min-width:320px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
-        </div>
-        <div class="fg">
-          <label>Date Played</label>
-          <input type="date" id="log-date">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-        <div class="fg">
-          <label>Conditions</label>
-          <select id="log-cond">
-            <option>Calm</option><option>Windy</option><option>Rainy</option><option>Cold</option><option>Hot</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>Playing Partners</label>
-          <input type="text" id="log-partners" placeholder="e.g. Mark, Trevor">
-        </div>
-        <div class="fg">
-          <label>Notes</label>
-          <input type="text" id="log-round-notes" placeholder="e.g. first round of season">
-        </div>
-      </div>
 
-      <!-- Selected course info banner -->
-      <div id="selected-course-banner" style="display:none;margin-top:14px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px 16px;display:none;align-items:center;gap:16px;flex-wrap:wrap">
-        <div>
-          <div style="font-size:14px;font-weight:600" id="scb-name"></div>
-          <div style="font-size:11px;color:var(--muted)" id="scb-meta"></div>
+          <!-- Date -->
+          <div class="fg">
+            <label>Date Played</label>
+            <input type="date" id="log-date">
+          </div>
+
+          <!-- Layout select — appears after course is chosen -->
+          <div class="fg" id="log-layout-wrap" style="display:none">
+            <label>Layout / Tees</label>
+            <select id="log-layout" onchange="onLayoutChange()">
+              <option value="">— Select layout —</option>
+            </select>
+          </div>
+
+          <!-- Conditions -->
+          <div class="fg">
+            <label>Conditions</label>
+            <select id="log-cond">
+              <option>Calm</option><option>Windy</option><option>Rainy</option><option>Cold</option><option>Hot</option>
+            </select>
+          </div>
+
+          <!-- Partners -->
+          <div class="fg">
+            <label>Playing Partners</label>
+            <input type="text" id="log-partners" placeholder="e.g. Mark, Trevor">
+          </div>
+
+          <!-- Notes -->
+          <div class="fg">
+            <label>Notes</label>
+            <input type="text" id="log-round-notes" placeholder="e.g. league round, tournament">
+          </div>
         </div>
-        <button class="btn btn-green" style="margin-left:auto" onclick="buildScorecard()">Build Scorecard →</button>
+
+        <!-- Selected course+layout summary -->
+        <div id="selected-course-banner" style="display:none;background:rgba(45,106,45,.1);border:1px solid rgba(45,106,45,.3);border-radius:8px;padding:14px 16px;margin-top:4px">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--text)" id="scb-name"></div>
+              <div style="font-size:12px;color:var(--muted);margin-top:3px" id="scb-meta"></div>
+            </div>
+            <button class="btn btn-green" onclick="buildScorecard()" style="white-space:nowrap">
+              Start Round →
+            </button>
+          </div>
+          <!-- Layout hole pars preview -->
+          <div id="scb-pars" style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap"></div>
+        </div>
+
+        <!-- New layout form — shows when "Add new layout" selected -->
+        <div id="new-layout-form" style="display:none;margin-top:14px;background:var(--ink3);border:1px solid var(--border);border-radius:8px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--dim);margin-bottom:10px">Define New Layout</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="fg"><label>Layout Name</label><input type="text" id="nl-name" placeholder="e.g. White Tees"></div>
+            <div class="fg"><label>Number of Holes</label><input type="number" id="nl-holes" min="6" max="36" value="18"></div>
+          </div>
+          <div class="fg" style="margin-bottom:10px">
+            <label>Par per hole <span style="color:var(--muted);font-weight:400">(comma separated)</span></label>
+            <input type="text" id="nl-pars" placeholder="3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3">
+          </div>
+          <div class="fg" style="margin-bottom:12px">
+            <label>Distances in feet <span style="color:var(--muted);font-weight:400">(optional, comma separated)</span></label>
+            <input type="text" id="nl-distances" placeholder="200,280,350,180,...">
+          </div>
+          <button class="btn btn-green" onclick="saveNewLayout()" style="font-size:12px">Save Layout</button>
+        </div>
       </div>
     </div>
 
-    <!-- Step 2: Scorecard -->
+    <!-- STEP 2: Full screen hole scorer -->
     <div id="log-step2" style="display:none">
 
-      <!-- Sticky header bar -->
-      <div style="position:sticky;top:52px;z-index:20;background:var(--ink);padding:10px 0;margin-bottom:12px;border-bottom:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <div>
-            <div style="font-size:11px;color:var(--muted)">Course</div>
-            <div style="font-size:13px;font-weight:600" id="sc-course-name"></div>
-          </div>
-          <div style="width:1px;height:32px;background:var(--border)"></div>
-          <div>
-            <div style="font-size:11px;color:var(--muted)">Total</div>
-            <div style="font-family:'Fira Code',monospace;font-size:18px;font-weight:600" id="sc-total-display">—</div>
-          </div>
-          <div>
-            <div style="font-size:11px;color:var(--muted)">vs Par</div>
-            <div style="font-family:'Fira Code',monospace;font-size:18px;font-weight:600" id="sc-vspar-display">—</div>
-          </div>
-          <div style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
-            <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="color:var(--gold)">●</span><span id="sc-eagles">0</span> Eagles</div>
-            <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="color:var(--grass)">●</span><span id="sc-birdies">0</span> Birdies</div>
-            <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="color:var(--rose)">●</span><span id="sc-bogeys">0</span> Bogeys</div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-green" onclick="saveRound()">💾 Save Round</button>
-            <button class="btn btn-ghost" onclick="resetLog()">← Back</button>
-          </div>
+      <!-- Top bar: navigation + running score -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:16px;gap:8px">
+
+        <!-- Prev hole -->
+        <button id="btn-prev-hole" onclick="goHole(activeHoleIndex-1)"
+          style="width:44px;height:44px;background:var(--ink3);border:1px solid var(--border);border-radius:10px;color:var(--dim);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+
+        <!-- Course + hole counter -->
+        <div style="flex:1;text-align:center">
+          <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sc-course-name"></div>
+          <div style="font-size:11px;color:var(--muted)" id="sc-layout-name"></div>
         </div>
+
+        <!-- Running total -->
+        <div style="text-align:center;min-width:60px">
+          <div style="font-family:'Fira Code',monospace;font-size:18px;font-weight:700;line-height:1" id="sc-total-display">—</div>
+          <div style="font-family:'Fira Code',monospace;font-size:12px;font-weight:600" id="sc-vspar-display" style="color:var(--muted)">—</div>
+        </div>
+
+        <!-- Next hole -->
+        <button id="btn-next-hole" onclick="goHole(activeHoleIndex+1)"
+          style="width:44px;height:44px;background:var(--ink3);border:1px solid var(--border);border-radius:10px;color:var(--dim);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
       </div>
 
-      <!-- Hole cards container -->
-      <div id="hole-cards-container" style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px"></div>
+      <!-- Hole progress strip -->
+      <div id="sc-progress" style="display:flex;gap:3px;margin-bottom:16px;flex-wrap:wrap"></div>
+
+      <!-- Single hole card — full width -->
+      <div id="active-hole-card"></div>
+
+      <!-- Bottom nav -->
+      <div style="display:flex;gap:10px;margin-top:16px;margin-bottom:32px">
+        <button class="btn btn-ghost" onclick="resetLog()" style="flex:1">← Back</button>
+        <button class="btn btn-green" onclick="saveRound()" style="flex:2;font-size:14px">💾 Save Round</button>
+      </div>
 
     </div>
 
     <!-- Recent rounds -->
-    <div class="sec-head"><div class="sec-title">Recent Rounds</div></div>
-    <div class="panel" style="padding:0;overflow:hidden">
-      <table class="tbl">
-        <thead><tr><th>Date</th><th>Course</th><th>Score</th><th>+/-</th><th>Holes</th><th>Conditions</th><th>Notes</th><th></th></tr></thead>
-        <tbody id="recent-rounds-tbody"></tbody>
-      </table>
+    <div id="log-recent-section">
+      <div class="sec-head" style="margin-top:8px"><div class="sec-title">Recent Rounds</div></div>
+      <div class="panel" style="padding:0;overflow:hidden">
+        <table class="tbl">
+          <thead><tr><th>Date</th><th>Course</th><th>Layout</th><th>Score</th><th>+/-</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="recent-rounds-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1098,6 +1307,8 @@ const flightState = { speed: null, glide: null, turn: null, fade: null };
 // ═══════════════════════════════════════════════════════════
 const UDISC = {"courses":[{"id":"c_lighthouse_at_como_lak","name":"Lighthouse at Como Lake","holes":18,"pars":[3,4,4,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3]},{"id":"c_black_diamond_at_emery","name":"Black Diamond at Emery Park","holes":18,"pars":[4,4,4,4,4,4,4,4,3,3,5,4,3,3,4,4,4,4]},{"id":"c_ellicott_creek_park","name":"Ellicott Creek Park","holes":18,"pars":[3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_chestnut_ridge","name":"Chestnut Ridge","holes":18,"pars":[4,4,4,4,5,5,4,3,3,4,4,4,4,4,4,4,4,4]},{"id":"c_shore_winds___white_co","name":"Shore Winds - White Course","holes":18,"pars":[3,3,3,5,4,3,4,5,3,3,3,4,4,3,4,5,5,5]},{"id":"c_hidden_heisers","name":"Hidden Heisers","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_bond_lake_disc_golf_co","name":"Bond Lake Disc Golf Course","holes":18,"pars":[3,3,3,4,3,4,3,3,3,3,3,3,3,3,3,3,3,4]},{"id":"c_pine_woods_park_dgc","name":"Pine Woods Park DGC","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_arrowhead_dgc_at_wilso","name":"Arrowhead DGC at Wilson-Tuscarora State Park","holes":18,"pars":[3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_joseph_davis_state_par","name":"Joseph Davis State Park DGC","holes":36,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_newfane_pro_am_blarney","name":"Newfane Pro-Am/Blarney Stone","holes":18,"pars":[3,3,5,3,3,4,3,3,3,3,4,5,3,3,3,3,3,4]},{"id":"c_the_greens_dgc_at_outw","name":"The Greens DGC at Outwater Memorial Park","holes":18,"pars":[3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_blue_heron_at_beaver_i","name":"Blue Heron at Beaver Island State Park","holes":18,"pars":[3,3,3,4,3,3,3,3,3,3,3,4,3,4,4,3,3,4]},{"id":"c_joseph_davis_disc_golf","name":"Joseph Davis Disc Golf Complex","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_hawk_s_landing","name":"Hawk's Landing","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_the_ravine_at_chestnut","name":"The Ravine at Chestnut Ridge","holes":18,"pars":[3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_mills_park","name":"Mills Park","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3]},{"id":"c_shore_winds___the_beas","name":"Shore Winds - The Beast","holes":18,"pars":[4,5,4,3,4,5,3,5,4,4,3,3,3,5,3,5,4,4]},{"id":"c_shore_winds___wind_rus","name":"Shore Winds - Wind Rush Alley","holes":18,"pars":[3,3,4,5,4,3,4,5,3,3,3,4,4,3,4,5,5,4]},{"id":"c_royalton_ravine","name":"Royalton Ravine","holes":18,"pars":[3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3]},{"id":"c_joseph_davis_state_par","name":"Joseph Davis State Park","holes":36,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_revive_wesleyan","name":"Revive Wesleyan","holes":9,"pars":[3,4,3,3,3,3,3,3,4]},{"id":"c_burgess_park","name":"Burgess Park","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_maple_hill","name":"Maple Hill","holes":18,"pars":[4,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,4,4]},{"id":"c_pyramids_dgc","name":"Pyramids DGC","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3]},{"id":"c_meadowbrook_orchards","name":"Meadowbrook Orchards","holes":18,"pars":[4,3,3,3,3,3,4,3,4,3,4,3,3,3,4,3,4,4]},{"id":"c_joralemon_park","name":"Joralemon Park","holes":36,"pars":[3,3,4,3,4,3,3,4,3,3,3,3,4,3,3,4,4,3,3,3,3,3,3,3,4,4,5,3,4,3,3,3,3,4,3,4]},{"id":"c_wiconisco_creek_disc_g","name":"Wiconisco Creek Disc Golf Course","holes":18,"pars":[3,3,4,3,3,3,4,3,3,3,3,4,3,3,3,3,3,3]},{"id":"c_diamond_hawk_golf_cour","name":"Diamond Hawk Golf Course","holes":18,"pars":[4,3,4,3,3,3,3,3,3,4,3,3,4,3,5,4,3,3]},{"id":"c_swover_creek_brewery","name":"Swover Creek Brewery","holes":18,"pars":[3,3,4,4,3,4,4,3,4,4,3,3,4,3,3,3,3,4]},{"id":"c_waid_park","name":"Waid Park","holes":18,"pars":[3,3,4,4,3,4,3,3,5,3,4,4,3,4,3,3,5,4]},{"id":"c_buffalo_mountain_disc_","name":"Buffalo Mountain Disc Golf","holes":18,"pars":[3,4,3,3,3,3,3,4,4,3,3,3,4,3,3,3,3,4]},{"id":"c_new_london_tech_dgc","name":"New London Tech DGC","holes":18,"pars":[3,4,3,3,4,5,5,4,5,3,4,3,4,3,4,3,4,4]},{"id":"c_lakeview_dgc_at_morain","name":"Lakeview DGC at Moraine State Park","holes":18,"pars":[3,4,3,4,3,5,3,4,3,4,3,4,3,4,4,5,3,4]},{"id":"c_parma_town_park","name":"Parma Town Park","holes":18,"pars":[3,3,3,4,4,4,4,3,4,3,3,3,5,4,4,3,4,3]},{"id":"c_501_disc_golf","name":"501 Disc Golf","holes":18,"pars":[3,4,3,3,4,3,3,3,4,3,3,4,3,3,3,3,3,4]},{"id":"c_mile_marker_63","name":"Mile Marker 63","holes":18,"pars":[4,3,4,4,4,3,4,4,3,3,3,3,3,4,3,3,3,5]},{"id":"c_faylor_lake_discgolfpa","name":"Faylor Lake DiscGolfPark","holes":18,"pars":[4,4,3,4,3,5,4,5,3,3,4,3,3,3,5,5,4,4]},{"id":"c_widener_park__baker_fa","name":"Widener Park (Baker Farm - Chili DGC)","holes":18,"pars":[3,3,3,3,3,4,3,3,3,3,5,3,3,3,3,3,3,4]},{"id":"c_shadow_pines","name":"Shadow Pines","holes":18,"pars":[4,3,3,3,4,3,3,3,3,4,5,3,3,4,3,3,3,4]},{"id":"c_the_27_at_joseph_davis","name":"The 27 at Joseph Davis State Park","holes":36,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_the_griffin","name":"The Griffin","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]},{"id":"c_hidden_trails_disc_gol","name":"Hidden Trails Disc Golf course","holes":9,"pars":[3,3,3,3,3,3,3,3,3]}],"holeStats":{"c_lighthouse_at_como_lak":{"1":{"count":88,"avg":4.193,"best":2,"worst":6,"scores":[6,4,5,4,5,4,5,5,3,5,4,5,5,3,5,5,4,3,3,3]},"2":{"count":88,"avg":3.898,"best":2,"worst":8,"scores":[6,4,3,4,6,4,5,4,2,4,3,5,3,3,3,3,4,4,3,5]},"3":{"count":88,"avg":3.773,"best":3,"worst":6,"scores":[4,4,4,4,4,3,5,4,4,3,4,5,3,4,3,4,4,4,4,4]},"4":{"count":88,"avg":3.273,"best":2,"worst":5,"scores":[3,4,4,3,2,2,3,5,3,2,5,5,4,3,2,3,3,3,2,4]},"5":{"count":88,"avg":2.705,"best":2,"worst":4,"scores":[3,2,3,3,2,3,3,2,2,2,3,3,2,3,3,2,3,3,2,2]},"6":{"count":88,"avg":2.909,"best":2,"worst":6,"scores":[3,4,3,3,3,2,3,2,2,3,3,3,2,2,3,3,2,3,2,4]},"7":{"count":88,"avg":3.761,"best":2,"worst":6,"scores":[3,3,3,4,5,3,4,3,2,3,3,5,4,4,3,4,3,4,3,3]},"8":{"count":86,"avg":3.558,"best":2,"worst":7,"scores":[3,3,3,3,3,3,3,3,4,3,4,4,3,3,3,3,3,6,3,3]},"9":{"count":86,"avg":2.872,"best":2,"worst":5,"scores":[2,3,4,2,3,4,4,3,3,2,3,3,3,2,2,2,4,4,4,3]},"10":{"count":84,"avg":4.024,"best":2,"worst":8,"scores":[4,3,3,4,5,3,3,4,3,3,4,3,4,3,4,3,3,4,3,5]},"11":{"count":83,"avg":3.313,"best":2,"worst":6,"scores":[3,3,3,3,5,4,2,3,3,2,3,3,3,3,3,3,3,4,2,3]},"12":{"count":81,"avg":3.444,"best":2,"worst":6,"scores":[3,3,3,5,3,3,4,3,3,3,3,3,5,4,3,3,3,4,4,4]},"13":{"count":81,"avg":2.889,"best":2,"worst":5,"scores":[3,3,3,3,3,2,3,2,3,3,3,3,3,2,2,3,3,3,2,2]},"14":{"count":81,"avg":2.827,"best":2,"worst":6,"scores":[3,2,3,3,3,3,3,2,4,2,2,3,4,3,3,2,2,3,2,2]},"15":{"count":83,"avg":3.434,"best":2,"worst":5,"scores":[3,5,3,3,4,3,3,4,3,3,3,3,3,4,4,3,5,3,3,3]},"16":{"count":82,"avg":3.378,"best":2,"worst":5,"scores":[4,3,4,3,2,3,4,4,3,2,3,3,3,2,3,3,4,4,2,5]},"17":{"count":82,"avg":2.927,"best":2,"worst":5,"scores":[2,2,3,3,3,2,3,4,3,4,3,3,3,3,2,2,2,3,2,3]},"18":{"count":82,"avg":3.061,"best":2,"worst":5,"scores":[4,3,3,3,2,2,2,2,2,2,2,3,3,2,2,2,2,3,3,2]},"19":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"20":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"21":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"22":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"23":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"24":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]}},"c_black_diamond_at_emery":{"1":{"count":48,"avg":5.75,"best":3,"worst":9,"scores":[4,5,5,4,6,7,7,7,7,6,5,4,6,7,7,5,3,5,4,5]},"2":{"count":48,"avg":4.083,"best":3,"worst":6,"scores":[4,3,6,4,4,4,5,4,5,5,3,5,4,6,5,4,4,5,3,3]},"3":{"count":48,"avg":3.729,"best":3,"worst":6,"scores":[3,4,4,3,3,3,4,3,4,3,4,4,3,3,4,4,3,4,4,3]},"4":{"count":48,"avg":3.792,"best":2,"worst":6,"scores":[3,4,4,3,3,3,5,3,5,3,2,4,3,3,3,3,2,3,5,3]},"5":{"count":48,"avg":4.229,"best":2,"worst":7,"scores":[5,4,3,4,3,3,5,3,5,5,3,5,5,5,4,3,4,3,4,2]},"6":{"count":48,"avg":4.312,"best":3,"worst":7,"scores":[4,5,3,4,6,4,5,4,5,5,3,5,3,3,3,5,3,4,3,4]},"7":{"count":48,"avg":4.083,"best":2,"worst":6,"scores":[3,3,2,5,4,4,5,4,5,5,5,4,6,4,3,4,4,3,4,4]},"8":{"count":48,"avg":4.646,"best":3,"worst":10,"scores":[5,5,5,5,4,3,5,3,5,5,3,7,5,3,5,6,3,5,4,3]},"9":{"count":48,"avg":2.854,"best":2,"worst":5,"scores":[2,3,2,3,2,3,3,3,3,3,3,3,3,3,2,2,3,3,2,5]},"10":{"count":45,"avg":3.511,"best":2,"worst":5,"scores":[2,3,3,3,4,3,3,4,3,4,3,2,3,4,4,2,3,3,3,3]},"11":{"count":45,"avg":5.022,"best":3,"worst":8,"scores":[3,4,4,3,6,6,4,6,3,6,6,5,5,5,6,4,4,5,4,5]},"12":{"count":45,"avg":4.8,"best":3,"worst":7,"scores":[4,6,4,4,7,5,4,6,3,6,7,4,5,5,5,4,4,4,4,4]},"13":{"count":45,"avg":3.444,"best":2,"worst":5,"scores":[3,3,4,3,3,4,2,3,3,3,5,4,4,4,3,4,4,3,2,4]},"14":{"count":44,"avg":3.568,"best":2,"worst":7,"scores":[2,3,3,2,4,4,2,4,2,4,3,3,5,3,3,3,3,3,3,2]},"15":{"count":44,"avg":3.909,"best":2,"worst":7,"scores":[4,2,2,3,4,4,3,5,3,5,7,3,3,4,3,3,2,4,6,3]},"16":{"count":44,"avg":3.727,"best":3,"worst":6,"scores":[5,4,4,3,4,3,4,4,4,4,4,3,4,3,3,4,3,3,4,3]},"17":{"count":44,"avg":4.955,"best":3,"worst":9,"scores":[5,4,5,7,4,5,4,5,4,5,4,5,7,5,7,5,6,4,4,5]},"18":{"count":45,"avg":3.933,"best":2,"worst":6,"scores":[4,3,3,5,4,5,4,5,4,5,4,3,4,4,4,4,4,3,3,3]}},"c_ellicott_creek_park":{"1":{"count":62,"avg":2.661,"best":2,"worst":4,"scores":[3,2,3,3,3,3,2,2,2,2,3,3,2,3,2,3,2,3,3,2]},"2":{"count":62,"avg":2.871,"best":2,"worst":5,"scores":[4,3,2,2,3,2,4,2,3,2,4,2,3,3,2,2,3,2,3,2]},"3":{"count":62,"avg":2.774,"best":2,"worst":4,"scores":[2,4,3,3,3,2,4,3,3,2,3,4,3,2,3,3,4,2,3,2]},"4":{"count":62,"avg":3.823,"best":2,"worst":6,"scores":[4,3,4,3,4,5,5,3,4,5,4,4,3,3,4,4,4,4,4,4]},"5":{"count":62,"avg":3.274,"best":2,"worst":5,"scores":[3,3,3,3,3,2,2,4,3,3,3,3,3,3,2,4,3,3,4,3]},"6":{"count":62,"avg":3.032,"best":2,"worst":5,"scores":[3,3,3,2,3,3,3,3,3,4,4,2,2,4,3,3,3,3,3,3]},"7":{"count":62,"avg":3.29,"best":2,"worst":6,"scores":[3,3,6,2,3,3,4,4,2,2,3,2,3,3,4,4,4,3,4,2]},"8":{"count":63,"avg":3.143,"best":2,"worst":4,"scores":[4,4,3,3,3,3,3,2,3,3,2,4,3,3,3,3,3,3,3,3]},"9":{"count":63,"avg":2.952,"best":2,"worst":5,"scores":[2,3,3,4,4,3,3,3,4,3,3,3,3,3,2,3,3,5,3,2]},"10":{"count":62,"avg":2.903,"best":2,"worst":6,"scores":[2,3,4,2,3,3,3,3,5,2,2,3,2,3,2,2,3,2,3,3]},"11":{"count":62,"avg":2.661,"best":2,"worst":4,"scores":[3,2,2,2,2,2,2,3,2,3,3,3,3,3,3,3,4,2,2,2]},"12":{"count":63,"avg":2.921,"best":2,"worst":5,"scores":[3,3,2,4,3,4,2,3,3,2,5,2,2,3,3,2,4,3,3,2]},"13":{"count":61,"avg":3.213,"best":2,"worst":7,"scores":[3,4,3,3,3,3,3,4,4,4,7,3,3,3,3,3,2,3,3,2]},"14":{"count":61,"avg":3.033,"best":2,"worst":5,"scores":[3,3,3,2,3,2,4,2,3,2,3,3,3,3,3,2,4,4,3,3]},"15":{"count":61,"avg":2.885,"best":2,"worst":5,"scores":[3,2,3,3,3,2,3,2,3,3,2,4,4,4,3,2,3,2,3,2]},"16":{"count":61,"avg":2.508,"best":1,"worst":5,"scores":[2,2,2,3,3,2,2,2,2,2,2,4,2,2,1,2,2,3,2,2]},"17":{"count":61,"avg":2.951,"best":2,"worst":5,"scores":[3,3,3,3,3,3,3,2,3,3,3,3,3,3,3,2,3,3,3,2]},"18":{"count":61,"avg":3.279,"best":2,"worst":6,"scores":[3,5,3,4,3,3,3,3,4,2,4,3,3,3,3,3,2,4,3,2]},"19":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"20":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]}},"c_chestnut_ridge":{"1":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"2":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"3":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"6":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"7":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"10":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"11":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"12":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"13":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"14":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"15":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"16":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"17":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"18":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]}},"c_shore_winds___white_co":{"1":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"2":{"count":2,"avg":3.0,"best":2,"worst":4,"scores":[2,4]},"3":{"count":2,"avg":5.0,"best":5,"worst":5,"scores":[5,5]},"4":{"count":2,"avg":4.0,"best":4,"worst":4,"scores":[4,4]},"5":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"6":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"7":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"8":{"count":2,"avg":4.0,"best":3,"worst":5,"scores":[5,3]},"9":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"10":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"11":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"12":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"13":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"14":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"15":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"16":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"17":{"count":2,"avg":5.0,"best":4,"worst":6,"scores":[4,6]},"18":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]}},"c_hidden_heisers":{"1":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"2":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"3":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"6":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"10":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"11":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"12":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"13":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"14":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"15":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"16":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"17":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"18":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]}},"c_bond_lake_disc_golf_co":{"1":{"count":49,"avg":3.429,"best":2,"worst":5,"scores":[4,3,3,5,3,4,4,5,4,3,3,4,3,4,3,3,4,3,3,3]},"2":{"count":49,"avg":3.347,"best":2,"worst":5,"scores":[3,3,3,3,2,4,3,2,4,4,4,3,3,4,4,4,4,3,3,3]},"3":{"count":49,"avg":3.571,"best":3,"worst":6,"scores":[4,4,3,3,3,3,4,5,3,3,3,4,3,4,3,4,3,3,4,5]},"4":{"count":49,"avg":4.673,"best":3,"worst":8,"scores":[4,5,5,6,4,4,8,3,4,5,4,4,4,5,4,4,3,4,5,4]},"5":{"count":49,"avg":3.041,"best":2,"worst":6,"scores":[3,3,2,3,3,3,3,2,2,2,2,3,4,3,2,3,3,3,2,6]},"6":{"count":49,"avg":4.184,"best":2,"worst":7,"scores":[4,5,3,3,5,5,3,5,3,6,4,4,3,4,3,4,5,2,4,5]},"7":{"count":49,"avg":3.327,"best":2,"worst":5,"scores":[3,4,2,5,2,3,4,3,3,4,3,4,3,4,3,4,2,3,3,2]},"8":{"count":49,"avg":2.735,"best":2,"worst":5,"scores":[2,2,2,3,2,3,3,2,3,3,3,5,2,2,2,3,3,2,2,2]},"9":{"count":49,"avg":3.898,"best":2,"worst":6,"scores":[3,3,3,5,3,2,4,3,3,3,2,5,3,4,5,4,3,4,4,4]},"10":{"count":49,"avg":3.469,"best":2,"worst":6,"scores":[3,5,4,4,4,3,5,2,5,3,3,5,2,4,4,4,3,3,2,4]},"11":{"count":49,"avg":3.041,"best":2,"worst":5,"scores":[3,3,2,4,3,4,5,2,4,4,3,4,3,3,3,4,3,4,2,2]},"12":{"count":49,"avg":3.51,"best":2,"worst":6,"scores":[2,4,4,5,3,3,4,3,3,3,3,4,3,4,3,4,3,3,2,3]},"13":{"count":49,"avg":2.98,"best":2,"worst":5,"scores":[5,3,3,4,3,3,3,3,2,2,2,3,3,3,2,3,2,2,3,4]},"14":{"count":49,"avg":3.49,"best":2,"worst":5,"scores":[4,4,4,5,3,2,4,2,2,3,4,3,3,4,3,4,3,4,3,4]},"15":{"count":49,"avg":3.51,"best":2,"worst":5,"scores":[4,4,3,5,4,3,4,3,3,4,4,4,3,4,3,4,5,2,4,4]},"16":{"count":49,"avg":2.776,"best":2,"worst":4,"scores":[3,3,3,3,2,4,3,2,3,2,3,2,2,2,3,3,3,2,2,4]},"17":{"count":49,"avg":3.98,"best":2,"worst":7,"scores":[4,4,3,4,3,3,4,4,4,3,3,3,4,4,2,4,4,3,3,5]},"18":{"count":48,"avg":4.625,"best":3,"worst":9,"scores":[4,5,4,6,4,3,7,4,3,3,3,6,4,5,4,5,4,6,4,5]},"19":{"count":2,"avg":2.5,"best":2,"worst":3,"scores":[3,2]},"20":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"21":{"count":2,"avg":3.5,"best":2,"worst":5,"scores":[2,5]},"22":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]}},"c_pine_woods_park_dgc":{"1":{"count":22,"avg":2.773,"best":2,"worst":4,"scores":[3,4,3,2,2,2,2,2,4,3,2,3,2,3,3,3,3,3,3,2]},"2":{"count":22,"avg":2.727,"best":2,"worst":4,"scores":[3,2,3,2,2,3,3,3,3,2,2,3,2,2,4,3,3,3,4,3]},"3":{"count":22,"avg":2.818,"best":1,"worst":4,"scores":[3,3,3,3,3,4,2,3,2,1,3,3,3,2,3,3,3,3,2,4]},"4":{"count":22,"avg":2.727,"best":2,"worst":4,"scores":[3,2,3,3,2,2,3,3,3,3,2,3,3,2,3,2,3,4,3,3]},"5":{"count":22,"avg":3.0,"best":2,"worst":5,"scores":[3,3,3,3,3,4,3,4,3,3,3,2,2,3,2,3,3,2,3,5]},"6":{"count":22,"avg":2.955,"best":2,"worst":4,"scores":[3,4,3,3,3,3,3,3,4,3,2,3,3,3,3,2,2,3,3,3]},"7":{"count":22,"avg":3.0,"best":2,"worst":4,"scores":[3,3,3,4,2,3,3,3,2,2,3,4,3,3,2,4,3,3,4,3]},"8":{"count":22,"avg":2.773,"best":1,"worst":4,"scores":[4,3,3,2,3,4,2,3,3,3,2,3,1,3,2,2,4,3,3,3]},"9":{"count":22,"avg":2.955,"best":2,"worst":5,"scores":[3,3,3,2,2,3,3,3,3,3,2,3,3,5,3,4,3,3,2,3]},"10":{"count":22,"avg":2.773,"best":2,"worst":4,"scores":[3,3,3,3,2,3,3,3,4,2,2,2,2,3,2,3,3,3,3,3]},"11":{"count":22,"avg":2.818,"best":2,"worst":4,"scores":[3,3,2,3,3,2,4,2,2,3,4,3,3,3,2,3,3,2,3,3]},"12":{"count":22,"avg":3.227,"best":2,"worst":4,"scores":[3,4,4,3,4,4,3,3,3,4,2,3,3,3,2,3,3,4,3,3]},"13":{"count":18,"avg":2.611,"best":2,"worst":4,"scores":[3,3,3,3,3,4,2,3,3,3,2,2,2,2,3,2,2,2]},"14":{"count":18,"avg":2.944,"best":2,"worst":4,"scores":[3,3,3,3,3,2,4,3,2,2,3,3,3,3,3,4,3,3]},"15":{"count":18,"avg":2.889,"best":2,"worst":4,"scores":[3,2,3,2,3,3,3,3,4,2,3,4,3,2,3,2,3,4]},"16":{"count":18,"avg":3.0,"best":2,"worst":4,"scores":[3,3,2,4,3,3,3,4,4,4,2,3,2,2,3,4,2,3]},"17":{"count":18,"avg":3.167,"best":2,"worst":5,"scores":[3,3,2,3,3,3,2,2,4,2,4,4,4,5,3,4,3,3]},"18":{"count":18,"avg":2.833,"best":2,"worst":4,"scores":[3,4,4,3,3,2,3,2,3,3,4,3,3,3,2,2,2,2]}},"c_arrowhead_dgc_at_wilso":{"1":{"count":3,"avg":3.667,"best":3,"worst":4,"scores":[4,3,4]},"2":{"count":3,"avg":2.667,"best":2,"worst":3,"scores":[3,3,2]},"3":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"4":{"count":3,"avg":4.0,"best":3,"worst":5,"scores":[3,4,5]},"5":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[4,3,3]},"6":{"count":3,"avg":2.667,"best":2,"worst":3,"scores":[3,2,3]},"7":{"count":3,"avg":3.0,"best":2,"worst":4,"scores":[3,4,2]},"8":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[4,3,3]},"9":{"count":3,"avg":4.667,"best":4,"worst":5,"scores":[5,4,5]},"10":{"count":3,"avg":4.333,"best":3,"worst":5,"scores":[5,5,3]},"11":{"count":3,"avg":4.667,"best":3,"worst":7,"scores":[4,7,3]},"12":{"count":3,"avg":4.333,"best":4,"worst":5,"scores":[4,4,5]},"13":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,3,4]},"14":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"15":{"count":3,"avg":2.333,"best":2,"worst":3,"scores":[2,3,2]},"16":{"count":3,"avg":3.0,"best":2,"worst":4,"scores":[2,4,3]},"17":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,4,3]},"18":{"count":3,"avg":4.0,"best":4,"worst":4,"scores":[4,4,4]}},"c_joseph_davis_state_par":{"1":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[3,3,2,2]},"2":{"count":4,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3]},"3":{"count":4,"avg":3.0,"best":2,"worst":4,"scores":[3,3,4,2]},"4":{"count":4,"avg":3.75,"best":3,"worst":4,"scores":[3,4,4,4]},"5":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[2,3,3,3]},"6":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[3,2,2,3]},"7":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[2,3,3,3]},"8":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,2,3,3]},"9":{"count":4,"avg":3.5,"best":3,"worst":4,"scores":[3,3,4,4]},"10":{"count":4,"avg":3.25,"best":3,"worst":4,"scores":[3,3,3,4]},"11":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[3,2,3,2]},"12":{"count":4,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3]},"13":{"count":4,"avg":3.25,"best":2,"worst":5,"scores":[2,3,3,5]},"14":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,3,3,2]},"15":{"count":4,"avg":3.0,"best":2,"worst":4,"scores":[2,3,4,3]},"16":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,3,2,3]},"17":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[2,3,3,3]},"18":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[3,2,2,3]},"19":{"count":4,"avg":3.0,"best":2,"worst":5,"scores":[2,2,3,5]},"20":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,2,3,3]},"21":{"count":4,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3]},"22":{"count":4,"avg":2.75,"best":2,"worst":4,"scores":[3,2,4,2]},"23":{"count":4,"avg":3.25,"best":3,"worst":4,"scores":[3,3,3,4]},"24":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[2,2,3,3]},"25":{"count":4,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3]},"26":{"count":4,"avg":3.75,"best":3,"worst":4,"scores":[3,4,4,4]},"27":{"count":4,"avg":3.25,"best":2,"worst":5,"scores":[3,2,3,5]},"28":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,3,2,3]},"29":{"count":4,"avg":3.25,"best":3,"worst":4,"scores":[3,4,3,3]},"30":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[2,3,3,3]},"31":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,3,2,3]},"32":{"count":4,"avg":3.5,"best":3,"worst":4,"scores":[3,3,4,4]},"33":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[3,2,3,2]},"34":{"count":4,"avg":3.0,"best":2,"worst":4,"scores":[2,3,4,3]},"35":{"count":4,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3]},"36":{"count":4,"avg":3.0,"best":2,"worst":4,"scores":[2,4,3,3]}},"c_newfane_pro_am_blarney":{"1":{"count":6,"avg":3.0,"best":2,"worst":4,"scores":[3,3,3,3,2,4]},"2":{"count":6,"avg":2.667,"best":2,"worst":3,"scores":[3,2,3,2,3,3]},"3":{"count":6,"avg":7.0,"best":5,"worst":8,"scores":[7,5,8,7,8,7]},"4":{"count":6,"avg":3.167,"best":3,"worst":4,"scores":[4,3,3,3,3,3]},"5":{"count":6,"avg":3.667,"best":3,"worst":4,"scores":[3,4,4,4,3,4]},"6":{"count":6,"avg":3.5,"best":3,"worst":4,"scores":[3,4,4,3,4,3]},"7":{"count":6,"avg":2.667,"best":2,"worst":3,"scores":[3,3,2,2,3,3]},"8":{"count":6,"avg":3.333,"best":3,"worst":4,"scores":[4,4,3,3,3,3]},"9":{"count":6,"avg":3.167,"best":3,"worst":4,"scores":[3,3,4,3,3,3]},"10":{"count":6,"avg":3.333,"best":3,"worst":4,"scores":[4,4,3,3,3,3]},"11":{"count":6,"avg":4.333,"best":4,"worst":6,"scores":[4,4,4,4,4,6]},"12":{"count":6,"avg":5.667,"best":5,"worst":7,"scores":[6,5,5,5,6,7]},"13":{"count":6,"avg":3.333,"best":2,"worst":4,"scores":[4,3,4,2,3,4]},"14":{"count":6,"avg":3.333,"best":2,"worst":5,"scores":[2,4,5,2,4,3]},"15":{"count":6,"avg":3.333,"best":3,"worst":4,"scores":[3,4,4,3,3,3]},"16":{"count":6,"avg":3.5,"best":3,"worst":4,"scores":[4,3,4,4,3,3]},"17":{"count":6,"avg":2.833,"best":2,"worst":4,"scores":[2,2,4,3,3,3]},"18":{"count":6,"avg":5.167,"best":4,"worst":6,"scores":[5,6,6,5,4,5]}},"c_the_greens_dgc_at_outw":{"1":{"count":21,"avg":2.619,"best":2,"worst":4,"scores":[3,2,2,3,3,3,2,4,2,2,2,4,3,2,3,2,3,3,2,2]},"2":{"count":21,"avg":3.19,"best":2,"worst":4,"scores":[3,3,3,3,4,4,3,3,3,4,4,2,4,3,3,3,4,2,3,3]},"3":{"count":21,"avg":4.095,"best":2,"worst":7,"scores":[7,4,5,3,4,4,3,4,4,4,2,5,4,4,4,5,4,4,4,5]},"4":{"count":21,"avg":2.333,"best":2,"worst":4,"scores":[3,2,3,2,3,2,2,2,2,2,3,2,2,2,2,2,3,2,2,2]},"5":{"count":21,"avg":3.0,"best":2,"worst":5,"scores":[3,3,2,3,3,3,4,3,2,3,3,3,4,2,4,5,3,3,2,2]},"6":{"count":21,"avg":4.571,"best":3,"worst":7,"scores":[5,5,5,5,4,7,4,4,5,5,4,4,5,4,5,3,4,5,3,5]},"7":{"count":21,"avg":2.667,"best":1,"worst":4,"scores":[3,3,4,3,3,4,4,1,2,3,3,2,2,2,2,2,3,3,2,2]},"8":{"count":21,"avg":2.619,"best":2,"worst":4,"scores":[2,2,3,3,3,3,2,2,3,3,2,4,3,3,3,2,2,3,2,2]},"9":{"count":21,"avg":2.952,"best":2,"worst":6,"scores":[6,2,3,5,3,4,4,3,2,2,2,3,3,3,2,3,2,3,2,2]},"10":{"count":21,"avg":3.524,"best":2,"worst":8,"scores":[3,3,4,3,3,3,4,4,3,3,4,4,8,3,2,2,3,3,3,3]},"11":{"count":21,"avg":2.952,"best":2,"worst":4,"scores":[2,3,3,2,2,3,3,3,3,2,3,4,4,3,3,3,3,3,2,4]},"12":{"count":21,"avg":3.571,"best":3,"worst":6,"scores":[6,4,5,3,3,4,3,3,3,3,3,4,3,3,3,4,3,3,4,3]},"13":{"count":21,"avg":2.857,"best":2,"worst":4,"scores":[4,2,4,2,2,3,3,3,3,2,3,3,3,3,3,3,3,2,3,3]},"14":{"count":21,"avg":2.762,"best":2,"worst":4,"scores":[3,3,3,2,2,3,4,2,2,2,2,3,2,4,3,4,3,3,3,2]},"15":{"count":21,"avg":2.905,"best":2,"worst":4,"scores":[3,3,3,4,2,3,4,2,2,2,3,3,3,3,4,4,3,2,2,2]},"16":{"count":21,"avg":3.19,"best":2,"worst":5,"scores":[2,3,4,3,4,3,3,2,2,4,4,4,3,3,2,5,3,3,3,2]},"17":{"count":21,"avg":2.857,"best":2,"worst":4,"scores":[3,3,3,3,3,3,2,3,2,3,3,4,2,3,2,3,3,3,2,3]},"18":{"count":21,"avg":2.905,"best":2,"worst":5,"scores":[3,3,4,3,3,3,3,2,3,3,2,3,3,3,3,2,2,3,2,3]}},"c_blue_heron_at_beaver_i":{"1":{"count":21,"avg":2.905,"best":2,"worst":5,"scores":[4,3,3,3,2,3,2,5,2,2,2,3,3,3,3,3,3,3,3,3]},"2":{"count":21,"avg":2.905,"best":2,"worst":4,"scores":[3,3,3,3,2,3,3,4,2,3,3,3,3,3,3,3,2,3,2,4]},"3":{"count":21,"avg":3.095,"best":2,"worst":6,"scores":[3,4,3,3,2,4,3,6,3,3,3,3,3,3,2,3,2,3,3,3]},"4":{"count":21,"avg":3.238,"best":2,"worst":5,"scores":[2,2,3,4,3,3,2,5,3,3,3,2,3,3,4,5,3,4,4,3]},"5":{"count":21,"avg":3.143,"best":2,"worst":5,"scores":[2,3,4,4,2,3,2,3,2,4,2,4,2,5,3,3,4,4,3,3]},"6":{"count":21,"avg":3.524,"best":2,"worst":5,"scores":[4,3,4,4,4,4,3,3,4,3,3,3,4,4,4,4,2,3,3,3]},"7":{"count":21,"avg":3.381,"best":2,"worst":5,"scores":[4,3,3,3,3,3,3,3,3,3,4,4,3,2,3,5,4,3,4,5]},"8":{"count":21,"avg":3.333,"best":2,"worst":5,"scores":[4,4,3,4,2,2,4,5,3,3,2,3,5,3,2,3,3,2,5,3]},"9":{"count":21,"avg":3.333,"best":3,"worst":5,"scores":[3,3,5,3,3,4,5,3,3,3,3,3,4,3,3,3,3,3,3,3]},"10":{"count":21,"avg":2.857,"best":2,"worst":4,"scores":[3,3,2,3,2,4,3,2,3,3,2,3,3,3,3,3,3,3,3,3]},"11":{"count":21,"avg":3.095,"best":2,"worst":5,"scores":[4,3,3,5,2,3,4,4,3,3,3,2,2,3,3,3,2,4,3,2]},"12":{"count":21,"avg":3.619,"best":3,"worst":5,"scores":[4,3,4,4,4,4,3,5,3,3,3,4,4,4,3,4,3,4,3,4]},"13":{"count":21,"avg":3.048,"best":2,"worst":6,"scores":[3,3,3,3,2,3,3,6,3,2,2,2,3,3,3,3,5,4,2,3]},"14":{"count":21,"avg":3.571,"best":2,"worst":6,"scores":[4,3,4,3,3,3,3,4,3,3,4,6,5,3,3,5,3,4,3,2]},"15":{"count":21,"avg":3.476,"best":3,"worst":5,"scores":[3,3,3,4,3,3,3,5,3,4,3,3,4,4,3,4,3,4,4,4]},"16":{"count":21,"avg":3.048,"best":2,"worst":4,"scores":[3,3,2,4,2,3,4,3,3,3,4,4,3,3,3,2,3,3,3,3]},"17":{"count":21,"avg":2.952,"best":2,"worst":4,"scores":[3,3,3,4,2,3,3,4,2,3,2,3,4,3,3,3,2,4,3,3]},"18":{"count":21,"avg":4.143,"best":3,"worst":6,"scores":[6,4,3,5,4,3,4,5,4,3,4,4,4,4,3,4,5,6,5,3]}},"c_joseph_davis_disc_golf":{"1":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"2":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"3":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"6":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"7":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"10":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"11":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"12":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"13":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"14":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"15":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"16":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"17":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"18":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]}},"c_hawk_s_landing":{"1":{"count":12,"avg":2.667,"best":2,"worst":3,"scores":[3,3,3,2,3,3,3,3,2,2,3,2]},"2":{"count":12,"avg":2.917,"best":2,"worst":5,"scores":[5,3,2,3,2,3,3,3,3,3,3,2]},"3":{"count":12,"avg":2.333,"best":1,"worst":4,"scores":[3,4,3,2,2,2,3,2,1,2,2,2]},"4":{"count":12,"avg":3.0,"best":2,"worst":4,"scores":[3,2,4,3,2,4,3,2,3,3,3,4]},"5":{"count":12,"avg":2.917,"best":2,"worst":4,"scores":[2,2,3,2,3,3,4,3,4,3,3,3]},"6":{"count":12,"avg":3.083,"best":2,"worst":4,"scores":[2,3,4,2,4,3,3,4,3,4,2,3]},"7":{"count":12,"avg":2.25,"best":1,"worst":3,"scores":[2,3,1,2,2,3,2,3,2,3,2,2]},"8":{"count":12,"avg":2.75,"best":2,"worst":5,"scores":[3,4,3,2,5,3,3,2,2,2,2,2]},"9":{"count":12,"avg":2.917,"best":2,"worst":4,"scores":[3,2,3,3,4,3,3,3,2,3,3,3]},"10":{"count":12,"avg":3.0,"best":2,"worst":5,"scores":[3,3,3,4,3,2,2,2,3,5,3,3]},"11":{"count":12,"avg":3.167,"best":2,"worst":4,"scores":[3,3,3,4,3,2,3,4,4,2,4,3]},"12":{"count":12,"avg":3.417,"best":3,"worst":4,"scores":[3,4,3,3,3,4,4,4,4,3,3,3]},"13":{"count":12,"avg":2.833,"best":1,"worst":4,"scores":[4,2,4,3,3,3,4,3,1,3,2,2]},"14":{"count":12,"avg":3.0,"best":2,"worst":5,"scores":[4,2,5,3,3,4,2,2,3,3,2,3]},"15":{"count":12,"avg":3.083,"best":2,"worst":4,"scores":[3,3,3,3,4,3,3,3,3,3,4,2]},"16":{"count":12,"avg":2.833,"best":2,"worst":4,"scores":[2,3,3,2,3,3,4,3,3,3,3,2]},"17":{"count":12,"avg":2.833,"best":2,"worst":4,"scores":[4,3,2,2,3,3,2,3,3,3,3,3]},"18":{"count":12,"avg":2.667,"best":2,"worst":4,"scores":[2,2,2,3,3,3,2,3,3,4,3,2]}},"c_the_ravine_at_chestnut":{"1":{"count":24,"avg":3.417,"best":2,"worst":5,"scores":[3,5,3,3,3,3,4,4,3,5,4,3,3,4,4,3,3,3,3,3]},"2":{"count":24,"avg":3.25,"best":2,"worst":4,"scores":[2,3,2,3,3,3,3,4,4,3,4,3,3,3,4,4,3,4,3,3]},"3":{"count":24,"avg":3.083,"best":2,"worst":5,"scores":[2,4,3,5,2,3,2,4,3,3,4,3,3,3,3,2,3,5,3,2]},"4":{"count":24,"avg":3.083,"best":2,"worst":4,"scores":[4,3,3,4,2,3,3,4,3,3,4,3,3,2,3,4,3,2,3,3]},"5":{"count":24,"avg":3.75,"best":3,"worst":6,"scores":[3,3,5,4,3,4,3,4,3,4,5,3,4,4,4,3,3,6,4,3]},"6":{"count":24,"avg":3.375,"best":2,"worst":5,"scores":[4,3,3,4,3,3,3,3,4,3,5,3,5,3,2,3,4,4,3,3]},"7":{"count":23,"avg":3.478,"best":2,"worst":6,"scores":[5,4,3,3,3,2,3,4,6,4,2,5,3,3,4,3,2,3,3,3]},"8":{"count":23,"avg":3.217,"best":2,"worst":6,"scores":[3,2,4,4,3,2,2,3,3,3,2,6,3,2,3,4,4,3,3,3]},"9":{"count":23,"avg":2.783,"best":2,"worst":4,"scores":[3,3,3,3,3,3,2,3,3,4,2,3,2,2,4,3,2,3,2,3]},"10":{"count":23,"avg":3.304,"best":2,"worst":6,"scores":[3,2,3,3,4,3,3,4,3,3,4,4,3,5,4,2,3,3,6,3]},"11":{"count":23,"avg":3.609,"best":2,"worst":5,"scores":[4,5,5,5,4,2,3,3,5,3,4,3,3,3,3,3,3,4,4,3]},"12":{"count":23,"avg":3.391,"best":2,"worst":5,"scores":[3,3,3,4,4,3,5,4,3,4,5,3,3,3,4,2,4,2,3,3]},"13":{"count":22,"avg":3.136,"best":2,"worst":4,"scores":[2,3,4,2,2,4,4,3,4,3,3,3,3,3,3,2,4,4,4,3]},"14":{"count":22,"avg":3.182,"best":2,"worst":5,"scores":[2,3,3,5,2,4,3,3,3,3,2,3,3,3,5,3,3,4,3,3]},"15":{"count":23,"avg":3.217,"best":2,"worst":5,"scores":[3,4,3,3,3,3,4,3,4,5,3,3,3,3,3,3,3,2,5,2]},"16":{"count":23,"avg":2.783,"best":2,"worst":4,"scores":[3,3,2,4,4,3,2,3,3,3,3,3,2,3,3,2,3,2,3,3]},"17":{"count":23,"avg":2.739,"best":2,"worst":4,"scores":[2,3,4,2,3,2,3,4,3,3,2,4,3,3,3,2,2,3,3,2]},"18":{"count":23,"avg":3.087,"best":2,"worst":4,"scores":[3,4,3,3,3,3,4,4,4,4,4,3,3,3,4,3,2,2,3,2]}},"c_mills_park":{"1":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"2":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"3":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"4":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"5":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"6":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]},"7":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]}},"c_shore_winds___the_beas":{"1":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[5,4]},"2":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"3":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"4":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"5":{"count":2,"avg":6.0,"best":5,"worst":7,"scores":[5,7]},"6":{"count":2,"avg":5.5,"best":5,"worst":6,"scores":[6,5]},"7":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"8":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"9":{"count":2,"avg":5.5,"best":5,"worst":6,"scores":[5,6]},"10":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"11":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"12":{"count":2,"avg":2.5,"best":2,"worst":3,"scores":[2,3]},"13":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"14":{"count":2,"avg":5.5,"best":4,"worst":7,"scores":[7,4]},"15":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"16":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"17":{"count":2,"avg":5.0,"best":4,"worst":6,"scores":[4,6]},"18":{"count":2,"avg":7.0,"best":6,"worst":8,"scores":[8,6]}},"c_shore_winds___wind_rus":{"1":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"2":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[4,3,3]},"3":{"count":3,"avg":5.0,"best":3,"worst":8,"scores":[3,8,4]},"4":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"5":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,4,3]},"6":{"count":3,"avg":2.667,"best":2,"worst":3,"scores":[2,3,3]},"7":{"count":3,"avg":4.0,"best":3,"worst":5,"scores":[4,3,5]},"8":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[4,3,3]},"9":{"count":3,"avg":4.0,"best":4,"worst":4,"scores":[4,4,4]},"10":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,4,3]},"11":{"count":3,"avg":2.333,"best":2,"worst":3,"scores":[2,3,2]},"12":{"count":3,"avg":2.667,"best":2,"worst":3,"scores":[3,2,3]},"13":{"count":3,"avg":3.333,"best":2,"worst":4,"scores":[4,4,2]},"14":{"count":3,"avg":2.667,"best":2,"worst":3,"scores":[3,2,3]},"15":{"count":3,"avg":5.667,"best":3,"worst":8,"scores":[8,6,3]},"16":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,3,4]},"17":{"count":3,"avg":5.0,"best":4,"worst":6,"scores":[5,6,4]},"18":{"count":3,"avg":3.333,"best":2,"worst":4,"scores":[4,2,4]}},"c_royalton_ravine":{"1":{"count":20,"avg":2.75,"best":2,"worst":4,"scores":[2,3,3,3,3,3,2,4,2,3,3,3,2,2,3,4,3,2,2,3]},"2":{"count":20,"avg":3.95,"best":2,"worst":6,"scores":[4,5,2,3,3,5,2,6,4,6,6,4,3,5,3,4,4,3,4,3]},"3":{"count":20,"avg":2.9,"best":2,"worst":4,"scores":[3,3,2,2,3,3,4,3,3,3,4,3,3,2,3,3,4,2,3,2]},"4":{"count":20,"avg":3.6,"best":3,"worst":5,"scores":[3,4,3,3,3,3,3,5,4,5,5,4,3,4,3,4,3,3,4,3]},"5":{"count":20,"avg":4.1,"best":3,"worst":6,"scores":[6,5,4,3,4,3,3,6,5,5,4,5,4,5,4,3,3,3,4,3]},"6":{"count":20,"avg":3.1,"best":2,"worst":4,"scores":[2,4,3,3,3,2,2,3,4,4,3,2,4,3,3,4,3,3,4,3]},"7":{"count":20,"avg":3.25,"best":2,"worst":5,"scores":[4,5,4,3,4,2,3,3,3,3,3,2,2,4,2,4,3,3,4,4]},"8":{"count":20,"avg":2.95,"best":2,"worst":5,"scores":[3,3,3,3,3,2,2,3,3,2,4,2,2,4,2,3,3,3,5,4]},"9":{"count":20,"avg":4.25,"best":3,"worst":6,"scores":[4,4,4,3,6,4,3,4,4,4,5,5,3,4,4,5,6,4,5,4]},"10":{"count":20,"avg":3.95,"best":3,"worst":7,"scores":[5,7,4,3,4,4,3,5,4,5,5,3,3,4,3,4,3,3,4,3]},"11":{"count":20,"avg":2.55,"best":1,"worst":4,"scores":[3,3,2,3,2,2,2,4,2,4,2,3,1,2,2,3,2,3,4,2]},"12":{"count":20,"avg":3.75,"best":2,"worst":6,"scores":[3,4,3,3,3,4,3,5,4,4,4,2,6,4,3,5,3,4,4,4]},"13":{"count":20,"avg":3.9,"best":3,"worst":5,"scores":[3,5,5,3,3,5,4,4,5,4,4,3,3,5,4,5,4,3,3,3]},"14":{"count":20,"avg":3.15,"best":2,"worst":5,"scores":[4,5,3,4,3,2,3,3,2,3,4,3,3,3,3,3,4,3,3,2]},"15":{"count":20,"avg":4.0,"best":3,"worst":6,"scores":[3,5,4,3,4,3,4,6,4,4,5,4,3,5,3,5,3,4,4,4]},"16":{"count":20,"avg":3.75,"best":2,"worst":6,"scores":[3,6,2,3,4,4,4,6,5,4,5,4,4,4,2,4,2,4,3,2]},"17":{"count":20,"avg":2.95,"best":2,"worst":4,"scores":[3,4,2,2,3,2,2,3,3,3,4,3,3,2,4,3,3,3,3,4]},"18":{"count":20,"avg":3.45,"best":2,"worst":7,"scores":[3,5,5,3,3,3,3,4,3,3,7,2,3,4,4,4,2,2,3,3]}},"c_revive_wesleyan":{"1":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,4,3]},"2":{"count":3,"avg":4.0,"best":4,"worst":4,"scores":[4,4,4]},"3":{"count":3,"avg":2.667,"best":2,"worst":3,"scores":[2,3,3]},"4":{"count":3,"avg":3.0,"best":2,"worst":4,"scores":[4,2,3]},"5":{"count":3,"avg":3.0,"best":2,"worst":4,"scores":[2,3,4]},"6":{"count":3,"avg":4.0,"best":3,"worst":5,"scores":[5,3,4]},"7":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"8":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"9":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]}},"c_burgess_park":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"3":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"4":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"5":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"6":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"9":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"10":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"11":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"12":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"13":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"14":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"15":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"16":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"17":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"18":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]}},"c_maple_hill":{"1":{"count":6,"avg":3.0,"best":2,"worst":4,"scores":[2,3,3,4,4,2]},"2":{"count":6,"avg":3.667,"best":2,"worst":5,"scores":[3,4,5,3,2,5]},"3":{"count":6,"avg":4.0,"best":3,"worst":6,"scores":[3,4,4,3,4,6]},"4":{"count":6,"avg":2.667,"best":2,"worst":3,"scores":[3,2,3,3,3,2]},"5":{"count":6,"avg":3.667,"best":3,"worst":5,"scores":[3,4,4,3,3,5]},"6":{"count":6,"avg":3.667,"best":2,"worst":5,"scores":[3,5,4,4,2,4]},"7":{"count":6,"avg":3.167,"best":3,"worst":4,"scores":[3,3,3,4,3,3]},"8":{"count":6,"avg":3.5,"best":2,"worst":4,"scores":[4,2,4,4,3,4]},"9":{"count":6,"avg":2.667,"best":2,"worst":5,"scores":[2,2,2,5,3,2]},"10":{"count":6,"avg":4.167,"best":3,"worst":6,"scores":[5,6,4,4,3,3]},"11":{"count":6,"avg":3.833,"best":3,"worst":5,"scores":[3,4,3,5,3,5]},"12":{"count":6,"avg":3.5,"best":3,"worst":4,"scores":[3,3,3,4,4,4]},"13":{"count":6,"avg":3.5,"best":3,"worst":4,"scores":[4,3,4,3,3,4]},"14":{"count":6,"avg":2.667,"best":2,"worst":4,"scores":[2,3,4,2,2,3]},"15":{"count":6,"avg":2.5,"best":2,"worst":3,"scores":[3,2,2,3,3,2]},"16":{"count":6,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3,3,3]},"17":{"count":6,"avg":4.333,"best":3,"worst":7,"scores":[4,4,4,7,3,4]},"18":{"count":6,"avg":5.0,"best":4,"worst":7,"scores":[5,5,4,7,5,4]}},"c_pyramids_dgc":{"1":{"count":4,"avg":3.25,"best":3,"worst":4,"scores":[3,3,3,4]},"2":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,3,2,3]},"3":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,3,2,3]},"4":{"count":4,"avg":3.5,"best":3,"worst":5,"scores":[5,3,3,3]},"5":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[2,3,3,2]},"6":{"count":4,"avg":2.25,"best":2,"worst":3,"scores":[2,3,2,2]},"7":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[2,3,3,3]},"8":{"count":4,"avg":3.0,"best":2,"worst":4,"scores":[3,4,2,3]},"9":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[3,3,2,2]},"10":{"count":4,"avg":2.5,"best":2,"worst":3,"scores":[3,3,2,2]},"11":{"count":4,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3]},"12":{"count":4,"avg":4.0,"best":3,"worst":5,"scores":[4,4,3,5]},"13":{"count":4,"avg":4.5,"best":4,"worst":6,"scores":[4,6,4,4]},"14":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[2,3,3,3]},"15":{"count":4,"avg":2.75,"best":2,"worst":3,"scores":[3,3,3,2]},"16":{"count":4,"avg":3.5,"best":3,"worst":4,"scores":[4,4,3,3]},"17":{"count":4,"avg":3.0,"best":2,"worst":4,"scores":[4,3,2,3]},"18":{"count":4,"avg":3.25,"best":3,"worst":4,"scores":[3,3,3,4]}},"c_meadowbrook_orchards":{"1":{"count":2,"avg":4.0,"best":4,"worst":4,"scores":[4,4]},"2":{"count":2,"avg":4.0,"best":3,"worst":5,"scores":[3,5]},"3":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"4":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"5":{"count":2,"avg":4.0,"best":4,"worst":4,"scores":[4,4]},"6":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"7":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"8":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"9":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[5,4]},"10":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"11":{"count":2,"avg":4.0,"best":4,"worst":4,"scores":[4,4]},"12":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"13":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"14":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"15":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[5,4]},"16":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"17":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"18":{"count":2,"avg":4.5,"best":3,"worst":6,"scores":[6,3]}},"c_joralemon_park":{"1":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"2":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"3":{"count":1,"avg":7.0,"best":7,"worst":7,"scores":[7]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"6":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"9":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"10":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"11":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"12":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"13":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"14":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"15":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"16":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"17":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"18":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"19":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"20":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"21":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"22":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"23":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"24":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"25":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"26":{"count":1,"avg":8.0,"best":8,"worst":8,"scores":[8]},"27":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]},"28":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"29":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"30":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"31":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"32":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"33":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"34":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"35":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"36":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]}},"c_wiconisco_creek_disc_g":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"3":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"4":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"5":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"6":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"7":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"10":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"11":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"12":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"13":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"14":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"15":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"16":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"17":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"18":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]}},"c_diamond_hawk_golf_cour":{"1":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[4,3]},"2":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"3":{"count":2,"avg":4.0,"best":4,"worst":4,"scores":[4,4]},"4":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"5":{"count":2,"avg":4.0,"best":4,"worst":4,"scores":[4,4]},"6":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"7":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"8":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"9":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"10":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"11":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"12":{"count":2,"avg":2.5,"best":2,"worst":3,"scores":[2,3]},"13":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[5,4]},"14":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"15":{"count":2,"avg":5.0,"best":5,"worst":5,"scores":[5,5]},"16":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[5,4]},"17":{"count":2,"avg":3.5,"best":2,"worst":5,"scores":[5,2]},"18":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]}},"c_swover_creek_brewery":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"3":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"6":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"7":{"count":1,"avg":7.0,"best":7,"worst":7,"scores":[7]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]},"10":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"11":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"12":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"13":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"14":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"15":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"16":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"17":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"18":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]}},"c_waid_park":{"1":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"2":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"3":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"6":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":8.0,"best":8,"worst":8,"scores":[8]},"10":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"11":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"12":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"13":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"14":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"15":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"16":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"17":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"18":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]}},"c_buffalo_mountain_disc_":{"1":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]},"2":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"3":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"4":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"5":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"6":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"7":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"8":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"9":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"10":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"11":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"12":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"13":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"14":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"15":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"16":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"17":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"18":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]}},"c_new_london_tech_dgc":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"3":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"6":{"count":1,"avg":7.0,"best":7,"worst":7,"scores":[7]},"7":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"8":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"9":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]},"10":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"11":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"12":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"13":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"14":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"15":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"16":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"17":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"18":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]}},"c_lakeview_dgc_at_morain":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":7.0,"best":7,"worst":7,"scores":[7]},"3":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"4":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"5":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"6":{"count":1,"avg":7.0,"best":7,"worst":7,"scores":[7]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"9":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"10":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]},"11":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"12":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"13":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"14":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"15":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"16":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"17":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"18":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]}},"c_parma_town_park":{"1":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"2":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"3":{"count":3,"avg":4.0,"best":3,"worst":5,"scores":[4,3,5]},"4":{"count":3,"avg":4.667,"best":4,"worst":5,"scores":[4,5,5]},"5":{"count":3,"avg":4.333,"best":4,"worst":5,"scores":[5,4,4]},"6":{"count":3,"avg":3.667,"best":3,"worst":4,"scores":[3,4,4]},"7":{"count":3,"avg":3.667,"best":3,"worst":4,"scores":[3,4,4]},"8":{"count":3,"avg":4.0,"best":4,"worst":4,"scores":[4,4,4]},"9":{"count":3,"avg":4.0,"best":3,"worst":5,"scores":[3,4,5]},"10":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"11":{"count":3,"avg":4.333,"best":4,"worst":5,"scores":[4,5,4]},"12":{"count":3,"avg":4.0,"best":3,"worst":5,"scores":[3,4,5]},"13":{"count":3,"avg":4.333,"best":4,"worst":5,"scores":[4,4,5]},"14":{"count":3,"avg":3.667,"best":3,"worst":4,"scores":[3,4,4]},"15":{"count":3,"avg":4.0,"best":3,"worst":5,"scores":[3,4,5]},"16":{"count":3,"avg":4.0,"best":3,"worst":5,"scores":[5,3,4]},"17":{"count":3,"avg":4.667,"best":4,"worst":5,"scores":[5,5,4]},"18":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,3,4]}},"c_501_disc_golf":{"1":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"2":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"3":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"6":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"7":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"8":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"9":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"10":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"11":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"12":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"13":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"14":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"15":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"16":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"17":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"18":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]}},"c_mile_marker_63":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"3":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"4":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"5":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"6":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"10":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"11":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"12":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"13":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"14":{"count":1,"avg":6.0,"best":6,"worst":6,"scores":[6]},"15":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"16":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"17":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"18":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]}},"c_faylor_lake_discgolfpa":{"1":{"count":2,"avg":5.5,"best":5,"worst":6,"scores":[5,6]},"2":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"3":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"4":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"5":{"count":2,"avg":2.5,"best":2,"worst":3,"scores":[2,3]},"6":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"7":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"8":{"count":2,"avg":5.5,"best":5,"worst":6,"scores":[6,5]},"9":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"10":{"count":2,"avg":3.5,"best":3,"worst":4,"scores":[3,4]},"11":{"count":2,"avg":4.5,"best":4,"worst":5,"scores":[4,5]},"12":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"13":{"count":2,"avg":4.0,"best":3,"worst":5,"scores":[5,3]},"14":{"count":2,"avg":3.0,"best":3,"worst":3,"scores":[3,3]},"15":{"count":2,"avg":4.0,"best":4,"worst":4,"scores":[4,4]},"16":{"count":2,"avg":5.5,"best":5,"worst":6,"scores":[5,6]},"17":{"count":2,"avg":5.5,"best":5,"worst":6,"scores":[6,5]},"18":{"count":2,"avg":4.0,"best":3,"worst":5,"scores":[3,5]}},"c_widener_park__baker_fa":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"3":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"4":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"5":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"6":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"9":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"10":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]},"11":{"count":1,"avg":7.0,"best":7,"worst":7,"scores":[7]},"12":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"13":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"14":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"15":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"16":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"17":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"18":{"count":1,"avg":5.0,"best":5,"worst":5,"scores":[5]}},"c_shadow_pines":{"1":{"count":3,"avg":3.667,"best":3,"worst":4,"scores":[3,4,4]},"2":{"count":3,"avg":2.667,"best":2,"worst":4,"scores":[2,4,2]},"3":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,3,4]},"4":{"count":3,"avg":3.667,"best":3,"worst":4,"scores":[4,4,3]},"5":{"count":3,"avg":4.667,"best":3,"worst":6,"scores":[3,5,6]},"6":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[4,3,3]},"7":{"count":3,"avg":3.0,"best":2,"worst":4,"scores":[4,3,2]},"8":{"count":3,"avg":2.667,"best":2,"worst":3,"scores":[3,2,3]},"9":{"count":3,"avg":3.333,"best":3,"worst":4,"scores":[3,4,3]},"10":{"count":3,"avg":3.667,"best":3,"worst":5,"scores":[3,5,3]},"11":{"count":3,"avg":5.0,"best":5,"worst":5,"scores":[5,5,5]},"12":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"13":{"count":3,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3]},"14":{"count":3,"avg":4.667,"best":3,"worst":6,"scores":[3,6,5]},"15":{"count":3,"avg":3.667,"best":3,"worst":5,"scores":[5,3,3]},"16":{"count":3,"avg":3.667,"best":3,"worst":4,"scores":[4,4,3]},"17":{"count":3,"avg":3.667,"best":3,"worst":5,"scores":[3,5,3]},"18":{"count":3,"avg":4.0,"best":4,"worst":4,"scores":[4,4,4]}},"c_the_27_at_joseph_davis":{"1":{"count":5,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3,3]},"2":{"count":5,"avg":2.8,"best":2,"worst":3,"scores":[3,3,3,2,3]},"3":{"count":5,"avg":2.6,"best":2,"worst":3,"scores":[2,3,3,2,3]},"4":{"count":5,"avg":3.6,"best":3,"worst":5,"scores":[3,5,3,4,3]},"5":{"count":5,"avg":2.4,"best":2,"worst":3,"scores":[2,3,2,3,2]},"6":{"count":5,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3,3]},"7":{"count":5,"avg":2.8,"best":2,"worst":4,"scores":[2,4,3,3,2]},"8":{"count":5,"avg":3.2,"best":2,"worst":4,"scores":[4,3,4,2,3]},"9":{"count":5,"avg":3.2,"best":3,"worst":4,"scores":[3,4,3,3,3]},"10":{"count":5,"avg":3.0,"best":2,"worst":4,"scores":[2,3,4,3,3]},"11":{"count":5,"avg":2.8,"best":2,"worst":3,"scores":[3,3,3,3,2]},"12":{"count":5,"avg":2.8,"best":2,"worst":4,"scores":[3,4,3,2,2]},"13":{"count":5,"avg":3.4,"best":3,"worst":5,"scores":[3,5,3,3,3]},"14":{"count":5,"avg":3.2,"best":2,"worst":4,"scores":[2,4,4,3,3]},"15":{"count":5,"avg":3.0,"best":2,"worst":4,"scores":[3,2,3,3,4]},"16":{"count":5,"avg":3.4,"best":3,"worst":4,"scores":[3,4,3,3,4]},"17":{"count":5,"avg":3.0,"best":3,"worst":3,"scores":[3,3,3,3,3]},"18":{"count":5,"avg":3.0,"best":2,"worst":4,"scores":[3,4,3,3,2]},"19":{"count":5,"avg":3.0,"best":2,"worst":4,"scores":[3,4,3,2,3]},"20":{"count":5,"avg":2.8,"best":2,"worst":3,"scores":[3,3,3,2,3]},"21":{"count":5,"avg":3.0,"best":2,"worst":5,"scores":[3,5,3,2,2]},"22":{"count":5,"avg":2.6,"best":2,"worst":3,"scores":[2,2,3,3,3]},"23":{"count":5,"avg":3.2,"best":3,"worst":4,"scores":[3,4,3,3,3]},"24":{"count":5,"avg":3.0,"best":2,"worst":4,"scores":[3,4,3,2,3]},"25":{"count":5,"avg":3.2,"best":3,"worst":4,"scores":[3,4,3,3,3]},"26":{"count":5,"avg":3.4,"best":3,"worst":4,"scores":[4,4,3,3,3]},"27":{"count":5,"avg":2.6,"best":2,"worst":4,"scores":[2,4,2,3,2]},"28":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"29":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"30":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"31":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"32":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"33":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"34":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"35":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"36":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]}},"c_the_griffin":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"3":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"4":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"5":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"6":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]}},"c_hidden_trails_disc_gol":{"1":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"2":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"3":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"4":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"5":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"6":{"count":1,"avg":4.0,"best":4,"worst":4,"scores":[4]},"7":{"count":1,"avg":3.0,"best":3,"worst":3,"scores":[3]},"8":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]},"9":{"count":1,"avg":2.0,"best":2,"worst":2,"scores":[2]}}},"rounds":[["2016-07-03","c_lighthouse_at_como_lak",18,null,0,0,4,12,2],["2016-07-04","c_lighthouse_at_como_lak",11,null,2,0,8,4,4],["2016-07-04","c_black_diamond_at_emery",11,null,0,0,8,8,2],["2016-07-09","c_lighthouse_at_como_lak",17,null,0,0,9,5,4],["2016-07-10","c_lighthouse_at_como_lak",17,null,0,0,7,6,5],["2016-07-15","c_lighthouse_at_como_lak",7,null,3,0,7,7,1],["2016-07-19","c_lighthouse_at_como_lak",8,null,4,0,7,4,3],["2016-07-20","c_lighthouse_at_como_lak",8,null,2,0,10,4,2],["2016-07-21","c_lighthouse_at_como_lak",12,null,1,0,7,8,2],["2016-07-24","c_lighthouse_at_como_lak",10,null,0,0,9,9,0],["2016-07-26","c_lighthouse_at_como_lak",5,null,1,0,14,2,1],["2016-07-27","c_ellicott_creek_park",8,null,1,0,11,4,2],["2016-07-30","c_lighthouse_at_como_lak",4,null,3,0,10,4,1],["2016-08-03","c_black_diamond_at_emery",25,null,2,0,9,3,4],["2016-08-03","c_chestnut_ridge",-7,null,7,2,9,2,0],["2016-08-04","c_lighthouse_at_como_lak",8,null,2,0,8,7,1],["2017-07-16","c_shore_winds___white_co",-4,null,6,1,10,1,1],["2017-07-28","c_shore_winds___white_co",2,null,5,2,5,7,1],["2018-05-29","c_hidden_heisers",12,null,0,0,8,8,2],["2018-07-13","c_lighthouse_at_como_lak",13,null,2,0,10,3,3],["2020-07-19","c_bond_lake_disc_golf_co",12,null,0,0,9,7,2],["2020-08-16","c_bond_lake_disc_golf_co",2,null,2,0,13,3,0],["2020-09-02","c_lighthouse_at_como_lak",7,null,2,0,8,7,1],["2020-09-27","c_ellicott_creek_park",1,null,5,0,8,5,0],["2020-10-06","c_pine_woods_park_dgc",1,null,1,0,15,2,0],["2020-10-18","c_lighthouse_at_como_lak",3,null,1,0,13,4,0],["2020-12-23","c_pine_woods_park_dgc",-2,null,3,0,14,1,0],["2021-01-07","c_pine_woods_park_dgc",0,null,2,0,14,2,0],["2021-01-13","c_arrowhead_dgc_at_wilso",7,null,2,0,9,5,2],["2021-01-20","c_joseph_davis_state_par",9,null,6,0,18,9,3],["2021-02-24","c_ellicott_creek_park",7,null,0,0,13,4,1],["2021-03-10","c_newfane_pro_am_blarney",6,null,3,0,7,7,1],["2021-03-17","c_pine_woods_park_dgc",1,null,3,0,11,4,0],["2021-03-17","c_newfane_pro_am_blarney",5,null,2,0,10,5,1],["2021-03-17","c_the_greens_dgc_at_outw",14,null,0,0,9,5,4],["2021-03-23","c_the_greens_dgc_at_outw",9,null,3,0,10,2,3],["2021-03-24","c_lighthouse_at_como_lak",7,null,2,0,11,2,3],["2021-03-30","c_blue_heron_at_beaver_i",7,null,3,0,10,3,2],["2021-04-02","c_ellicott_creek_park",-3,null,10,1,2,5,1],["2021-04-10","c_the_greens_dgc_at_outw",-2,null,5,0,10,3,0],["2021-04-14","c_ellicott_creek_park",-3,null,6,0,10,2,0],["2021-04-18","c_lighthouse_at_como_lak",7,null,4,0,6,6,2],["2021-04-25","c_bond_lake_disc_golf_co",14,null,1,0,8,5,4],["2021-04-29","c_bond_lake_disc_golf_co",4,null,3,0,10,4,1],["2021-05-01","c_ellicott_creek_park",4,null,4,0,8,5,1],["2021-05-03","c_bond_lake_disc_golf_co",-4,null,7,2,8,3,0],["2021-05-03","c_bond_lake_disc_golf_co",4,null,2,0,11,5,0],["2021-05-08","c_lighthouse_at_como_lak",6,null,4,0,8,4,2],["2021-05-12","c_blue_heron_at_beaver_i",-7,null,3,1,9,5,1],["2021-05-14","c_ellicott_creek_park",3,null,3,0,10,5,0],["2021-05-15","c_joseph_davis_disc_golf",-5,null,7,0,9,2,0],["2021-05-19","c_newfane_pro_am_blarney",12,null,1,0,8,6,3],["2021-05-26","c_ellicott_creek_park",4,null,4,0,9,4,1],["2021-05-30","c_lighthouse_at_como_lak",10,null,1,0,9,4,4],["2021-06-16","c_arrowhead_dgc_at_wilso",7,null,2,0,7,7,2],["2021-06-26","c_lighthouse_at_como_lak",-2,null,3,0,12,3,0],["2021-06-26","c_lighthouse_at_como_lak",-2,null,3,0,12,2,1],["2021-07-03","c_hawk_s_landing",0,null,5,0,9,3,1],["2021-07-05","c_pine_woods_park_dgc",0,null,1,0,16,1,0],["2021-07-07","c_ellicott_creek_park",3,null,4,0,9,4,1],["2021-07-07","c_pine_woods_park_dgc",-4,null,6,0,10,2,0],["2021-07-10","c_pine_woods_park_dgc",-6,null,8,0,8,2,0],["2021-07-13","c_lighthouse_at_como_lak",4,null,12,11,2,1,3],["2021-07-14","c_ellicott_creek_park",0,null,5,0,9,4,0],["2021-07-21","c_bond_lake_disc_golf_co",3,null,1,0,5,9,3],["2021-07-24","c_bond_lake_disc_golf_co",6,null,1,0,12,3,2],["2021-07-24","c_bond_lake_disc_golf_co",11,null,0,0,7,5,6],["2021-07-28","c_ellicott_creek_park",1,null,7,0,4,7,0],["2021-08-08","c_blue_heron_at_beaver_i",0,null,4,1,12,2,0],["2021-08-12","c_pine_woods_park_dgc",0,null,5,0,8,5,0],["2021-08-13","c_lighthouse_at_como_lak",9,null,1,0,7,8,2],["2021-08-17","c_newfane_pro_am_blarney",0,null,5,0,9,3,1],["2021-08-19","c_lighthouse_at_como_lak",11,null,0,0,7,9,2],["2021-08-21","c_lighthouse_at_como_lak",1,null,5,0,8,3,2],["2021-08-21","c_lighthouse_at_como_lak",4,null,2,0,11,3,2],["2021-08-22","c_blue_heron_at_beaver_i",2,null,5,0,10,2,1],["2021-08-23","c_ellicott_creek_park",0,null,5,0,9,4,0],["2021-08-29","c_bond_lake_disc_golf_co",-3,null,6,0,10,2,0],["2021-08-30","c_ellicott_creek_park",1,null,6,0,7,4,1],["2021-09-01","c_ellicott_creek_park",-1,null,7,0,8,1,2],["2021-09-03","c_lighthouse_at_como_lak",-5,null,3,0,14,0,1],["2021-09-05","c_lighthouse_at_como_lak",-5,null,6,0,9,3,0],["2021-09-05","c_black_diamond_at_emery",14,null,6,0,3,7,2],["2021-09-07","c_pine_woods_park_dgc",0,null,4,0,10,4,0],["2021-09-25","c_the_greens_dgc_at_outw",8,null,2,0,8,6,2],["2021-09-25","c_newfane_pro_am_blarney",4,null,1,0,14,2,1],["2021-09-30","c_ellicott_creek_park",-2,null,5,0,11,2,0],["2021-10-06","c_the_ravine_at_chestnut",7,null,2,0,9,5,2],["2021-10-07","c_pine_woods_park_dgc",-3,null,5,0,11,2,0],["2021-10-08","c_lighthouse_at_como_lak",0,null,3,0,10,4,1],["2021-10-10","c_ellicott_creek_park",0,null,5,0,9,4,0],["2021-10-13","c_blue_heron_at_beaver_i",10,null,1,0,10,6,1],["2021-10-14","c_ellicott_creek_park",-4,null,5,0,13,0,0],["2021-10-18","c_mills_park",5,null,11,9,3,2,2],["2021-10-28","c_lighthouse_at_como_lak",11,null,1,0,6,8,3],["2021-11-09","c_bond_lake_disc_golf_co",1,null,2,0,13,3,0],["2021-12-18","c_the_ravine_at_chestnut",2,null,4,0,9,5,0],["2022-02-16","c_ellicott_creek_park",5,null,2,0,11,4,1],["2022-03-02","c_pine_woods_park_dgc",0,null,5,0,8,5,0],["2022-03-09","c_ellicott_creek_park",0,null,3,0,13,2,0],["2022-03-16","c_the_greens_dgc_at_outw",0,null,4,0,11,2,1],["2022-04-04","c_lighthouse_at_como_lak",-2,null,5,0,12,1,0],["2022-04-06","c_ellicott_creek_park",-5,null,7,0,10,1,0],["2022-04-07","c_black_diamond_at_emery",19,null,0,0,6,6,6],["2022-04-10","c_black_diamond_at_emery",6,null,5,0,7,2,4],["2022-04-10","c_black_diamond_at_emery",21,null,0,0,4,5,9],["2022-04-20","c_ellicott_creek_park",-2,null,8,0,6,3,1],["2022-04-23","c_lighthouse_at_como_lak",-3,null,6,0,10,2,0],["2022-04-24","c_newfane_pro_am_blarney",9,null,1,0,10,4,3],["2022-04-27","c_blue_heron_at_beaver_i",-17,null,13,0,4,1,0],["2022-05-11","c_the_ravine_at_chestnut",-8,null,9,0,8,1,0],["2022-05-14","c_bond_lake_disc_golf_co",7,null,0,0,7,6,5],["2022-05-14","c_bond_lake_disc_golf_co",-1,null,5,0,10,3,0],["2022-05-18","c_lighthouse_at_como_lak",1,null,2,0,12,4,0],["2022-05-29","c_black_diamond_at_emery",2,null,4,0,7,6,1],["2022-05-29","c_black_diamond_at_emery",16,null,1,0,3,6,8],["2022-05-30","c_shore_winds___the_beas",7,null,4,0,7,5,2],["2022-05-30","c_shore_winds___wind_rus",-4,null,8,2,7,2,1],["2022-06-04","c_ellicott_creek_park",1,null,3,0,12,2,1],["2022-06-11","c_hawk_s_landing",-3,null,6,0,9,3,0],["2022-06-14","c_royalton_ravine",6,null,2,0,11,3,2],["2022-06-17","c_lighthouse_at_como_lak",-1,null,2,0,13,3,0],["2022-06-19","c_hawk_s_landing",0,null,4,1,10,3,1],["2022-06-24","c_the_ravine_at_chestnut",5,null,2,0,10,5,1],["2022-06-29","c_ellicott_creek_park",4,null,3,0,10,3,2],["2022-06-30","c_bond_lake_disc_golf_co",11,null,0,0,10,6,2],["2022-07-02","c_royalton_ravine",16,null,0,0,5,4,9],["2022-07-05","c_pine_woods_park_dgc",-3,null,5,1,10,3,0],["2022-07-08","c_ellicott_creek_park",-3,null,6,0,9,3,0],["2022-07-09","c_ellicott_creek_park",6,null,3,0,8,5,2],["2022-07-12","c_lighthouse_at_como_lak",4,null,0,0,12,5,1],["2022-07-15","c_bond_lake_disc_golf_co",11,null,1,0,3,8,6],["2022-07-22","c_lighthouse_at_como_lak",4,null,3,0,8,5,2],["2022-07-31","c_blue_heron_at_beaver_i",2,null,5,0,9,4,0],["2022-08-01","c_lighthouse_at_como_lak",-5,null,5,0,10,3,0],["2022-08-14","c_ellicott_creek_park",4,null,3,0,9,5,1],["2022-08-19","c_lighthouse_at_como_lak",3,null,3,0,10,3,2],["2022-08-28","c_arrowhead_dgc_at_wilso",5,null,4,0,8,3,3],["2022-09-01","c_ellicott_creek_park",-3,null,7,0,7,4,0],["2022-09-02","c_blue_heron_at_beaver_i",1,null,6,1,8,3,1],["2022-09-04","c_ellicott_creek_park",0,null,3,0,12,3,0],["2022-09-04","c_ellicott_creek_park",0,null,3,0,12,3,0],["2022-09-08","c_pine_woods_park_dgc",-8,null,10,0,6,2,0],["2022-09-09","c_the_ravine_at_chestnut",3,null,5,0,6,6,1],["2022-09-18","c_joseph_davis_state_par",-10,null,10,1,26,0,0],["2022-09-23","c_lighthouse_at_como_lak",6,null,3,0,6,8,1],["2022-10-02","c_lighthouse_at_como_lak",6,null,3,0,6,8,1],["2022-10-09","c_lighthouse_at_como_lak",-1,null,4,0,11,2,1],["2022-10-22","c_royalton_ravine",3,null,5,0,7,4,2],["2022-11-04","c_bond_lake_disc_golf_co",9,null,2,0,9,6,1],["2022-12-03","c_lighthouse_at_como_lak",-3,null,9,0,5,3,1],["2022-12-09","c_the_ravine_at_chestnut",6,null,3,0,9,3,3],["2023-01-06","c_the_ravine_at_chestnut",2,null,4,0,9,4,1],["2023-01-06","c_the_ravine_at_chestnut",10,null,0,0,9,8,1],["2023-02-17","c_the_greens_dgc_at_outw",-1,null,4,0,11,3,0],["2023-02-17","c_the_greens_dgc_at_outw",7,null,1,0,11,5,1],["2023-03-16","c_ellicott_creek_park",-2,null,11,6,4,3,0],["2023-03-31","c_bond_lake_disc_golf_co",13,null,0,0,6,6,6],["2023-04-02","c_ellicott_creek_park",-3,null,13,9,4,1,0],["2023-04-05","c_ellicott_creek_park",-6,null,7,0,10,1,0],["2023-04-07","c_lighthouse_at_como_lak",-2,null,7,0,8,2,1],["2023-04-12","c_hawk_s_landing",-6,null,8,0,8,2,0],["2023-04-14","c_lighthouse_at_como_lak",-4,null,13,8,5,0,0],["2023-04-14","c_lighthouse_at_como_lak",-1,null,8,0,5,3,2],["2023-04-19","c_the_ravine_at_chestnut",-23,null,7,0,10,1,0],["2023-04-23","c_blue_heron_at_beaver_i",11,null,1,0,6,7,4],["2023-04-26","c_blue_heron_at_beaver_i",-12,null,8,0,9,1,0],["2023-04-28","c_revive_wesleyan",0,null,3,0,4,1,1],["2023-04-30","c_ellicott_creek_park",2,null,3,0,11,3,1],["2023-05-03","c_ellicott_creek_park",-6,null,8,0,8,2,0],["2023-05-06","c_bond_lake_disc_golf_co",7,null,2,0,11,2,3],["2023-05-06","c_bond_lake_disc_golf_co",8,null,1,0,6,4,7],["2023-05-07","c_joseph_davis_state_par",-11,null,11,0,21,4,0],["2023-05-10","c_lighthouse_at_como_lak",3,null,2,0,11,4,1],["2023-05-19","c_black_diamond_at_emery",3,null,4,1,7,5,2],["2023-05-21","c_bond_lake_disc_golf_co",4,null,3,0,8,7,0],["2023-05-24","c_lighthouse_at_como_lak",-1,null,5,0,8,5,0],["2023-05-25","c_lighthouse_at_como_lak",1,null,3,0,10,5,0],["2023-05-26","c_revive_wesleyan",1,null,1,0,6,2,0],["2023-05-28","c_black_diamond_at_emery",3,null,4,0,9,2,3],["2023-05-29","c_shore_winds___wind_rus",-3,null,7,5,6,3,2],["2023-05-29","c_shore_winds___the_beas",12,null,1,0,9,4,4],["2023-06-04","c_blue_heron_at_beaver_i",-3,null,6,0,11,1,0],["2023-06-09","c_ellicott_creek_park",2,null,5,0,7,5,1],["2023-06-11","c_lighthouse_at_como_lak",-1,null,6,0,7,4,1],["2023-06-13","c_burgess_park",7,null,2,0,9,5,2],["2023-06-15","c_maple_hill",1,null,4,1,10,3,1],["2023-06-15","c_maple_hill",5,null,6,0,5,5,2],["2023-06-16","c_pyramids_dgc",1,null,4,0,10,3,1],["2023-06-16","c_pyramids_dgc",5,null,0,0,14,3,1],["2023-06-23","c_blue_heron_at_beaver_i",-3,null,9,0,7,2,0],["2023-06-25","c_blue_heron_at_beaver_i",-4,null,4,1,10,3,1],["2023-06-25","c_blue_heron_at_beaver_i",-1,null,3,0,10,4,1],["2023-06-28","c_black_diamond_at_emery",1,null,5,0,9,3,1],["2023-07-02","c_pine_woods_park_dgc",-2,null,5,0,11,1,1],["2023-07-05","c_lighthouse_at_como_lak",-3,null,8,0,4,5,1],["2023-07-07","c_ellicott_creek_park",1,null,4,0,10,3,1],["2023-07-09","c_ellicott_creek_park",-3,null,6,0,10,1,1],["2023-07-09","c_pine_woods_park_dgc",-7,null,6,1,12,0,0],["2023-07-10","c_the_ravine_at_chestnut",1,null,3,0,12,2,1],["2023-07-16","c_hawk_s_landing",1,null,4,0,10,3,1],["2023-07-19","c_black_diamond_at_emery",7,null,4,0,6,3,5],["2023-07-23","c_black_diamond_at_emery",15,null,1,0,6,6,5],["2023-07-24","c_black_diamond_at_emery",10,null,3,0,8,2,5],["2023-07-24","c_black_diamond_at_emery",3,null,9,1,5,3,1],["2023-07-30","c_ellicott_creek_park",-1,null,6,0,7,5,0],["2023-08-02","c_bond_lake_disc_golf_co",2,null,1,0,14,3,0],["2023-08-06","c_royalton_ravine",-2,null,3,0,14,1,0],["2023-08-09","c_lighthouse_at_como_lak",2,null,12,11,2,3,1],["2023-08-11","c_pine_woods_park_dgc",-1,null,6,0,8,3,1],["2023-08-20","c_lighthouse_at_como_lak",5,null,3,0,6,8,1],["2023-08-24","c_lighthouse_at_como_lak",-1,null,3,0,12,2,1],["2023-08-27","c_black_diamond_at_emery",5,null,9,0,5,2,2],["2023-09-01","c_revive_wesleyan",2,null,3,3,4,2,0],["2023-09-01","c_the_ravine_at_chestnut",6,null,2,0,9,7,0],["2023-09-03","c_ellicott_creek_park",3,null,3,0,9,6,0],["2023-09-05","c_bond_lake_disc_golf_co",8,null,2,0,3,7,6],["2023-09-08","c_ellicott_creek_park",-3,null,11,7,6,1,0],["2023-09-08","c_pine_woods_park_dgc",-8,null,9,0,8,1,0],["2023-09-10","c_royalton_ravine",6,null,1,0,11,5,1],["2023-09-15","c_blue_heron_at_beaver_i",3,null,3,0,13,1,1],["2023-09-20","c_lighthouse_at_como_lak",-1,null,5,0,6,7,0],["2023-09-22","c_bond_lake_disc_golf_co",6,null,4,0,6,7,1],["2023-09-24","c_the_greens_dgc_at_outw",2,null,4,0,8,6,0],["2023-09-26","c_ellicott_creek_park",1,null,3,0,11,4,0],["2023-09-27","c_lighthouse_at_como_lak",-2,null,4,0,11,2,1],["2023-10-04","c_bond_lake_disc_golf_co",-1,null,4,0,12,1,1],["2023-10-07","c_bond_lake_disc_golf_co",6,null,0,0,6,8,4],["2023-10-07","c_bond_lake_disc_golf_co",0,null,4,0,12,1,1],["2023-10-12","c_ellicott_creek_park",0,null,3,0,12,3,0],["2023-10-19","c_lighthouse_at_como_lak",0,205,3,0,12,1,2],["2023-10-20","c_ellicott_creek_park",4,168,3,0,10,4,1],["2023-10-26","c_lighthouse_at_como_lak",4,185,3,0,8,6,1],["2023-11-05","c_ellicott_creek_park",-2,201,4,0,12,2,0],["2023-11-12","c_joseph_davis_state_par",-2,192,6,0,23,7,0],["2023-11-26","c_blue_heron_at_beaver_i",-1,223,6,0,11,1,0],["2023-12-10","c_ellicott_creek_park",1,188,5,0,9,3,1],["2024-01-02","c_the_ravine_at_chestnut",11,156,0,0,10,6,2],["2024-02-19","c_pine_woods_park_dgc",-2,167,5,0,10,3,0],["2024-03-03","c_the_greens_dgc_at_outw",-5,225,7,1,8,3,0],["2024-03-04","c_lighthouse_at_como_lak",-1,217,6,0,8,4,0],["2024-03-08","c_ellicott_creek_park",2,181,3,0,13,1,1],["2024-03-14","c_the_ravine_at_chestnut",7,181,2,0,9,6,1],["2024-03-17","c_bond_lake_disc_golf_co",6,181,2,0,9,6,1],["2024-03-27","c_the_ravine_at_chestnut",3,198,4,0,9,3,2],["2024-03-30","c_black_diamond_at_emery",-8,231,9,0,8,1,0],["2024-04-09","c_the_ravine_at_chestnut",-3,144,0,0,8,7,3],["2024-04-10","c_blue_heron_at_beaver_i",-1,168,1,0,13,3,1],["2024-04-17","c_the_ravine_at_chestnut",-20,227,3,0,15,0,0],["2024-04-17","c_the_ravine_at_chestnut",-13,196,4,2,12,0,2],["2024-04-20","c_black_diamond_at_emery",5,170,4,0,6,7,1],["2024-04-24","c_lighthouse_at_como_lak",-1,210,5,1,9,3,1],["2024-04-27","c_ellicott_creek_park",-5,223,8,0,8,2,0],["2024-05-01","c_bond_lake_disc_golf_co",9,169,2,0,9,5,2],["2024-05-04","c_black_diamond_at_emery",-8,230,10,0,6,2,0],["2024-05-04","c_black_diamond_at_emery",10,150,3,0,6,6,3],["2024-05-11","c_hawk_s_landing",0,null,3,0,12,3,0],["2024-05-14","c_ellicott_creek_park",2,181,1,0,15,2,0],["2024-05-21","c_black_diamond_at_emery",0,190,6,0,7,2,3],["2024-05-26","c_lighthouse_at_como_lak",0,201,3,0,12,1,2],["2024-05-26","c_black_diamond_at_emery",1,184,4,0,8,6,0],["2024-05-26","c_black_diamond_at_emery",5,197,3,0,6,6,3],["2024-05-27","c_black_diamond_at_emery",4,161,10,9,3,5,0],["2024-06-06","c_lighthouse_at_como_lak",3,190,2,0,11,3,2],["2024-06-08","c_royalton_ravine",1,null,6,0,7,3,2],["2024-06-12","c_meadowbrook_orchards",7,178,1,0,10,6,1],["2024-06-12","c_pyramids_dgc",-7,242,7,0,11,0,0],["2024-06-12","c_maple_hill",5,200,4,0,6,7,1],["2024-06-13","c_joralemon_park",16,187,5,0,16,12,3],["2024-06-13","c_maple_hill",11,196,1,0,9,4,4],["2024-06-19","c_ellicott_creek_park",-6,224,7,0,10,1,0],["2024-06-25","c_bond_lake_disc_golf_co",-3,229,7,0,10,0,1],["2024-06-28","c_lighthouse_at_como_lak",0,192,9,8,6,3,0],["2024-06-28","c_lighthouse_at_como_lak",-8,null,12,1,3,2,1],["2024-07-02","c_royalton_ravine",-3,null,7,0,7,4,0],["2024-07-02","c_bond_lake_disc_golf_co",5,184,2,0,10,5,1],["2024-07-06","c_royalton_ravine",13,null,0,0,7,4,7],["2024-07-06","c_shore_winds___wind_rus",-10,202,9,3,7,2,0],["2024-07-09","c_bond_lake_disc_golf_co",-1,224,1,0,7,9,1],["2024-07-14","c_bond_lake_disc_golf_co",0,213,5,0,9,4,0],["2024-07-14","c_bond_lake_disc_golf_co",8,184,1,0,5,4,8],["2024-07-15","c_royalton_ravine",0,null,3,0,6,6,3],["2024-07-20","c_the_greens_dgc_at_outw",-7,236,9,0,7,2,0],["2024-07-25","c_blue_heron_at_beaver_i",-4,214,9,0,5,3,1],["2024-07-30","c_black_diamond_at_emery",11,176,1,0,4,9,4],["2024-08-02","c_the_greens_dgc_at_outw",-3,212,7,0,7,4,0],["2024-08-07","c_bond_lake_disc_golf_co",-1,216,4,0,11,3,0],["2024-08-10","c_blue_heron_at_beaver_i",2,172,1,0,12,4,1],["2024-08-14","c_black_diamond_at_emery",7,171,3,0,7,5,3],["2024-08-18","c_joseph_davis_state_par",5,172,7,0,20,6,3],["2024-08-27","c_lighthouse_at_como_lak",-1,211,5,0,8,4,1],["2024-08-30","c_royalton_ravine",5,null,1,0,7,6,4],["2024-09-01","c_the_ravine_at_chestnut",7,176,1,0,10,6,1],["2024-09-03","c_the_greens_dgc_at_outw",-3,205,6,0,9,3,0],["2024-09-03","c_ellicott_creek_park",2,174,4,0,8,6,0],["2024-09-06","c_the_greens_dgc_at_outw",6,162,3,0,7,7,1],["2024-09-07","c_royalton_ravine",13,null,1,0,3,8,6],["2024-09-10","c_lighthouse_at_como_lak",-3,218,4,0,11,2,1],["2024-09-13","c_wiconisco_creek_disc_g",0,208,5,0,9,3,1],["2024-09-14","c_bond_lake_disc_golf_co",2,198,3,0,10,5,0],["2024-09-19","c_lighthouse_at_como_lak",1,203,2,0,12,2,2],["2024-09-28","c_bond_lake_disc_golf_co",8,186,1,0,5,8,4],["2024-10-01","c_bond_lake_disc_golf_co",-2,219,8,0,6,2,2],["2024-10-10","c_royalton_ravine",2,null,5,0,7,5,1],["2024-10-15","c_black_diamond_at_emery",-2,219,7,2,7,2,2],["2024-10-16","c_lighthouse_at_como_lak",0,202,3,0,8,7,0],["2024-10-20","c_lighthouse_at_como_lak",-1,212,3,0,13,1,1],["2024-10-22","c_ellicott_creek_park",-6,215,9,0,6,3,0],["2024-10-26","c_diamond_hawk_golf_cour",3,169,2,0,12,3,1],["2024-10-26","c_diamond_hawk_golf_cour",2,174,2,0,12,4,0],["2024-10-27","c_royalton_ravine",0,null,5,1,9,3,1],["2024-10-30","c_black_diamond_at_emery",3,194,5,1,7,3,3],["2024-11-09","c_blue_heron_at_beaver_i",0,183,4,0,11,2,1],["2024-11-12","c_ellicott_creek_park",1,178,4,0,10,3,1],["2024-11-16","c_ellicott_creek_park",-5,208,8,0,7,3,0],["2024-11-17","c_pine_woods_park_dgc",0,159,1,0,10,1,0],["2024-11-19","c_bond_lake_disc_golf_co",2,202,5,0,8,4,1],["2024-11-25","c_black_diamond_at_emery",-4,228,9,0,5,3,1],["2024-12-03","c_the_greens_dgc_at_outw",6,162,4,0,8,5,1],["2024-12-10","c_ellicott_creek_park",-1,193,9,6,7,2,0],["2024-12-18","c_bond_lake_disc_golf_co",4,188,4,0,8,5,1],["2025-01-03","c_lighthouse_at_como_lak",6,173,2,0,11,1,4],["2025-01-03","c_lighthouse_at_como_lak",-2,214,2,0,13,3,0],["2025-02-12","c_pine_woods_park_dgc",0,161,2,0,8,2,0],["2025-02-12","c_pine_woods_park_dgc",0,161,2,0,8,2,0],["2025-03-04","c_ellicott_creek_park",4,165,5,0,8,3,2],["2025-03-07","c_swover_creek_brewery",7,178,2,0,11,2,3],["2025-03-08","c_waid_park",9,185,0,0,11,6,1],["2025-03-08","c_buffalo_mountain_disc_",14,null,0,0,7,9,2],["2025-03-09","c_new_london_tech_dgc",9,218,0,0,10,7,1],["2025-03-10","c_lakeview_dgc_at_morain",12,172,0,0,10,5,3],["2025-03-18","c_lighthouse_at_como_lak",-2,217,4,0,11,2,1],["2025-03-18","c_the_ravine_at_chestnut",2,185,10,9,5,3,0],["2025-03-19","c_ellicott_creek_park",1,169,12,11,4,2,0],["2025-03-28","c_lighthouse_at_como_lak",2,195,6,3,7,4,1],["2025-03-29","c_black_diamond_at_emery",2,174,11,9,4,3,0],["2025-04-02","c_lighthouse_at_como_lak",5,171,6,3,7,2,3],["2025-04-05","c_lighthouse_at_como_lak",-7,222,8,0,7,3,0],["2025-04-09","c_the_greens_dgc_at_outw",-2,201,4,0,12,2,0],["2025-04-13","c_the_greens_dgc_at_outw",-4,200,6,0,8,4,0],["2025-04-14","c_lighthouse_at_como_lak",8,167,1,0,8,8,1],["2025-04-17","c_black_diamond_at_emery",-1,196,5,2,8,4,1],["2025-04-20","c_bond_lake_disc_golf_co",-1,213,4,0,11,3,0],["2025-04-23","c_parma_town_park",3,193,6,0,6,5,1],["2025-04-26","c_hawk_s_landing",-1,180,5,0,9,4,0],["2025-04-29","c_lighthouse_at_como_lak",-1,213,7,3,9,0,2],["2025-05-02","c_lighthouse_at_como_lak",-15,237,9,1,7,2,0],["2025-05-07","c_black_diamond_at_emery",2,220,3,0,8,6,1],["2025-05-07","c_ellicott_creek_park",-5,209,6,0,11,1,0],["2025-05-10","c_bond_lake_disc_golf_co",2,null,1,0,7,6,4],["2025-05-19","c_lighthouse_at_como_lak",-5,225,6,0,11,0,1],["2025-05-22","c_black_diamond_at_emery",4,160,8,4,4,4,2],["2025-05-24","c_black_diamond_at_emery",-6,225,8,0,9,0,1],["2025-05-24","c_black_diamond_at_emery",12,165,0,0,4,12,2],["2025-05-25","c_black_diamond_at_emery",-6,235,8,1,9,0,1],["2025-05-25","c_black_diamond_at_emery",12,157,0,0,4,12,2],["2025-05-27","c_royalton_ravine",2,218,4,0,3,7,4],["2025-06-13","c_maple_hill",-2,226,4,0,12,2,0],["2025-06-13","c_pyramids_dgc",-1,204,5,0,10,2,1],["2025-06-13","c_maple_hill",5,192,4,1,7,3,4],["2025-06-14","c_501_disc_golf",7,199,2,0,8,7,1],["2025-06-14","c_mile_marker_63",-3,182,6,0,10,1,1],["2025-06-14","c_meadowbrook_orchards",3,198,2,0,12,3,1],["2025-06-16","c_ellicott_creek_park",-1,188,3,0,13,2,0],["2025-06-17","c_royalton_ravine",0,204,4,0,10,4,0],["2025-06-21","c_bond_lake_disc_golf_co",-1,221,4,0,12,2,0],["2025-06-22","c_lighthouse_at_como_lak",0,208,2,0,13,2,1],["2025-06-27","c_blue_heron_at_beaver_i",-2,194,4,1,12,1,1],["2025-06-28","c_faylor_lake_discgolfpa",3,191,6,0,8,2,2],["2025-06-29","c_faylor_lake_discgolfpa",7,199,2,0,8,7,1],["2025-07-03","c_lighthouse_at_como_lak",7,176,0,0,10,4,4],["2025-07-05","c_widener_park__baker_fa",9,177,0,0,11,5,2],["2025-07-05","c_shadow_pines",0,190,5,0,8,4,1],["2025-07-15","c_lighthouse_at_como_lak",-4,233,8,0,5,4,1],["2025-07-22","c_bond_lake_disc_golf_co",-1,237,2,0,4,12,0],["2025-07-29","c_hawk_s_landing",-2,209,5,0,10,3,0],["2025-07-29","c_hawk_s_landing",-5,175,6,2,9,3,0],["2025-08-05","c_lighthouse_at_como_lak",-5,236,6,0,10,2,0],["2025-08-07","c_black_diamond_at_emery",7,186,2,0,6,6,4],["2025-08-09","c_royalton_ravine",6,197,0,0,6,9,3],["2025-08-09","c_bond_lake_disc_golf_co",0,217,5,0,10,2,1],["2025-08-09","c_bond_lake_disc_golf_co",0,233,0,0,7,11,0],["2025-08-09","c_black_diamond_at_emery",-8,248,9,1,5,4,0],["2025-08-10","c_black_diamond_at_emery",5,205,1,0,9,5,3],["2025-08-16","c_ellicott_creek_park",-6,218,6,1,11,1,0],["2025-08-20","c_parma_town_park",5,229,1,0,12,4,1],["2025-08-20","c_shadow_pines",9,167,1,0,9,6,2],["2025-08-23","c_parma_town_park",11,186,0,0,9,7,2],["2025-08-24","c_black_diamond_at_emery",4,188,4,0,6,6,2],["2025-08-24","c_shadow_pines",1,213,3,0,12,2,1],["2025-08-28","c_the_greens_dgc_at_outw",2,177,7,0,5,3,3],["2025-08-30","c_lighthouse_at_como_lak",-7,250,8,0,9,0,1],["2025-09-03","c_royalton_ravine",3,187,3,0,10,4,1],["2025-09-06","c_the_27_at_joseph_davis",-10,208,11,0,23,2,0],["2025-09-08","c_the_ravine_at_chestnut",-6,243,9,0,6,3,0],["2025-09-16","c_the_ravine_at_chestnut",0,208,3,0,12,3,0],["2025-09-16","c_the_ravine_at_chestnut",3,190,6,0,5,5,2],["2025-09-18","c_lighthouse_at_como_lak",-2,216,7,0,7,2,2],["2025-09-20","c_bond_lake_disc_golf_co",4,188,3,0,10,4,1],["2025-09-27","c_bond_lake_disc_golf_co",1,195,5,1,9,3,1],["2025-09-30","c_hawk_s_landing",0,172,4,0,11,2,1],["2025-09-30","c_hawk_s_landing",-4,167,6,0,10,2,0],["2025-10-10","c_black_diamond_at_emery",5,183,6,0,5,4,3],["2025-10-16","c_the_griffin",-2,192,12,10,6,0,0],["2025-10-25","c_ellicott_creek_park",-5,211,7,0,9,2,0],["2025-10-28","c_black_diamond_at_emery",-1,215,7,0,6,4,1],["2025-10-29","c_lighthouse_at_como_lak",0,192,10,9,6,2,0],["2025-11-04","c_black_diamond_at_emery",-1,214,6,1,7,3,2],["2025-11-15","c_ellicott_creek_park",1,176,4,0,9,5,0],["2025-11-18","c_the_ravine_at_chestnut",7,165,0,0,14,2,2],["2025-11-22","c_bond_lake_disc_golf_co",-2,223,6,0,8,4,0],["2025-12-13","c_the_27_at_joseph_davis",14,127,11,10,10,12,3],["2025-12-26","c_black_diamond_at_emery",0,180,7,1,11,0,0],["2025-12-26","c_black_diamond_at_emery",2,175,12,9,3,3,0],["2026-01-01","c_the_27_at_joseph_davis",0,182,3,0,21,3,0],["2026-02-16","c_ellicott_creek_park",-1,185,5,0,10,2,1],["2026-02-16","c_ellicott_creek_park",0,181,2,0,14,2,0],["2026-02-22","c_the_greens_dgc_at_outw",-1,193,3,0,13,2,0],["2026-02-28","c_pine_woods_park_dgc",2,137,1,0,9,1,1],["2026-03-07","c_the_greens_dgc_at_outw",-2,198,4,0,12,2,0],["2026-03-08","c_lighthouse_at_como_lak",7,163,0,0,12,5,1],["2026-03-15","c_royalton_ravine",0,206,3,0,12,3,0],["2026-03-15","c_royalton_ravine",11,146,1,0,6,10,1],["2026-03-21","c_the_27_at_joseph_davis",-7,176,9,0,17,1,0],["2026-03-28","c_hidden_trails_disc_gol",-2,168,4,0,3,2,0],["2026-03-29","c_bond_lake_disc_golf_co",12,148,3,0,4,8,3],["2026-04-01","c_the_greens_dgc_at_outw",-9,245,11,0,5,2,0],["2026-04-03","c_lighthouse_at_como_lak",-11,243,10,0,6,2,0],["2026-04-08","c_hawk_s_landing",-8,247,9,0,8,1,0],["2026-04-08","c_the_greens_dgc_at_outw",-5,219,9,0,6,2,1],["2026-04-11","c_royalton_ravine",1,198,4,0,9,5,0],["2026-04-15","c_the_ravine_at_chestnut",-5,245,8,3,10,0,0],["2026-04-19","c_the_27_at_joseph_davis",-6,204,7,0,19,1,0],["2026-04-21","c_black_diamond_at_emery",-3,215,6,0,10,1,1],["2026-04-22","c_ellicott_creek_park",-12,257,12,0,6,0,0],["2026-04-26","c_lighthouse_at_como_lak",3,189,4,0,8,5,1],["2026-04-27","c_black_diamond_at_emery",-5,227,9,1,5,3,1]],"roundKeys":["date","courseId","plusMinus","rating","birdies","eagles","pars","bogeys","doubles"]};
 
+
+const UDISC_LAYOUTS = [{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_white_tees","layoutName":"White Tees","holes":18,"pars":[3,4,3,3,3,3,4,3,3,4,3,3,3,3,3,3,3,3],"rounds":61},{"courseId":"c_ellicott_creek_park","courseName":"Ellicott Creek Park","layoutId":"l_ellicott_creek__white_tees","layoutName":"White Tees","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":60},{"courseId":"c_black_diamond_at_emery","courseName":"Black Diamond at Emery Park","layoutId":"l_black_diamond_a_white_tees","layoutName":"White Tees","holes":18,"pars":[5,4,4,4,5,4,4,4,3,3,4,5,3,3,4,4,4,4],"rounds":34},{"courseId":"c_bond_lake_disc_golf_co","courseName":"Bond Lake Disc Golf Course","layoutId":"l_bond_lake_disc__short_tees","layoutName":"Short Tees","holes":18,"pars":[3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,4],"rounds":32},{"courseId":"c_the_ravine_at_chestnut","courseName":"The Ravine at Chestnut Ridge","layoutId":"l_the_ravine_at_c_white_tees","layoutName":"White Tees","holes":18,"pars":[4,4,4,4,5,5,4,3,3,4,4,4,4,4,4,4,4,4],"rounds":24},{"courseId":"c_the_greens_dgc_at_outw","courseName":"The Greens DGC at Outwater Memorial Park","layoutId":"l_the_greens_dgc__main","layoutName":"Main","holes":18,"pars":[3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":20},{"courseId":"c_pine_woods_park_dgc","courseName":"Pine Woods Park DGC","layoutId":"l_pine_woods_park_main_tees","layoutName":"Main Tees","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":15},{"courseId":"c_blue_heron_at_beaver_i","courseName":"Blue Heron at Beaver Island State Park","layoutId":"l_blue_heron_at_b_white_tees","layoutName":"White Tees","holes":18,"pars":[3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,4],"rounds":15},{"courseId":"c_bond_lake_disc_golf_co","courseName":"Bond Lake Disc Golf Course","layoutId":"l_bond_lake_disc__long_tees","layoutName":"Long Tees","holes":18,"pars":[3,4,4,5,3,4,4,3,4,4,3,4,3,4,4,3,4,5],"rounds":14},{"courseId":"c_black_diamond_at_emery","courseName":"Black Diamond at Emery Park","layoutId":"l_black_diamond_a_gold_tees","layoutName":"Gold Tees","holes":18,"pars":[5,4,4,4,4,4,4,4,3,3,4,5,4,4,4,4,5,4],"rounds":13},{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_main","layoutName":"Main","holes":18,"pars":[3,3,3,3,3,3,4,3,3,4,3,3,3,3,3,3,3,3],"rounds":13},{"courseId":"c_royalton_ravine","courseName":"Royalton Ravine","layoutId":"l_royalton_ravine_short_tees","layoutName":"Short Tees","holes":18,"pars":[3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3],"rounds":13},{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_blue_tees","layoutName":"Blue Tees","holes":18,"pars":[4,4,4,3,3,3,4,3,3,4,3,3,3,3,3,3,3,3],"rounds":7},{"courseId":"c_royalton_ravine","courseName":"Royalton Ravine","layoutId":"l_royalton_ravine_long_tees","layoutName":"Long Tees","holes":18,"pars":[3,4,3,4,4,3,3,3,4,4,3,4,4,3,4,4,3,4],"rounds":7},{"courseId":"c_hawk_s_landing","courseName":"Hawk's Landing","layoutId":"l_hawk_s_landing_white_tees","layoutName":"White Tees","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":7},{"courseId":"c_newfane_pro_am_blarney","courseName":"Newfane Pro-Am/Blarney Stone","layoutId":"l_newfane_pro_am__main","layoutName":"Main","holes":18,"pars":[3,3,5,3,3,4,3,3,3,3,4,5,3,3,3,3,3,4],"rounds":6},{"courseId":"c_pine_woods_park_dgc","courseName":"Pine Woods Park DGC","layoutId":"l_pine_woods_park_12_hole_la","layoutName":"12 Hole Layout","holes":12,"pars":[3,3,3,3,3,3,3,3,3,3,3,3],"rounds":4},{"courseId":"c_blue_heron_at_beaver_i","courseName":"Blue Heron at Beaver Island State Park","layoutId":"l_blue_heron_at_b_temp_layou","layoutName":"Temp Layout","holes":18,"pars":[3,3,3,4,3,3,3,3,3,3,3,5,3,5,5,3,4,5],"rounds":4},{"courseId":"c_maple_hill","courseName":"Maple Hill","layoutId":"l_maple_hill_maple_hill","layoutName":"Maple Hill Blues","holes":18,"pars":[3,3,3,3,3,4,3,3,3,4,3,3,3,3,3,3,3,4],"rounds":4},{"courseId":"c_pyramids_dgc","courseName":"Pyramids DGC","layoutId":"l_pyramids_dgc_new_white_","layoutName":"New White (2022)","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3],"rounds":4},{"courseId":"c_joseph_davis_state_par","courseName":"Joseph Davis State Park","layoutId":"l_joseph_davis_st_full_cours","layoutName":"Full Course","holes":36,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":4},{"courseId":"c_hawk_s_landing","courseName":"Hawk's Landing","layoutId":"l_hawk_s_landing_blue_tees","layoutName":"Blue Tees","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":3},{"courseId":"c_shore_winds___wind_rus","courseName":"Shore Winds - Wind Rush Alley","layoutId":"l_shore_winds___w_white_tees","layoutName":"White Tees","holes":18,"pars":[3,3,4,5,4,3,4,5,3,3,3,4,4,3,4,5,5,4],"rounds":3},{"courseId":"c_revive_wesleyan","courseName":"Revive Wesleyan","layoutId":"l_revive_wesleyan_white_tees","layoutName":"White Tees","holes":9,"pars":[3,4,3,3,3,3,3,3,4],"rounds":3},{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_red_tees","layoutName":"Red Tees","holes":18,"pars":[4,4,4,3,3,3,4,3,3,4,3,3,3,3,3,3,3,3],"rounds":2},{"courseId":"c_ellicott_creek_park","courseName":"Ellicott Creek Park","layoutId":"l_ellicott_creek__main","layoutName":"Main","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":2},{"courseId":"c_the_27_at_joseph_davis","courseName":"The 27 at Joseph Davis State Park","layoutId":"l_the_27_at_josep_the_27_whi","layoutName":"The 27 White Tees","holes":27,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":2},{"courseId":"c_the_27_at_joseph_davis","courseName":"The 27 at Joseph Davis State Park","layoutId":"l_the_27_at_josep_36_holes__","layoutName":"36 holes- both courses","holes":36,"pars":[3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":2},{"courseId":"c_hawk_s_landing","courseName":"Hawk's Landing","layoutId":"l_hawk_s_landing_red_tees","layoutName":"Red Tees","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":2},{"courseId":"c_pine_woods_park_dgc","courseName":"Pine Woods Park DGC","layoutId":"l_pine_woods_park_new_18","layoutName":"New 18","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":2},{"courseId":"c_shadow_pines","courseName":"Shadow Pines","layoutId":"l_shadow_pines_blue__adva","layoutName":"Blue (Advanced) Layout","holes":18,"pars":[4,3,3,3,4,3,3,3,3,4,5,3,3,4,3,3,3,4],"rounds":2},{"courseId":"c_meadowbrook_orchards","courseName":"Meadowbrook Orchards","layoutId":"l_meadowbrook_orc_meadowbroo","layoutName":"Meadowbrook Blue Layout","holes":18,"pars":[4,3,3,3,3,3,4,3,4,3,4,3,3,3,4,3,4,4],"rounds":2},{"courseId":"c_diamond_hawk_golf_cour","courseName":"Diamond Hawk Golf Course","layoutId":"l_diamond_hawk_go_white_tees","layoutName":"White Tees","holes":18,"pars":[4,3,4,3,3,3,3,3,3,4,3,3,4,3,5,4,3,3],"rounds":2},{"courseId":"c_shore_winds___the_beas","courseName":"Shore Winds - The Beast","layoutId":"l_shore_winds___t_white_tees","layoutName":"White Tees","holes":18,"pars":[4,5,4,3,4,5,3,5,4,4,3,3,3,5,3,5,4,4],"rounds":2},{"courseId":"c_arrowhead_dgc_at_wilso","courseName":"Arrowhead DGC at Wilson-Tuscarora State Park","layoutId":"l_arrowhead_dgc_a_blue_tee","layoutName":"Blue Tee","holes":18,"pars":[3,3,3,4,5,3,3,4,3,3,4,3,3,3,3,3,3,3],"rounds":2},{"courseId":"c_shore_winds___white_co","courseName":"Shore Winds - White Course","layoutId":"l_shore_winds___w_main","layoutName":"Main","holes":18,"pars":[3,3,3,5,4,3,4,5,3,3,3,4,4,3,4,5,5,5],"rounds":2},{"courseId":"c_black_diamond_at_emery","courseName":"Black Diamond at Emery Park","layoutId":"l_black_diamond_a_red_tees","layoutName":"Red Tees","holes":18,"pars":[4,4,4,3,4,3,3,3,3,3,4,4,3,3,3,3,4,3],"rounds":1},{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_spartan_su","layoutName":"Spartan Sunday Funday 2026","holes":18,"pars":[3,4,4,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_spartan_su","layoutName":"Spartan Sunday Funday 2025","holes":18,"pars":[4,4,4,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_como_glitc","layoutName":"Como Glitch World Championship 2025","holes":24,"pars":[4,4,4,3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,4,3,3,3,3],"rounds":1},{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_2024_glitc","layoutName":"2024 Glitch World Championship","holes":18,"pars":[3,3,4,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_lighthouse_at_como_lak","courseName":"Lighthouse at Como Lake","layoutId":"l_lighthouse_at_c_original_c","layoutName":"Original Course Pars","holes":18,"pars":[3,3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_ellicott_creek_park","courseName":"Ellicott Creek Park","layoutId":"l_ellicott_creek__clash_at_t","layoutName":"Clash at the Creek","holes":20,"pars":[3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_ellicott_creek_park","courseName":"Ellicott Creek Park","layoutId":"l_ellicott_creek__clash_at_t","layoutName":"Clash at the Creek IV","holes":20,"pars":[3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_the_27_at_joseph_davis","courseName":"The 27 at Joseph Davis State Park","layoutId":"l_the_27_at_josep_the_27_red","layoutName":"The 27 Red Tees","holes":27,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_the_ravine_at_chestnut","courseName":"The Ravine at Chestnut Ridge","layoutId":"l_the_ravine_at_c_main","layoutName":"Main","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_the_greens_dgc_at_outw","courseName":"The Greens DGC at Outwater Memorial Park","layoutId":"l_the_greens_dgc__league","layoutName":"League","holes":18,"pars":[3,3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_bond_lake_disc_golf_co","courseName":"Bond Lake Disc Golf Course","layoutId":"l_bond_lake_disc__wny_point_","layoutName":"WNY Point Series Finals 2025","holes":22,"pars":[3,3,3,4,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3],"rounds":1},{"courseId":"c_bond_lake_disc_golf_co","courseName":"Bond Lake Disc Golf Course","layoutId":"l_bond_lake_disc__squalla_la","layoutName":"Squalla layout","holes":18,"pars":[3,3,3,4,3,4,3,3,3,3,3,3,3,3,3,3,3,4],"rounds":1},{"courseId":"c_bond_lake_disc_golf_co","courseName":"Bond Lake Disc Golf Course","layoutId":"l_bond_lake_disc__bonds_lake","layoutName":"Bonds Lake AM Champs White","holes":21,"pars":[3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3],"rounds":1},{"courseId":"c_hidden_trails_disc_gol","courseName":"Hidden Trails Disc Golf course","layoutId":"l_hidden_trails_d_white","layoutName":"White","holes":9,"pars":[3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_pine_woods_park_dgc","courseName":"Pine Woods Park DGC","layoutId":"l_pine_woods_park_18_hole","layoutName":"18 Hole","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_the_griffin","courseName":"The Griffin","layoutId":"l_the_griffin_the_griffi","layoutName":"The Griffin Open","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_shadow_pines","courseName":"Shadow Pines","layoutId":"l_shadow_pines_white__int","layoutName":"White (Intermediate) Layout","holes":18,"pars":[4,3,4,3,4,3,3,3,3,4,4,3,3,4,3,3,3,5],"rounds":1},{"courseId":"c_parma_town_park","courseName":"Parma Town Park","layoutId":"l_parma_town_park_blue_tee_p","layoutName":"Blue tee pad to White Veteran (Long) Basket","holes":18,"pars":[3,3,3,4,4,4,4,3,4,3,3,3,5,4,4,3,4,3],"rounds":1},{"courseId":"c_parma_town_park","courseName":"Parma Town Park","layoutId":"l_parma_town_park_afdo_25___","layoutName":"AFDO 25 - MPO & MA1","holes":18,"pars":[3,3,3,4,4,4,4,3,4,3,3,3,5,4,4,3,4,3],"rounds":1},{"courseId":"c_parma_town_park","courseName":"Parma Town Park","layoutId":"l_parma_town_park_white_tee_","layoutName":"White tee pad to White Veteran (long) Basket","holes":18,"pars":[3,3,3,4,4,4,3,3,3,3,3,3,4,4,4,4,4,3],"rounds":1},{"courseId":"c_widener_park__baker_fa","courseName":"Widener Park (Baker Farm - Chili DGC)","layoutId":"l_widener_park__b_main","layoutName":"Main","holes":18,"pars":[3,3,3,3,3,4,3,3,3,3,5,3,3,3,3,3,3,4],"rounds":1},{"courseId":"c_faylor_lake_discgolfpa","courseName":"Faylor Lake DiscGolfPark","layoutId":"l_faylor_lake_dis_standard_g","layoutName":"Standard Gold Layout","holes":18,"pars":[4,4,3,4,3,5,4,5,3,3,4,3,3,3,5,5,4,4],"rounds":1},{"courseId":"c_faylor_lake_discgolfpa","courseName":"Faylor Lake DiscGolfPark","layoutId":"l_faylor_lake_dis_standard_w","layoutName":"Standard White Layout","holes":18,"pars":[4,4,3,4,3,5,3,5,3,3,4,3,3,3,4,4,4,4],"rounds":1},{"courseId":"c_blue_heron_at_beaver_i","courseName":"Blue Heron at Beaver Island State Park","layoutId":"l_blue_heron_at_b_blue_tees","layoutName":"Blue Tees","holes":18,"pars":[3,4,4,3,3,4,4,3,3,3,3,4,3,5,3,3,4,4],"rounds":1},{"courseId":"c_blue_heron_at_beaver_i","courseName":"Blue Heron at Beaver Island State Park","layoutId":"l_blue_heron_at_b_main","layoutName":"Main","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3,4],"rounds":1},{"courseId":"c_501_disc_golf","courseName":"501 Disc Golf","layoutId":"l_501_disc_golf_blue_baske","layoutName":"Blue Baskets","holes":18,"pars":[3,4,3,3,4,3,3,3,4,3,3,4,3,3,3,3,3,4],"rounds":1},{"courseId":"c_mile_marker_63","courseName":"Mile Marker 63","layoutId":"l_mile_marker_63_short","layoutName":"Short","holes":18,"pars":[4,3,4,4,4,3,4,4,3,3,3,3,3,4,3,3,3,5],"rounds":1},{"courseId":"c_maple_hill","courseName":"Maple Hill","layoutId":"l_maple_hill_maple_hill","layoutName":"Maple Hill Whites","holes":18,"pars":[4,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,4,4],"rounds":1},{"courseId":"c_maple_hill","courseName":"Maple Hill","layoutId":"l_maple_hill_maple_hill","layoutName":"Maple Hill Golds","holes":18,"pars":[4,3,3,3,3,3,3,3,4,3,4,4,3,3,3,3,4,4],"rounds":1},{"courseId":"c_lakeview_dgc_at_morain","courseName":"Lakeview DGC at Moraine State Park","layoutId":"l_lakeview_dgc_at_gold_tees","layoutName":"Gold Tees","holes":18,"pars":[3,4,3,4,3,5,3,4,3,4,3,4,3,4,4,5,3,4],"rounds":1},{"courseId":"c_new_london_tech_dgc","courseName":"New London Tech DGC","layoutId":"l_new_london_tech_main","layoutName":"Main","holes":18,"pars":[3,4,3,3,4,5,5,4,5,3,4,3,4,3,4,3,4,4],"rounds":1},{"courseId":"c_waid_park","courseName":"Waid Park","layoutId":"l_waid_park_short_shor","layoutName":"Short-Short","holes":18,"pars":[3,3,4,4,3,4,3,3,5,3,4,4,3,4,3,3,5,4],"rounds":1},{"courseId":"c_buffalo_mountain_disc_","courseName":"Buffalo Mountain Disc Golf","layoutId":"l_buffalo_mountai_gold","layoutName":"Gold","holes":18,"pars":[3,4,3,3,3,3,3,4,4,3,3,3,4,3,3,3,3,4],"rounds":1},{"courseId":"c_swover_creek_brewery","courseName":"Swover Creek Brewery","layoutId":"l_swover_creek_br_swover_cre","layoutName":"Swover Creek Main Course","holes":18,"pars":[3,3,4,4,3,4,4,3,4,4,3,3,4,3,3,3,3,4],"rounds":1},{"courseId":"c_wiconisco_creek_disc_g","courseName":"Wiconisco Creek Disc Golf Course","layoutId":"l_wiconisco_creek_gold_tees","layoutName":"Gold Tees","holes":18,"pars":[3,3,4,3,3,3,4,3,3,3,3,4,3,3,3,3,3,3],"rounds":1},{"courseId":"c_joralemon_park","courseName":"Joralemon Park","layoutId":"l_joralemon_park_j36","layoutName":"J36","holes":36,"pars":[3,3,4,3,4,3,3,4,3,3,3,3,4,3,3,4,4,3,3,3,3,3,3,3,4,4,5,3,4,3,3,3,3,4,3,4],"rounds":1},{"courseId":"c_burgess_park","courseName":"Burgess Park","layoutId":"l_burgess_park_blue_b_pos","layoutName":"Blue B Position","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_arrowhead_dgc_at_wilso","courseName":"Arrowhead DGC at Wilson-Tuscarora State Park","layoutId":"l_arrowhead_dgc_a_white_tees","layoutName":"White Tees","holes":18,"pars":[3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_mills_park","courseName":"Mills Park","layoutId":"l_mills_park_18_hole_bl","layoutName":"18 hole Blue and Gold","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3],"rounds":1},{"courseId":"c_joseph_davis_disc_golf","courseName":"Joseph Davis Disc Golf Complex","layoutId":"l_joseph_davis_di_green_cour","layoutName":"Green Course","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_joseph_davis_state_par","courseName":"Joseph Davis State Park DGC","layoutId":"l_joseph_davis_st_full_cours","layoutName":"Full Course","holes":36,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_hidden_heisers","courseName":"Hidden Heisers","layoutId":"l_hidden_heisers_custom","layoutName":"Custom","holes":18,"pars":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"rounds":1},{"courseId":"c_black_diamond_at_emery","courseName":"Black Diamond at Emery Park","layoutId":"l_black_diamond_a_round_2_fr","layoutName":"Round 2 Front White BDD 2025","holes":13,"pars":[4,4,3,4,4,4,3,4,3,3,3,3,3],"rounds":0},{"courseId":"c_black_diamond_at_emery","courseName":"Black Diamond at Emery Park","layoutId":"l_black_diamond_a_round_1_wh","layoutName":"Round 1 White BDD 2025","holes":27,"pars":[4,4,3,4,4,4,3,4,3,3,3,3,3,3,4,3,4,3,4,3,3,3,3,4,3,4,4],"rounds":0},{"courseId":"c_black_diamond_at_emery","courseName":"Black Diamond at Emery Park","layoutId":"l_black_diamond_a_round_2_fr","layoutName":"Round 2 Front White BDD 2024","holes":13,"pars":[4,4,3,4,4,4,3,3,3,3,3,4,3],"rounds":0},{"courseId":"c_black_diamond_at_emery","courseName":"Black Diamond at Emery Park","layoutId":"l_black_diamond_a_round_1_wh","layoutName":"Round 1 White BDD 2024","holes":27,"pars":[4,4,3,4,4,4,3,3,3,3,3,4,3,3,4,3,4,3,3,3,3,3,3,3,4,4,4],"rounds":0}];
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
@@ -1549,75 +1760,146 @@ function renderDashboard(){
 }
 
 // ═══════════════════════════════════════════════════════════
-// LOG ROUND — SCORECARD STYLE
+
 // ═══════════════════════════════════════════════════════════
-let activeCourse = null; // { id, name, holes, pars, distances }
+// RECOMMENDATION ENGINE
+// ═══════════════════════════════════════════════════════════
+function getHoleRecommendation(courseId, holeNum, layoutId){
+  const teeThrows = S.throws.filter(t =>
+    t.courseId === courseId && t.hole === holeNum && t.throwIndex === 0 &&
+    (!layoutId || !t.layoutId || t.layoutId === layoutId)
+  );
+  const allHoleThrows = S.throws.filter(t =>
+    t.courseId === courseId && t.hole === holeNum &&
+    (!layoutId || !t.layoutId || t.layoutId === layoutId)
+  );
+  const roundCount = [...new Set(allHoleThrows.map(t=>t.date))].length;
+  if(roundCount < 3) return null;
+
+  const combos = {};
+  teeThrows.forEach(t=>{
+    const disc = S.discs.find(d=>d.id===t.disc);
+    if(!disc||!t.throwType) return;
+    const key = `${disc.name}|${t.throwType}`;
+    if(!combos[key]) combos[key]={disc:disc.name,throwType:t.throwType,scores:[],landings:[]};
+    combos[key].scores.push(t.score);
+    if(t.landing) combos[key].landings.push(t.landing);
+  });
+
+  const comboList = Object.values(combos).filter(c=>c.scores.length>=2);
+  if(!comboList.length) return null;
+
+  comboList.forEach(c=>{
+    c.avgScore = c.scores.reduce((a,b)=>a+b,0)/c.scores.length;
+    const good=['Fairway','Circle 1','Circle 2','Basket'];
+    c.goodLandingPct = c.landings.length ? Math.round(c.landings.filter(l=>good.includes(l)).length/c.landings.length*100) : null;
+    c.obPct = c.landings.length ? Math.round(c.landings.filter(l=>l==='OB').length/c.landings.length*100) : 0;
+    c.rating = c.avgScore-(c.goodLandingPct||0)*0.02;
+  });
+
+  const best = comboList.sort((a,b)=>a.rating-b.rating)[0];
+  const worst = comboList[comboList.length-1];
+  const confidence = Math.min(3,Math.floor(best.scores.length/2));
+
+  return {
+    disc:best.disc, throwType:best.throwType, avgScore:best.avgScore.toFixed(2),
+    goodLandingPct:best.goodLandingPct, obPct:best.obPct,
+    throws:best.scores.length, roundCount, confidence,
+    vsDisc:worst!==best?worst.disc:null, vsAvg:worst!==best?worst.avgScore.toFixed(2):null
+  };
+}
+
+function recBadgeHTML(rec, compact=false){
+  if(!rec) return '';
+  const confDots = [1,2,3].map(i=>`<span class="${i<=rec.confidence?'on':''}"></span>`).join('');
+  const throwIcon = rec.throwType==='Backhand'?'🤚':rec.throwType==='Forehand'?'✋':rec.throwType==='Roller'?'🔄':'🪃';
+  if(compact){
+    return `<div class="rec-mini">🎯 <strong style="color:var(--yellow)">${rec.disc} ${rec.throwType}</strong> · avg ${rec.avgScore}${rec.goodLandingPct!==null?` · ${rec.goodLandingPct}% good landing`:''}</div>`;
+  }
+  return `<div class="rec-badge" style="margin-bottom:12px">
+    <div class="rec-badge-icon">🎯</div>
+    <div class="rec-badge-content">
+      <div class="rec-badge-title">Caddie Rec <span class="rec-confidence">${confDots}</span></div>
+      <div class="rec-badge-text">Throw <span class="rec-pill">${throwIcon} ${rec.throwType}</span> with <strong>${rec.disc}</strong>${rec.goodLandingPct!==null?` — ${rec.goodLandingPct}% good landing`:''}</div>
+      <div class="rec-badge-stat">Avg ${rec.avgScore} over ${rec.throws} throws · ${rec.roundCount} rounds${rec.vsDisc?` · vs ${rec.vsAvg} w/ ${rec.vsDisc}`:''}</div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOG ROUND — LAYOUT AWARE
+// ═══════════════════════════════════════════════════════════
+let activeCourse = null;  // { id, name }
+let activeLayout = null;  // { id, name, holes, pars, distances }
+let holeData = [];        // per-hole state
 let courseSearchTimer = null;
+
+// Layout storage key
+function getLayoutsKey(){ return 'cai_layouts'; }
+function getAllLayouts(){
+  try{ return JSON.parse(localStorage.getItem(getLayoutsKey())||'[]'); }catch(e){ return []; }
+}
+function saveLayouts(lyts){ localStorage.setItem(getLayoutsKey(), JSON.stringify(lyts)); }
+
+function getLayoutsForCourse(courseId){
+  // From UDisc embedded data
+  const embedded = (UDISC_LAYOUTS||[]).filter(l => l.courseId === courseId);
+  // From user-defined layouts
+  const custom = getAllLayouts().filter(l => l.courseId === courseId);
+  // Merge, prefer embedded
+  const seen = new Set(embedded.map(l=>l.layoutId));
+  return [...embedded, ...custom.filter(l=>!seen.has(l.layoutId))];
+}
 
 function renderLog(){
   document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
-  // Populate default disc select
-  const dd = document.getElementById('sc-default-disc');
-  if(dd) dd.innerHTML = '<option value="">— varies per hole —</option>' +
-    S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  resetLog();
   renderRecentRounds();
 }
 
 function resetLog(){
-  activeCourse = null;
+  activeCourse = null; activeLayout = null; holeData = [];
   document.getElementById('log-step2').style.display = 'none';
   document.getElementById('log-step1').style.display = 'block';
+  document.getElementById('log-recent-section').style.display = 'block';
   document.getElementById('log-course-search').value = '';
   document.getElementById('selected-course-banner').style.display = 'none';
   document.getElementById('course-suggestions').style.display = 'none';
+  document.getElementById('log-layout-wrap').style.display = 'none';
+  document.getElementById('new-layout-form').style.display = 'none';
 }
 
 // ── COURSE SEARCH ──
 function scheduleCourseSearch(val){
   clearTimeout(courseSearchTimer);
-  const spinner = document.getElementById('course-lookup-spinner');
-  const status = document.getElementById('course-lookup-status');
-  status.style.display = 'none';
   document.getElementById('course-suggestions').style.display = 'none';
+  document.getElementById('selected-course-banner').style.display = 'none';
+  document.getElementById('log-layout-wrap').style.display = 'none';
   if(val.trim().length < 2) return;
 
-  // Search known courses first
   const q = val.toLowerCase();
-  const known = S.courses.filter(c => c.name.toLowerCase().includes(q));
-  if(known.length){
-    showCourseSuggestions(known.map(c=>({...c, known:true})));
-    return;
-  }
+  const known = S.courses.filter(c => c.name.toLowerCase().includes(q)).slice(0,8);
+  if(known.length){ showCourseSuggestions(known.map(c=>({...c,known:true}))); return; }
 
-  // AI lookup for unknown courses
-  spinner.style.display = 'block';
-  courseSearchTimer = setTimeout(() => lookupCourse(val.trim()), 900);
+  document.getElementById('course-lookup-spinner').style.display = 'block';
+  courseSearchTimer = setTimeout(()=>lookupCourse(val.trim()), 900);
 }
 
 function showCourseSuggestions(courses){
   const el = document.getElementById('course-suggestions');
-  const status = document.getElementById('course-lookup-status');
   document.getElementById('course-lookup-spinner').style.display = 'none';
-
-  if(!courses.length){
-    status.textContent = 'No match found';
-    status.style.cssText = 'display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(244,63,94,.1);color:var(--rose);border:1px solid rgba(244,63,94,.3)';
-    el.style.display = 'none';
-    return;
-  }
-
+  if(!courses.length){ el.style.display='none'; return; }
   el.style.display = 'block';
   el.innerHTML = courses.map((c,i) => {
-    const parSum = c.pars ? c.pars.reduce((a,b)=>a+b,0) : '?';
-    const src = c.known ? '📍 Your courses' : '🤖 AI lookup';
-    const cls = c.known ? 'known' : 'ai-result';
-    return `<div class="course-suggestion ${cls}" onclick="selectLogCourse(${i})" data-course='${JSON.stringify(c).replace(/'/g,"&#39;")}'>
+    const layouts = getLayoutsForCourse(c.id);
+    const lytCount = layouts.length;
+    return `<div class="course-suggestion ${c.known?'known':'ai-result'}" onclick="selectLogCourse(${i})" data-course='${JSON.stringify({id:c.id,name:c.name,holes:c.holes,pars:c.pars}).replace(/'/g,"&#39;")}'>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
         <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">${c.name}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.holes} holes · Par ${parSum} · ${src}</div>
+          <div style="font-size:13px;font-weight:600">${c.name}</div>
+          <div style="font-size:11px;color:var(--muted)">${c.holes||18} holes · ${lytCount} layout${lytCount!==1?'s':''} known ${c.known?'· ✓ Your courses':''}</div>
         </div>
-        ${c.known ? '<span style="font-size:10px;color:var(--grass)">✓ Known</span>' : '<span style="font-size:10px;color:var(--sky)">AI</span>'}
+        <span style="font-size:10px;color:${c.known?'var(--pine-light)':'var(--blue)'}">→</span>
       </div>
     </div>`;
   }).join('');
@@ -1631,173 +1913,484 @@ function selectLogCourse(idx){
   document.getElementById('log-course-search').value = c.name;
   activeCourse = c;
 
-  // Add to S.courses if new
-  if(!S.courses.find(x=>x.id===c.id)){
-    S.courses.push(c);
-    save();
-  }
+  if(!S.courses.find(x=>x.id===c.id)) S.courses.push(c);
 
-  // Show banner
+  // Populate layout dropdown
+  populateLayoutSelect(c.id);
+}
+
+function populateLayoutSelect(courseId){
+  const wrap = document.getElementById('log-layout-wrap');
+  const sel = document.getElementById('log-layout');
+  const layouts = getLayoutsForCourse(courseId);
+
+  sel.innerHTML = '<option value="">— Select layout —</option>' +
+    layouts.map(l => `<option value="${l.layoutId}">${l.layoutName} (${l.holes}h · Par ${(l.pars||[]).reduce((a,b)=>a+b,0)||'?'})</option>`).join('') +
+    '<option value="__new__">+ Add new layout...</option>';
+
+  wrap.style.display = 'block';
+  document.getElementById('selected-course-banner').style.display = 'none';
+}
+
+function onLayoutChange(){
+  const val = document.getElementById('log-layout').value;
+  document.getElementById('new-layout-form').style.display = 'none';
+
+  if(val === '__new__'){
+    document.getElementById('new-layout-form').style.display = 'block';
+    document.getElementById('selected-course-banner').style.display = 'none';
+    return;
+  }
+  if(!val){ document.getElementById('selected-course-banner').style.display='none'; return; }
+
+  // Find selected layout
+  const layouts = getLayoutsForCourse(activeCourse.id);
+  const layout = layouts.find(l=>l.layoutId===val);
+  if(!layout) return;
+
+  activeLayout = layout;
+  showCourseBanner();
+}
+
+function showCourseBanner(){
+  if(!activeCourse||!activeLayout) return;
   const banner = document.getElementById('selected-course-banner');
-  const parSum = c.pars ? c.pars.reduce((a,b)=>a+b,0) : '?';
-  document.getElementById('scb-name').textContent = c.name;
-  document.getElementById('scb-meta').textContent = `${c.holes} holes · Par ${parSum}`;
-  banner.style.display = 'flex';
+  banner.style.display = 'block';
+  document.getElementById('scb-name').textContent = activeCourse.name;
+  document.getElementById('scb-meta').textContent =
+    `${activeLayout.layoutName} · ${activeLayout.holes} holes · Par ${(activeLayout.pars||[]).reduce((a,b)=>a+b,0)}`;
+
+  // Show par chips
+  const pars = document.getElementById('scb-pars');
+  pars.innerHTML = (activeLayout.pars||[]).map((p,i) => {
+    const dist = activeLayout.distances?.[i];
+    return `<div style="text-align:center">
+      <div class="par-chip p${p}">H${i+1} P${p}</div>
+      ${dist?`<div class="dist-badge">${dist}ft</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function saveNewLayout(){
+  const name = document.getElementById('nl-name').value.trim();
+  const holes = parseInt(document.getElementById('nl-holes').value)||18;
+  const parsRaw = document.getElementById('nl-pars').value;
+  const distRaw = document.getElementById('nl-distances').value;
+
+  if(!name){ toast('⚠️ Enter layout name'); return; }
+
+  let pars = parsRaw.split(',').map(p=>parseInt(p.trim())).filter(p=>!isNaN(p));
+  if(pars.length < holes) while(pars.length<holes) pars.push(3);
+  pars = pars.slice(0,holes);
+
+  let distances = distRaw ? distRaw.split(',').map(d=>parseInt(d.trim())).filter(d=>!isNaN(d)) : [];
+
+  const lid = 'l_custom_'+Date.now();
+  const layout = {
+    courseId: activeCourse.id, courseName: activeCourse.name,
+    layoutId: lid, layoutName: name,
+    holes, pars, distances, custom: true
+  };
+
+  const all = getAllLayouts();
+  all.push(layout);
+  saveLayouts(all);
+
+  document.getElementById('new-layout-form').style.display = 'none';
+  populateLayoutSelect(activeCourse.id);
+  document.getElementById('log-layout').value = lid;
+  activeLayout = layout;
+  showCourseBanner();
+  toast('✅ Layout saved!');
 }
 
 async function lookupCourse(name){
   const spinner = document.getElementById('course-lookup-spinner');
-  const status = document.getElementById('course-lookup-status');
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 800,
-        messages:[{role:'user', content:`You are a disc golf course database. Find disc golf courses matching "${name}".
-
-Return up to 3 matching real disc golf courses with their hole-by-hole par information.
-
-Respond ONLY with this exact JSON, no markdown:
-{"courses":[{"id":"c_unique_id","name":"Full Course Name","holes":18,"pars":[3,4,3,3,3,4,3,3,3,3,3,3,4,3,3,3,3,3],"city":"City","state":"ST"}]}
-
-Rules:
-- Only real disc golf courses you are confident about
-- pars array must have exactly 'holes' number of elements
-- Each par must be 3, 4, or 5
-- id should be c_ followed by lowercase course name with underscores
-- If no match return: {"courses":[]}`
-        }]
-      })
-    });
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:`Find disc golf courses matching "${name}". Return JSON only:
+{"courses":[{"id":"c_unique","name":"Full Name","holes":18,"pars":[3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"city":"City","state":"ST"}]}
+Return real courses only. No markdown.`}]})});
     const data = await res.json();
     const text = data.content?.find(b=>b.type==='text')?.text||'';
-    let parsed;
-    try{ parsed=JSON.parse(text.replace(/```json|```/g,'').trim()); }catch(e){ parsed=null; }
+    let parsed; try{parsed=JSON.parse(text.replace(/```[\w]*/g,'').trim());}catch(e){parsed=null;}
     spinner.style.display='none';
-    if(!parsed||!parsed.courses?.length){ showCourseSuggestions([]); return; }
-    showCourseSuggestions(parsed.courses.map(c=>({...c, known:false})));
-  } catch(e){
-    spinner.style.display='none';
-    status.textContent='Lookup failed';
-    status.style.cssText='display:inline-block;font-size:10px;color:var(--muted)';
-  }
+    if(!parsed?.courses?.length){showCourseSuggestions([]);return;}
+    showCourseSuggestions(parsed.courses.map(c=>({...c,known:false})));
+  }catch(e){ spinner.style.display='none'; }
 }
 
-// Close suggestions on outside click
-document.addEventListener('click', e=>{
-  if(!e.target.closest('#log-course-search')&&!e.target.closest('#course-suggestions')){
-    const s=document.getElementById('course-suggestions');
-    if(s) s.style.display='none';
-  }
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#log-course-search')&&!e.target.closest('#course-suggestions'))
+    document.getElementById('course-suggestions').style.display='none';
 });
 
-// ── HOLE CARD SCORECARD ──
-let holeData = []; // per-hole: { hole, par, score, throws: [{disc, throwType, landing}] }
-
-function getScoreClass(score, par){
-  if(!score) return '';
-  if(score===1) return 'selected-ace';
-  if(score<=par-2) return 'selected-eagle';
-  if(score===par-1) return 'selected-birdie';
-  if(score===par) return 'selected-par';
-  if(score===par+1) return 'selected-bogey';
-  return 'selected-double';
-}
-
-function getScoreLabel(score, par){
-  if(!score) return '';
-  if(score===1) return '🎯 ACE';
-  if(score<=par-2) return 'EAGLE';
-  if(score===par-1) return 'BIRDIE';
-  if(score===par) return 'PAR';
-  if(score===par+1) return 'BOGEY';
-  return `+${score-par}`;
-}
-
-function getLabelColor(scoreCls){
-  if(scoreCls.includes('ace')||scoreCls.includes('eagle')) return 'var(--gold)';
-  if(scoreCls.includes('birdie')) return 'var(--grass)';
-  if(scoreCls.includes('par')) return 'var(--sky)';
-  if(scoreCls.includes('bogey')) return 'var(--fire)';
-  if(scoreCls.includes('double')) return 'var(--rose)';
-  return 'var(--muted)';
-}
-
+// ── SCORECARD ──
 function buildScorecard(){
-  if(!activeCourse){ toast('⚠️ Select a course first'); return; }
-  const c = activeCourse;
-  document.getElementById('log-step1').style.display='none';
-  document.getElementById('log-step2').style.display='block';
-  document.getElementById('sc-course-name').textContent = c.name;
+  if(!activeCourse||!activeLayout){ toast('⚠️ Select course and layout first'); return; }
+  const c = activeLayout;
 
-  // Init hole data — each hole starts with one empty throw
-  holeData = Array.from({length: c.holes}, (_,i) => ({
-    hole: i+1, par: c.pars[i], score: null,
-    throws: [{ disc:'', throwType:'', landing:'' }]
+  holeData = Array.from({length:c.holes},(_,i)=>({
+    hole:i+1, par:c.pars[i]||3, dist:c.distances?.[i]||null,
+    score:c.pars[i]||3, // default to par
+    throws:[{disc:'',throwType:'',landing:''}]
   }));
 
+  document.getElementById('log-step1').style.display='none';
+  document.getElementById('log-recent-section').style.display='none';
+  document.getElementById('log-step2').style.display='block';
+  document.getElementById('sc-course-name').textContent = activeCourse.name;
+  document.getElementById('sc-layout-name').textContent = activeLayout.layoutName;
+
   renderHoleCards();
+  renderProgressDots();
   updateStickyTotal();
-  setTimeout(() => toggleHoleCard(1, true), 100);
+  setTimeout(()=>openHoleCard(1), 100);
+}
+
+// ── SCORECARD — MOBILE FIRST ──
+let activeHoleIndex = 0; // 0-based
+
+function buildScorecard(){
+  if(!activeCourse||!activeLayout){ toast('⚠️ Select course and layout first'); return; }
+
+  holeData = Array.from({length:activeLayout.holes},(_,i)=>({
+    hole:i+1, par:activeLayout.pars[i]||3, dist:activeLayout.distances?.[i]||null,
+    score:activeLayout.pars[i]||3,
+    throws:[{disc:'',throwType:'',landing:''}]
+  }));
+
+  activeHoleIndex = 0;
+  document.getElementById('log-step1').style.display='none';
+  document.getElementById('log-recent-section').style.display='none';
+  document.getElementById('log-step2').style.display='block';
+  document.getElementById('sc-course-name').textContent = activeCourse.name;
+  document.getElementById('sc-layout-name').textContent = activeLayout.layoutName;
+
+  renderProgress();
+  renderActiveHole();
+  updateRunningTotal();
+}
+
+function goHole(idx){
+  if(idx < 0 || idx >= holeData.length) return;
+  activeHoleIndex = idx;
+  renderProgress();
+  renderActiveHole();
+  // Scroll to top of hole card
+  document.getElementById('active-hole-card')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderProgress(){
+  const el = document.getElementById('sc-progress');
+  if(!el) return;
+  const total = holeData.length;
+  const dotW = Math.max(12, Math.min(24, Math.floor((window.innerWidth - 40) / total) - 4));
+  el.innerHTML = holeData.map((h,i) => {
+    const cls = getScoreClass(h.score, h.par);
+    let dotCls = 'hole-dot';
+    if(i === activeHoleIndex) dotCls += ' active';
+    else if(cls.includes('eagle')) dotCls += ' done-eagle';
+    else if(cls.includes('birdie')) dotCls += ' done-birdie';
+    else if(cls.includes('par') && h.score > 0) dotCls += ' done-par';
+    else if(cls.includes('bogey')) dotCls += ' done-bogey';
+    else if(cls.includes('double')) dotCls += ' done-double';
+    return `<div class="${dotCls}" style="flex:1;min-width:${dotW}px" onclick="goHole(${i})" title="H${h.hole}: ${h.score}"></div>`;
+  }).join('');
+
+  // Prev/next buttons
+  const prev = document.getElementById('btn-prev-hole');
+  const next = document.getElementById('btn-next-hole');
+  if(prev) prev.style.opacity = activeHoleIndex === 0 ? '.3' : '1';
+  if(next) next.style.opacity = activeHoleIndex === holeData.length-1 ? '.3' : '1';
+}
+
+function renderActiveHole(){
+  const h = holeData[activeHoleIndex];
+  const container = document.getElementById('active-hole-card');
+  if(!container) return;
+
+  const rec = getHoleRecommendation(activeCourse.id, h.hole, activeLayout.layoutId);
+  const cls = getScoreClass(h.score, h.par);
+  const tag = getScoreLabel(h.score, h.par);
+  const col = scoreLabelColor(cls);
+
+  container.innerHTML = `
+    <div class="hole-scorer">
+
+      <!-- Hole header -->
+      <div class="hole-scorer-head">
+        <div>
+          <div class="hole-num-big">Hole ${h.hole}</div>
+          <div class="hole-par-info">Par ${h.par}${h.dist?` · ${h.dist}ft`:''} · ${activeHoleIndex+1} of ${holeData.length}</div>
+        </div>
+        <div style="text-align:right">
+          ${rec ? `<div style="font-size:11px;color:var(--yellow)">🎯 ${rec.disc}</div><div style="font-size:10px;color:var(--muted)">${rec.throwType} · avg ${rec.avgScore}</div>` : ''}
+        </div>
+      </div>
+
+      <!-- Score stepper -->
+      <div class="score-row">
+        <button class="btn-score-adj minus" onclick="adjScore(-1)">−</button>
+        <div class="score-center">
+          <div class="score-big" id="live-score" style="color:${col}">${h.score}</div>
+          <div class="score-tag" id="live-tag" style="color:${col}">${tag||'PAR'}</div>
+        </div>
+        <button class="btn-score-adj plus" onclick="adjScore(1)">+</button>
+      </div>
+
+      <!-- Throw rows -->
+      <div class="throw-rows" id="throw-rows-container">
+        ${h.throws.map((_,ti) => throwRowHTML(h, ti)).join('')}
+      </div>
+
+      <div style="padding:0 12px 12px">
+        <button class="add-throw-btn" onclick="addThrow()">+ Add Throw</button>
+      </div>
+
+      <!-- Next hole button inside card -->
+      <div style="padding:0 12px 14px;display:flex;gap:8px">
+        ${activeHoleIndex < holeData.length-1
+          ? `<button class="btn btn-green" style="flex:1;font-size:14px;padding:12px" onclick="goHole(${activeHoleIndex+1})">Next: Hole ${h.hole+1} →</button>`
+          : `<button class="btn btn-green" style="flex:1;font-size:14px;padding:12px" onclick="saveRound()">💾 Save Round</button>`
+        }
+      </div>
+
+    </div>`;
+
+  // Restore disc selections
+  h.throws.forEach((_,ti) => {
+    restoreThrowRow(h, ti);
+  });
+}
+
+function throwRowHTML(h, ti){
+  const t = h.throws[ti];
+  const labels = ['Drive','Approach','Putt','Layup','5th','6th','7th','8th','9th'];
+  const label = labels[ti] || `Throw ${ti+1}`;
+
+  return `<div class="throw-row" id="throw-row-${ti}">
+    <div class="throw-row-label">${label} ${ti>0?`<button onclick="removeThrow(${ti})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;float:right">✕ remove</button>`:''}
+    </div>
+
+    <!-- Disc pills -->
+    <div class="disc-pills" id="disc-pills-${ti}">
+      ${S.discs.length
+        ? S.discs.map(d => `<button class="disc-pill ${t.disc===d.id?'selected':''}" onclick="setThrow(${ti},'disc','${d.id}',this)">${d.name}</button>`).join('')
+        : `<span style="font-size:12px;color:var(--muted)">Add discs to your bag first</span>`
+      }
+    </div>
+
+    <!-- Throw type -->
+    <div class="throw-type-row" id="tt-row-${ti}">
+      ${[['🤚','BH','Backhand',''],['✋','FH','Forehand','fh'],['🔄','Roll','Roller',''],['🔁','Thumb','Thumber',''],['🪃','Over','Overhand','']].map(([e,short,full,cls])=>
+        `<button class="tt-btn ${t.throwType===full?'selected '+cls:''}" onclick="setThrow(${ti},'throwType','${full}',this)">${e} ${short}</button>`
+      ).join('')}
+    </div>
+
+    <!-- Landing zone grid -->
+    <div class="landing-grid" id="lz-grid-${ti}">
+      ${[['🌿','Fairway','fairway'],['🌾','Rough','rough'],['🚫','OB','ob'],['🎯','Circle 1','circle'],['🔵','Circle 2','circle'],['⛳','Basket','basket']].map(([e,label,cls])=>
+        `<button class="lz-btn ${t.landing===label?'selected '+cls:''}" onclick="setThrow(${ti},'landing','${label}',this)">
+          <span class="lz-icon">${e}</span>
+          <span>${label}</span>
+        </button>`
+      ).join('')}
+    </div>
+  </div>`;
+}
+
+function restoreThrowRow(h, ti){
+  // Nothing needed — inline onclick handles state, classes already rendered
+}
+
+function setThrow(ti, field, value, btn){
+  const h = holeData[activeHoleIndex];
+  if(!h.throws[ti]) return;
+  h.throws[ti][field] = value;
+
+  // Update button states in the same group
+  if(field === 'disc'){
+    document.querySelectorAll(`#disc-pills-${ti} .disc-pill`).forEach(b => b.classList.remove('selected'));
+  } else if(field === 'throwType'){
+    document.querySelectorAll(`#tt-row-${ti} .tt-btn`).forEach(b => { b.className='tt-btn'; });
+    // Re-add fh class if forehand
+    if(value==='Forehand') btn.classList.add('fh');
+  } else if(field === 'landing'){
+    document.querySelectorAll(`#lz-grid-${ti} .lz-btn`).forEach(b => { b.className='lz-btn'; });
+    // Re-add color class
+    const clsMap = {'Fairway':'fairway','Rough':'rough','OB':'ob','Circle 1':'circle','Circle 2':'circle','Basket':'basket'};
+    if(clsMap[value]) btn.classList.add(clsMap[value]);
+  }
+  btn.classList.add('selected');
+}
+
+function adjScore(delta){
+  const h = holeData[activeHoleIndex];
+  h.score = Math.max(1, Math.min(15, h.score + delta));
+
+  // Auto-adjust throw count
+  while(h.throws.length < h.score) h.throws.push({disc:'',throwType:'',landing:''});
+  while(h.throws.length > h.score && h.throws.length > 1) h.throws.pop();
+
+  // Update display
+  const cls = getScoreClass(h.score, h.par);
+  const tag = getScoreLabel(h.score, h.par);
+  const col = scoreLabelColor(cls);
+  const scoreEl = document.getElementById('live-score');
+  const tagEl = document.getElementById('live-tag');
+  if(scoreEl){ scoreEl.textContent = h.score; scoreEl.style.color = col; }
+  if(tagEl){ tagEl.textContent = tag||'PAR'; tagEl.style.color = col; }
+
+  // Re-render throw rows
+  const container = document.getElementById('throw-rows-container');
+  if(container) container.innerHTML = h.throws.map((_,ti) => throwRowHTML(h,ti)).join('');
+
+  updateRunningTotal();
+  renderProgress();
+}
+
+function addThrow(){
+  const h = holeData[activeHoleIndex];
+  h.throws.push({disc:'',throwType:'',landing:''});
+  const container = document.getElementById('throw-rows-container');
+  if(container) container.innerHTML = h.throws.map((_,ti) => throwRowHTML(h,ti)).join('');
+}
+
+function removeThrow(ti){
+  const h = holeData[activeHoleIndex];
+  if(h.throws.length <= 1) return;
+  h.throws.splice(ti,1);
+  const container = document.getElementById('throw-rows-container');
+  if(container) container.innerHTML = h.throws.map((_,_ti) => throwRowHTML(h,_ti)).join('');
+}
+
+function updateRunningTotal(){
+  let total=0, parSoFar=0;
+  holeData.forEach(h=>{ total+=h.score; parSoFar+=h.par; });
+  const diff = total-parSoFar;
+  const tdEl = document.getElementById('sc-total-display');
+  const vpEl = document.getElementById('sc-vspar-display');
+  if(tdEl) tdEl.textContent = total;
+  if(vpEl){
+    vpEl.textContent = (diff>=0?'+':'')+diff;
+    vpEl.style.color = diff<0?'var(--pine-light)':diff===0?'var(--blue)':'var(--rose)';
+  }
+}
+
+// Legacy aliases so nothing breaks
+function updateStickyTotal(){ updateRunningTotal(); }
+function toggleHoleCard(hole){ goHole(hole-1); }
+function openHoleCard(hole){ goHole(hole-1); }
+function nextHole(current){ goHole(current); }
+function renderHoleCards(){ renderActiveHole(); }
+
+
+
+function holeCardHTML(h, rec){
+  const scoreCls = getScoreClass(h.score, h.par);
+  const scoreLabel = getScoreLabel(h.score, h.par);
+  const labelColor = scoreLabelColor(scoreCls);
+
+  return `<div class="hole-log-card" id="hlc-${h.hole}">
+    <!-- Collapsed header -->
+    <div class="hlc-header" onclick="toggleHoleCard(${h.hole})">
+      <div class="hlc-num">${h.hole}</div>
+      <div>
+        <div class="hlc-par">Par ${h.par}${h.dist?` · ${h.dist}ft`:''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+        <div class="hlc-score-display" style="color:${labelColor}">${h.score}</div>
+        ${scoreLabel?`<span class="hlc-label" style="border-color:${labelColor};color:${labelColor};background:${labelColor}18">${scoreLabel}</span>`:''}
+      </div>
+      <span class="hlc-chevron" id="chev-${h.hole}">▼</span>
+    </div>
+
+    <!-- Expanded body -->
+    <div class="hlc-body" id="hlcb-${h.hole}">
+
+      ${rec ? recBadgeHTML(rec) : ''}
+
+      <!-- Score stepper -->
+      <div style="text-align:center;margin-bottom:4px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Score</div>
+        <div class="score-stepper">
+          <button class="score-minus" onclick="adjustScore(${h.hole},-1)">−</button>
+          <div class="score-display" id="sd-${h.hole}">
+            <div class="score-num" id="sn-${h.hole}" style="color:${labelColor}">${h.score}</div>
+            <div class="score-vs-par" id="svp-${h.hole}" style="color:${labelColor}">${scoreLabel}</div>
+          </div>
+          <button class="score-plus" onclick="adjustScore(${h.hole},1)">+</button>
+        </div>
+      </div>
+
+      <!-- Throw slots -->
+      <div id="throw-cards-${h.hole}" style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
+        ${h.throws.map((_,ti)=>throwCardHTML(h.hole,ti,h.throws[ti])).join('')}
+      </div>
+      <button onclick="addThrow(${h.hole})" style="background:none;border:1px dashed var(--border);color:var(--muted);font-family:Archivo,sans-serif;font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;margin-top:6px;width:100%;transition:all .15s" onmouseover="this.style.borderColor='var(--pine-light)';this.style.color='var(--pine-light)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">+ Add Throw</button>
+
+      <!-- Next/Save -->
+      <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:8px">
+        ${h.hole < activeLayout.holes
+          ? `<button class="btn btn-green" onclick="nextHole(${h.hole})" style="font-size:12px">Hole ${h.hole+1} →</button>`
+          : `<button class="btn btn-green" onclick="saveRound()" style="font-size:12px">💾 Save Round</button>`}
+      </div>
+    </div>
+  </div>`;
 }
 
 function discOptHTML(){
-  return '<option value="">— disc —</option>' + S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  return '<option value="">— Select disc —</option>' +
+    S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
 }
 
 function throwCardHTML(hole, ti, t){
-  const throwNum = ti + 1;
+  const labels = ['🏌️ Drive','🎯 Approach','🤛 Putt','↩️ Layup','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣'];
+  const label = labels[ti] || `Throw ${ti+1}`;
   const disc = S.discs.find(d=>d.id===t.disc);
-  const labels = ['🏌️ Drive','⛳ Approach','🤛 Putt','↩️ Layup','🔁 Re-tee','6️⃣','7️⃣','8️⃣'];
-  const throwLabel = labels[ti] || `Throw ${throwNum}`;
 
-  // Build summary badges for collapsed state
+  // Build summary badges for collapsed header
   const badges = [];
   if(disc) badges.push(`<span class="throw-summary-badge has-data">🥏 ${disc.name}</span>`);
-  if(t.throwType){
-    const icon = t.throwType==='Backhand'?'🤚':t.throwType==='Forehand'?'✋':t.throwType==='Roller'?'🔄':'🪃';
-    badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.throwType}</span>`);
-  }
-  if(t.landing){
-    const icon = t.landing==='Fairway'?'🌿':t.landing==='Rough'?'🌾':t.landing==='OB'?'🚫':t.landing==='Circle 1'?'🎯':t.landing==='Circle 2'?'🔵':'⛳';
-    badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.landing}</span>`);
-  }
-  const hasData = badges.length > 0;
-  const summaryHTML = hasData ? badges.join('') : '<span class="throw-summary-badge">tap to log</span>';
+  if(t.throwType){ const icon=t.throwType==='Backhand'?'🤚':t.throwType==='Forehand'?'✋':t.throwType==='Roller'?'🔄':'🪃'; badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.throwType}</span>`); }
+  if(t.landing){ const icon=t.landing==='Fairway'?'🌿':t.landing==='Rough'?'🌾':t.landing==='OB'?'🚫':t.landing==='Circle 1'?'🎯':t.landing==='Circle 2'?'🔵':'⛳'; badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.landing}</span>`); }
 
   return `<div class="throw-card" id="tc-${hole}-${ti}">
     <div class="throw-card-header" onclick="toggleThrowCard(${hole},${ti})">
-      <span style="font-size:11px;font-weight:700;color:var(--dim);flex-shrink:0;min-width:70px">${throwLabel}</span>
-      <div id="ts-${hole}-${ti}" style="display:flex;gap:5px;flex-wrap:nowrap;overflow:hidden;flex:1">${summaryHTML}</div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        ${ti>0?`<button onclick="event.stopPropagation();removeThrow(${hole},${ti})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px" title="Remove throw">✕</button>`:''}
+      <span style="font-size:11px;font-weight:700;color:var(--dim);flex-shrink:0;min-width:72px">${label}</span>
+      <div id="ts-${hole}-${ti}" style="display:flex;gap:5px;flex-wrap:nowrap;overflow:hidden;flex:1">
+        ${badges.length ? badges.join('') : '<span class="throw-summary-badge">tap to log</span>'}
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        ${ti>0?`<button onclick="event.stopPropagation();removeThrow(${hole},${ti})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:4px">✕</button>`:''}
         <span id="tchev-${hole}-${ti}" style="color:var(--muted);font-size:10px;transition:transform .2s">▼</span>
       </div>
     </div>
     <div class="throw-card-body" id="tcb-${hole}-${ti}" style="display:none">
+
       <!-- Disc -->
       <div class="throw-detail-section">
         <div class="throw-detail-label">Disc</div>
-        <select class="throw-disc-sel" onchange="setThrowField(${hole},${ti},'disc',this.value)"
-          style="background:var(--ink2);border:1px solid var(--border);color:var(--text);font-family:Archivo,sans-serif;font-size:13px;padding:7px 10px;border-radius:7px;outline:none;width:100%;max-width:260px">
+        <select onchange="setThrowField(${hole},${ti},'disc',this.value)"
+          style="background:var(--ink2);border:1px solid var(--border);color:var(--text);font-family:Archivo,sans-serif;font-size:13px;padding:8px 10px;border-radius:7px;outline:none;width:100%;max-width:280px">
           ${discOptHTML()}
         </select>
       </div>
+
       <!-- Throw type -->
       <div class="throw-detail-section">
         <div class="throw-detail-label">Throw Type</div>
         <div class="toggle-row">
           ${[['🤚','Backhand','bh'],['✋','Forehand','fh'],['🔄','Roller',''],['🔁','Thumber',''],['🪃','Overhand','']].map(([e,v,c])=>{
-            const sel = t.throwType===v ? `selected ${c||''}` : '';
+            const sel = t.throwType===v ? `selected ${c}` : '';
             return `<button class="toggle-btn ${sel}" onclick="setThrowField(${hole},${ti},'throwType','${v}');selectToggle(this);updateThrowSummary(${hole},${ti})">${e} ${v}</button>`;
           }).join('')}
         </div>
       </div>
-      <!-- Landing -->
+
+      <!-- Landing zone -->
       <div class="throw-detail-section" style="margin-bottom:0">
-        <div class="throw-detail-label">Landing Zone</div>
+        <div class="throw-detail-label">Where Did It Land?</div>
         <div class="toggle-row">
           ${[['🌿','Fairway','fairway'],['🌾','Rough','rough'],['🚫','OB','ob'],['🎯','Circle 1','circle'],['🔵','Circle 2','circle'],['⛳','Basket','basket']].map(([e,v,c])=>{
             const sel = t.landing===v ? `selected ${c}` : '';
@@ -1809,99 +2402,17 @@ function throwCardHTML(hole, ti, t){
   </div>`;
 }
 
-function renderHoleCards(){
-  const container = document.getElementById('hole-cards-container');
-  container.innerHTML = holeData.map(h => {
-    const scoreCls = getScoreClass(h.score, h.par);
-    const scoreLabel = getScoreLabel(h.score, h.par);
-    const labelColor = getLabelColor(scoreCls);
-
-    // Score buttons
-    const maxScore = h.par + 4;
-    const scoreBtns = Array.from({length: maxScore}, (_,i) => {
-      const s = i+1;
-      const cls = h.score===s ? getScoreClass(s, h.par) : '';
-      const lbl = s===1?'ACE':s<=h.par-2?'EGL':s===h.par-1?'BRD':s===h.par?'PAR':s===h.par+1?'BOG':'+'+( s-h.par);
-      return `<button class="score-btn ${cls}" onclick="setScore(${h.hole},${s})">${s}<span class="score-btn-label">${lbl}</span></button>`;
-    }).join('');
-
-    // Collapsed header summary — show first throw disc + last landing
-    const firstDisc = S.discs.find(d=>d.id===h.throws[0]?.disc);
-    const throwsSummary = h.throws
-      .filter(t=>t.disc||t.throwType||t.landing)
-      .map(t=>{ const d=S.discs.find(x=>x.id===t.disc); return d?d.name:t.throwType||''; })
-      .filter(Boolean).join(' → ');
-
-    // Throw cards HTML
-    const throwCardsHTML = h.throws.map((t,ti) => throwCardHTML(h.hole, ti, t)).join('');
-
-    return `<div class="hole-log-card ${h.score?'scored':''}" id="hlc-${h.hole}">
-      <!-- Hole header -->
-      <div class="hlc-header" onclick="toggleHoleCard(${h.hole})">
-        <div class="hlc-num">${h.hole}</div>
-        <div style="flex-shrink:0"><div class="hlc-par">Par ${h.par}</div></div>
-        <div class="hlc-score-display" style="color:${h.score?labelColor:'var(--muted)'}">${h.score||'—'}</div>
-        ${h.score?`<span class="hlc-label" style="border-color:${labelColor};color:${labelColor};background:${labelColor}15;flex-shrink:0">${scoreLabel}</span>`:''}
-        <div class="hlc-summary">${throwsSummary}</div>
-        <span class="hlc-chevron" id="chev-${h.hole}">▼</span>
-      </div>
-
-      <!-- Hole body -->
-      <div class="hlc-body" id="hlcb-${h.hole}">
-
-        <!-- Caddie Recommendation (if enough data) -->
-        ${(()=>{ const rec=getHoleRecommendation(activeCourse.id, h.hole); return rec?recBadgeHTML(rec):''; })()}
-
-        <!-- Score -->
-        <div class="throw-detail-section">
-          <div class="throw-detail-label">Score</div>
-          <div class="score-btn-row">${scoreBtns}</div>
-        </div>
-
-        <!-- Throw divider -->
-        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Throw Detail</div>
-          <div style="flex:1;height:1px;background:var(--border)"></div>
-          <div style="font-size:10px;color:var(--muted)">${h.throws.length} throw${h.throws.length!==1?'s':''}</div>
-        </div>
-
-        <!-- Individual throw cards -->
-        <div id="throw-cards-${h.hole}" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
-          ${throwCardsHTML}
-        </div>
-
-        <!-- Add throw button -->
-        <button class="btn btn-ghost" onclick="addThrow(${h.hole})" style="font-size:11px;padding:5px 12px;margin-bottom:14px">
-          + Add Throw
-        </button>
-
-        <!-- Next / Save -->
-        <div style="display:flex;justify-content:flex-end">
-          ${h.hole < activeCourse.holes
-            ? `<button class="btn btn-green" onclick="nextHole(${h.hole})" style="font-size:12px">Next: Hole ${h.hole+1} →</button>`
-            : `<button class="btn btn-green" onclick="saveRound()" style="font-size:12px">💾 Save Round</button>`
-          }
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Restore disc selections
-  holeData.forEach(h => {
-    h.throws.forEach((t, ti) => {
-      const sel = document.querySelector(`#tc-${h.hole}-${ti} .throw-disc-sel`);
-      if(sel && t.disc) sel.value = t.disc;
-    });
-  });
-}
-
 function toggleThrowCard(hole, ti){
   const body = document.getElementById(`tcb-${hole}-${ti}`);
   const chev = document.getElementById(`tchev-${hole}-${ti}`);
-  if(!body) return;
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : 'block';
-  if(chev) chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+  const isOpen = body?.style.display !== 'none';
+  if(isOpen){ body.style.display='none'; if(chev) chev.style.transform=''; }
+  else { body.style.display='block'; if(chev) chev.style.transform='rotate(180deg)'; }
+}
+
+function setThrowField(hole, ti, field, value){
+  holeData[hole-1].throws[ti][field] = value;
+  if(field==='disc') updateThrowSummary(hole, ti);
 }
 
 function updateThrowSummary(hole, ti){
@@ -1909,22 +2420,38 @@ function updateThrowSummary(hole, ti){
   const disc = S.discs.find(d=>d.id===t.disc);
   const badges = [];
   if(disc) badges.push(`<span class="throw-summary-badge has-data">🥏 ${disc.name}</span>`);
-  if(t.throwType){
-    const icon = t.throwType==='Backhand'?'🤚':t.throwType==='Forehand'?'✋':t.throwType==='Roller'?'🔄':'🪃';
-    badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.throwType}</span>`);
-  }
-  if(t.landing){
-    const icon = t.landing==='Fairway'?'🌿':t.landing==='Rough'?'🌾':t.landing==='OB'?'🚫':t.landing==='Circle 1'?'🎯':t.landing==='Circle 2'?'🔵':'⛳';
-    badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.landing}</span>`);
-  }
+  if(t.throwType){ const icon=t.throwType==='Backhand'?'🤚':t.throwType==='Forehand'?'✋':t.throwType==='Roller'?'🔄':'🪃'; badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.throwType}</span>`); }
+  if(t.landing){ const icon=t.landing==='Fairway'?'🌿':t.landing==='Rough'?'🌾':t.landing==='OB'?'🚫':t.landing==='Circle 1'?'🎯':t.landing==='Circle 2'?'🔵':'⛳'; badges.push(`<span class="throw-summary-badge has-data">${icon} ${t.landing}</span>`); }
   const el = document.getElementById(`ts-${hole}-${ti}`);
   if(el) el.innerHTML = badges.length ? badges.join('') : '<span class="throw-summary-badge">tap to log</span>';
-  updateHoleHeader(hole);
+  // Also update disc select value
+  const sel = document.querySelector(`#tcb-${hole}-${ti} select`);
+  if(sel && t.disc) sel.value = t.disc;
+}
+
+function addThrow(hole){
+  holeData[hole-1].throws.push({disc:'',throwType:'',landing:''});
+  const ti = holeData[hole-1].throws.length-1;
+  const container = document.getElementById(`throw-cards-${hole}`);
+  if(container){
+    const div = document.createElement('div');
+    div.innerHTML = throwCardHTML(hole, ti, holeData[hole-1].throws[ti]);
+    container.appendChild(div.firstElementChild);
+  }
+}
+
+function removeThrow(hole, ti){
+  holeData[hole-1].throws.splice(ti,1);
+  const container = document.getElementById(`throw-cards-${hole}`);
+  if(container){
+    container.innerHTML = holeData[hole-1].throws.map((_,i)=>throwCardHTML(hole,i,holeData[hole-1].throws[i])).join('');
+    holeData[hole-1].throws.forEach((t,i)=>{ if(t.disc){ const sel=document.querySelector(`#tcb-${hole}-${i} select`); if(sel) sel.value=t.disc; } });
+  }
 }
 
 function selectToggle(btn){
   const row = btn.closest('.toggle-row');
-  row.querySelectorAll('.toggle-btn').forEach(b => b.className = 'toggle-btn');
+  row.querySelectorAll('.toggle-btn').forEach(b=>{ b.className='toggle-btn'; });
   btn.classList.add('selected');
   const val = btn.textContent.trim().toLowerCase();
   if(val.includes('backhand')) btn.classList.add('bh');
@@ -1936,209 +2463,213 @@ function selectToggle(btn){
   else if(val.includes('basket')) btn.classList.add('basket');
 }
 
-function addThrow(hole){
-  holeData[hole-1].throws.push({ disc:'', throwType:'', landing:'' });
-  const ti = holeData[hole-1].throws.length - 1;
-  const container = document.getElementById(`throw-cards-${hole}`);
-  const div = document.createElement('div');
-  div.innerHTML = throwCardHTML(hole, ti, { disc:'', throwType:'', landing:'' });
-  container.appendChild(div.firstElementChild);
-  // Update throw count label
-  const countEl = container.previousElementSibling?.querySelector('div:last-child');
-  if(countEl) countEl.textContent = `${ti+1} throws`;
-  // Auto-open the new throw
-  toggleThrowCard(hole, ti);
+
+function scoreLabelColor(cls){
+  if(!cls) return 'var(--muted)';
+  if(cls.includes('ace')||cls.includes('eagle')) return 'var(--yellow)';
+  if(cls.includes('birdie')) return 'var(--pine-light)';
+  if(cls.includes('par')) return 'var(--blue)';
+  if(cls.includes('bogey')) return 'var(--fire)';
+  return 'var(--rose)';
 }
 
-function removeThrow(hole, ti){
-  if(holeData[hole-1].throws.length <= 1){ toast('⚠️ At least one throw required'); return; }
-  holeData[hole-1].throws.splice(ti, 1);
-  // Re-render just this hole's throw cards
+function adjustScore(hole, delta){
+  const h = holeData[hole-1];
+  h.score = Math.max(1, Math.min(15, h.score + delta));
+
+  // Update score display
+  const cls = getScoreClass(h.score, h.par);
+  const label = getScoreLabel(h.score, h.par);
+  const color = scoreLabelColor(cls);
+  const numEl = document.getElementById(`sn-${hole}`);
+  const vpEl = document.getElementById(`svp-${hole}`);
+  if(numEl){ numEl.textContent = h.score; numEl.style.color = color; }
+  if(vpEl){ vpEl.textContent = label; vpEl.style.color = color; }
+
+  // Auto-adjust throw slots to match score
+  while(h.throws.length < h.score) h.throws.push({disc:'',throwType:'',landing:''});
+  while(h.throws.length > h.score && h.throws.length > 1) h.throws.pop();
+
+  // Re-render throw cards
   const container = document.getElementById(`throw-cards-${hole}`);
-  container.innerHTML = holeData[hole-1].throws.map((t,i) => throwCardHTML(hole, i, t)).join('');
-  // Restore disc values
-  holeData[hole-1].throws.forEach((t,i) => {
-    const sel = document.querySelector(`#tc-${hole}-${i} .throw-disc-sel`);
-    if(sel && t.disc) sel.value = t.disc;
-  });
+  if(container){
+    container.innerHTML = h.throws.map((_,ti)=>throwCardHTML(hole,ti,h.throws[ti])).join('');
+    h.throws.forEach((t,ti)=>{
+      if(t.disc){ const sel=document.querySelector(`#tcb-${hole}-${ti} select`); if(sel) sel.value=t.disc; }
+    });
+  }
+
   updateHoleHeader(hole);
+  updateStickyTotal();
+  renderProgressDots();
 }
 
-function toggleHoleCard(hole, forceOpen=false){
-  const body = document.getElementById(`hlcb-${hole}`);
-  const chev = document.getElementById(`chev-${hole}`);
-  if(!body) return;
-  const isOpen = body.classList.contains('open');
+function openHoleCard(hole){
   document.querySelectorAll('.hlc-body').forEach(b=>b.classList.remove('open'));
   document.querySelectorAll('.hlc-chevron').forEach(c=>c.classList.remove('open'));
   document.querySelectorAll('.hole-log-card').forEach(c=>c.classList.remove('active'));
-  if(!isOpen || forceOpen){
-    body.classList.add('open');
-    chev.classList.add('open');
-    document.getElementById(`hlc-${hole}`).classList.add('active');
-    setTimeout(()=>document.getElementById(`hlc-${hole}`).scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+  const body = document.getElementById(`hlcb-${hole}`);
+  const chev = document.getElementById(`chev-${hole}`);
+  const card = document.getElementById(`hlc-${hole}`);
+  if(body){ body.classList.add('open'); }
+  if(chev){ chev.classList.add('open'); }
+  if(card){
+    card.classList.add('active');
+    setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
   }
 }
 
-function setScore(hole, score){
-  const h = holeData[hole-1];
-  h.score = score;
-  // Ensure throw count matches score (add throws if score > current throws)
-  while(h.throws.length < score && h.throws.length < 8){
-    h.throws.push({ disc:'', throwType:'', landing:'' });
-  }
-  // Re-render score buttons
+function toggleHoleCard(hole){
   const body = document.getElementById(`hlcb-${hole}`);
-  const maxScore = h.par + 4;
-  const btnRow = body.querySelector('.score-btn-row');
-  if(btnRow){
-    btnRow.innerHTML = Array.from({length: maxScore}, (_,i) => {
-      const s = i+1;
-      const cls = s===score ? getScoreClass(s, h.par) : '';
-      const lbl = s===1?'ACE':s<=h.par-2?'EGL':s===h.par-1?'BRD':s===h.par?'PAR':s===h.par+1?'BOG':'+'+( s-h.par);
-      return `<button class="score-btn ${cls}" onclick="setScore(${hole},${s})">${s}<span class="score-btn-label">${lbl}</span></button>`;
-    }).join('');
-  }
-  // Re-render throw cards to match score
-  const throwContainer = document.getElementById(`throw-cards-${hole}`);
-  if(throwContainer){
-    throwContainer.innerHTML = h.throws.map((t,ti) => throwCardHTML(hole, ti, t)).join('');
-    h.throws.forEach((t,ti)=>{ const sel=document.querySelector(`#tc-${hole}-${ti} .throw-disc-sel`); if(sel&&t.disc) sel.value=t.disc; });
-    // Auto-open first throw if just scored
-    toggleThrowCard(hole, 0);
-  }
-  updateHoleHeader(hole);
-  updateStickyTotal();
+  const isOpen = body?.classList.contains('open');
+  document.querySelectorAll('.hlc-body').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.hlc-chevron').forEach(c=>c.classList.remove('open'));
+  document.querySelectorAll('.hole-log-card').forEach(c=>c.classList.remove('active'));
+  if(!isOpen){ openHoleCard(hole); }
+}
+
+function nextHole(current){
+  openHoleCard(current+1);
+}
+
+function renderProgressDots(){
+  const el = document.getElementById('sc-progress');
+  if(!el||!holeData.length) return;
+  const openHole = [...document.querySelectorAll('.hlc-body.open')][0]?.id?.replace('hlcb-','');
+  el.innerHTML = holeData.map(h=>{
+    const cls = getScoreClass(h.score,h.par);
+    const isActive = parseInt(openHole)===h.hole;
+    let dotCls = isActive?'hole-dot active':'hole-dot';
+    if(!isActive){
+      if(cls.includes('eagle')) dotCls+=' done-eagle';
+      else if(cls.includes('birdie')) dotCls+=' done-birdie';
+      else if(cls.includes('par')) dotCls+=' done-par';
+      else if(cls.includes('bogey')) dotCls+=' done-bogey';
+      else if(cls.includes('double')) dotCls+=' done-double';
+    }
+    return `<div class="${dotCls}" onclick="toggleHoleCard(${h.hole})" title="Hole ${h.hole}: ${h.score}"></div>`;
+  }).join('');
 }
 
 function updateHoleHeader(hole){
   const h = holeData[hole-1];
   const card = document.getElementById(`hlc-${hole}`);
   if(!card) return;
-  const scoreCls = getScoreClass(h.score, h.par);
-  const scoreLabel = getScoreLabel(h.score, h.par);
-  const labelColor = getLabelColor(scoreCls);
-
-  const scoreDisp = card.querySelector('.hlc-score-display');
-  if(scoreDisp){ scoreDisp.textContent=h.score||'—'; scoreDisp.style.color=h.score?labelColor:'var(--muted)'; }
-
+  const cls = getScoreClass(h.score,h.par);
+  const label = getScoreLabel(h.score,h.par);
+  const color = scoreLabelColor(cls);
+  const sd = card.querySelector('.hlc-score-display');
+  if(sd){ sd.textContent=h.score; sd.style.color=color; }
+  // Update label chip
+  const existChip = card.querySelector('.hlc-label');
+  if(existChip) existChip.remove();
   const header = card.querySelector('.hlc-header');
-  const chip = header.querySelector('.hlc-label');
-  if(chip) chip.remove();
-  if(h.score){
-    const c = document.createElement('span');
-    c.className='hlc-label';
-    c.style.cssText=`border-color:${labelColor};color:${labelColor};background:${labelColor}15;flex-shrink:0`;
-    c.textContent=scoreLabel;
-    scoreDisp.after(c);
+  const sdEl = header?.querySelector('.hlc-score-display');
+  if(sdEl && label){
+    const chip = document.createElement('span');
+    chip.className='hlc-label';
+    chip.style.cssText=`border-color:${color};color:${color};background:${color}18`;
+    chip.textContent=label;
+    sdEl.after(chip);
   }
-
-  // Summary: chain of disc names
-  const throwsSummary = h.throws
-    .filter(t=>t.disc||t.throwType||t.landing)
-    .map(t=>{ const d=S.discs.find(x=>x.id===t.disc); return d?d.name:t.throwType||''; })
-    .filter(Boolean).join(' → ');
-  const sumEl = header.querySelector('.hlc-summary');
-  if(sumEl) sumEl.textContent = throwsSummary;
-
-  card.classList.toggle('scored', !!h.score);
 }
 
-function nextHole(currentHole){ toggleHoleCard(currentHole+1, true); }
-
 function updateStickyTotal(){
-  let total=0, scored=0, eagles=0, birdies=0, bogeys=0, parSoFar=0;
+  let total=0,parSoFar=0,eagles=0,birdies=0,bogeys=0;
   holeData.forEach(h=>{
-    if(h.score){
-      total+=h.score; scored++; parSoFar+=h.par;
-      if(h.score<=h.par-2) eagles++;
-      else if(h.score===h.par-1) birdies++;
-      else if(h.score>=h.par+1) bogeys++;
-    }
+    total+=h.score; parSoFar+=h.par;
+    const d=h.score-h.par;
+    if(d<=-2)eagles++;
+    else if(d===-1)birdies++;
+    else if(d>=1)bogeys++;
   });
   const diff=total-parSoFar;
-  document.getElementById('sc-total-display').textContent=scored?total:'—';
-  const vsEl=document.getElementById('sc-vspar-display');
-  vsEl.textContent=scored?(diff>=0?'+':'')+diff:'—';
-  vsEl.style.color=!scored?'var(--muted)':diff<0?'var(--grass)':diff===0?'var(--sky)':'var(--rose)';
-  document.getElementById('sc-eagles').textContent=eagles;
-  document.getElementById('sc-birdies').textContent=birdies;
-  document.getElementById('sc-bogeys').textContent=bogeys;
+  const tdEl=document.getElementById('sc-total-display');
+  const vpEl=document.getElementById('sc-vspar-display');
+  if(tdEl) tdEl.textContent=total;
+  if(vpEl){
+    vpEl.textContent=(diff>=0?'+':'')+diff;
+    vpEl.style.color=diff<0?'var(--pine-light)':diff===0?'var(--blue)':'var(--rose)';
+  }
+  const egEl=document.getElementById('sc-eagles');
+  const bdEl=document.getElementById('sc-birdies');
+  const bgEl=document.getElementById('sc-bogeys');
+  if(egEl)egEl.textContent=eagles;
+  if(bdEl)bdEl.textContent=birdies;
+  if(bgEl)bgEl.textContent=bogeys;
 }
 
 function saveRound(){
-  if(!activeCourse){ toast('⚠️ No course selected'); return; }
-  const c = activeCourse;
+  if(!activeCourse||!activeLayout){ toast('⚠️ No course selected'); return; }
   const date = document.getElementById('log-date').value;
   const cond = document.getElementById('log-cond').value;
   const partners = document.getElementById('log-partners').value;
   const notes = document.getElementById('log-round-notes').value;
-  const scored = holeData.filter(h=>h.score);
-  if(!scored.length){ toast('⚠️ Enter at least one score'); return; }
+
   if(!date){ toast('⚠️ Select a date'); return; }
 
-  const scores=holeData.map(h=>h.score||0);
-  const pars=c.pars;
-  const total=scores.reduce((a,b)=>a+b,0);
-  const totalPar=pars.slice(0,c.holes).reduce((a,b)=>a+b,0);
-  const pm=total-totalPar;
-  const birdies=scored.filter(h=>h.score<h.par).length;
-  const eagles=scored.filter(h=>h.score<=h.par-2).length;
-  const bogeys=scored.filter(h=>h.score===h.par+1).length;
-  const doubles=scored.filter(h=>h.score>=h.par+2).length;
-  const parsCount=scored.filter(h=>h.score===h.par).length;
+  const pars = activeLayout.pars;
+  const scores = holeData.map(h=>h.score);
+  const total = scores.reduce((a,b)=>a+b,0);
+  const totalPar = pars.reduce((a,b)=>a+b,0);
+  const pm = total-totalPar;
+  const birdies = holeData.filter(h=>h.score<h.par).length;
+  const eagles = holeData.filter(h=>h.score<=h.par-2).length;
+  const bogeys = holeData.filter(h=>h.score===h.par+1).length;
+  const doubles = holeData.filter(h=>h.score>=h.par+2).length;
+  const parsCount = holeData.filter(h=>h.score===h.par).length;
 
-  const round={
-    id:'r'+Date.now(), courseId:c.id, courseName:c.name,
+  const round = {
+    id:'r'+Date.now(), courseId:activeCourse.id, courseName:activeCourse.name,
+    layoutId:activeLayout.layoutId, layoutName:activeLayout.layoutName,
     date, cond, partners, notes, scores,
-    throwData: holeData.map(h=>h.throws),
-    total, pm, birdies, eagles, bogeys, doubles, pars:parsCount, holes:c.holes
+    discs:holeData.map(h=>h.throws[0]?.disc||''),
+    throwTypes:holeData.map(h=>h.throws[0]?.throwType||''),
+    landings:holeData.map(h=>h.throws[0]?.landing||''),
+    total, pm, birdies, eagles, bogeys, doubles, pars:parsCount, holes:activeLayout.holes
   };
+
   if(!S.rounds) S.rounds=[];
   S.rounds.push(round);
 
-  // Save individual throws for analytics — one entry per throw per hole
+  // Save all throws with layout tag
   holeData.forEach(h=>{
-    if(!h.score) return;
-    h.throws.forEach((t, ti) => {
-      S.throws.push({
-        id:'t'+Date.now()+'_'+h.hole+'_'+ti,
-        courseId:c.id, hole:h.hole,
-        date, disc:t.disc, score:h.score, cond,
-        throwType:t.throwType, landing:t.landing,
-        throwIndex:ti, // 0=drive, 1=approach, 2=putt, etc.
-        notes:''
-      });
+    h.throws.forEach((t,ti)=>{
+      if(h.score>0){
+        S.throws.push({
+          id:'t'+Date.now()+'_'+h.hole+'_'+ti,
+          courseId:activeCourse.id, layoutId:activeLayout.layoutId,
+          hole:h.hole, date, disc:t.disc, score:h.score,
+          throwIndex:ti, throwType:t.throwType, landing:t.landing,
+          cond, notes:''
+        });
+      }
     });
   });
 
   save(); renderRecentRounds(); renderSidebar();
-  toast(`✅ Round saved! ${pm>=0?'+':''}${pm} vs par · ${birdies} birdies`);
   syncToSupabase();
+  toast(`✅ Round saved! ${pm>=0?'+':''}${pm} · ${birdies} birdies`);
   resetLog();
 }
-
-
 
 function renderRecentRounds(){
   const tbody = document.getElementById('recent-rounds-tbody');
   if(!tbody) return;
   const rounds = [...(S.rounds||[])].reverse().slice(0,20);
   if(!rounds.length){
-    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No rounds logged yet — log your first round above!</td></tr>';
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No rounds logged yet</td></tr>';
     return;
   }
   tbody.innerHTML = rounds.map(r=>{
-    const pm = r.pm;
-    const pmCol = pm<0?'var(--grass)':pm===0?'var(--sky)':'var(--rose)';
+    const pmCol = r.pm<0?'var(--pine-light)':r.pm===0?'var(--blue)':'var(--rose)';
     return `<tr>
       <td class="mono" style="color:var(--muted);font-size:11px">${r.date}</td>
       <td style="font-size:12px;font-weight:500">${r.courseName||r.courseId}</td>
+      <td style="font-size:11px;color:var(--blue)">${r.layoutName||'—'}</td>
       <td class="mono" style="font-weight:600">${r.total||'—'}</td>
-      <td class="mono" style="color:${pmCol};font-weight:700">${pm!=null?(pm>=0?'+':'')+pm:'—'}</td>
-      <td class="mono">${r.holes}</td>
-      <td style="font-size:11px;color:var(--muted)">${r.cond||'—'}</td>
-      <td style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes||r.partners||'—'}</td>
+      <td class="mono" style="color:${pmCol};font-weight:700">${r.pm!=null?(r.pm>=0?'+':'')+r.pm:'—'}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes||r.partners||'—'}</td>
       <td><button onclick="deleteRound('${r.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">✕</button></td>
     </tr>`;
   }).join('');
@@ -2152,9 +2683,6 @@ function deleteRound(id){
 function deleteThrow(id){ S.throws=S.throws.filter(t=>t.id!==id); save(); toast('🗑️ Removed'); }
 
 
-// ═══════════════════════════════════════════════════════════
-// ANALYTICS — REAL DATA
-// ═══════════════════════════════════════════════════════════
 
 // Helper: get rounds from UDISC.rounds array, filtered
 // round = [date, courseId, plusMinus, rating, birdies, eagles, pars, bogeys, doubles]
