@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <title>CaddyAI</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap');
 
@@ -555,6 +556,41 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 </head>
 <body>
 
+<!-- AUTH SCREEN -->
+<div id="auth-screen" style="display:none;position:fixed;inset:0;background:var(--ink);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:400px">
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-family:'Archivo Black',sans-serif;font-size:36px;color:var(--grass)">Caddy<span style="color:var(--text)">AI</span></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:6px">Disc golf analytics & AI caddie</div>
+    </div>
+
+    <!-- Tab switcher -->
+    <div style="display:flex;background:var(--ink2);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:20px">
+      <button id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;padding:8px;border:none;border-radius:7px;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--grass);color:#000;transition:all .15s">Sign In</button>
+      <button id="auth-tab-signup" onclick="switchAuthTab('signup')" style="flex:1;padding:8px;border:none;border-radius:7px;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted);transition:all .15s">Sign Up</button>
+    </div>
+
+    <div style="background:var(--ink2);border:1px solid var(--border);border-radius:12px;padding:24px">
+      <div class="fg" style="margin-bottom:14px">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="your@email.com" style="width:100%">
+      </div>
+      <div class="fg" style="margin-bottom:20px">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••" style="width:100%">
+      </div>
+
+      <button class="btn btn-green" style="width:100%;padding:11px;font-size:14px" onclick="handleAuth()">Sign In</button>
+      <div id="auth-error" style="display:none;margin-top:12px;font-size:12px;color:var(--rose);text-align:center;padding:8px;background:rgba(244,63,94,.08);border-radius:6px"></div>
+      <div id="auth-success" style="display:none;margin-top:12px;font-size:12px;color:var(--grass);text-align:center;padding:8px;background:rgba(34,197,94,.08);border-radius:6px"></div>
+    </div>
+
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted)">
+      Your data is private and secure. Each user has their own account.
+    </div>
+  </div>
+</div>
+
 <!-- TOP BAR -->
 <div id="topbar">
   <div class="brand">Caddy<span>AI</span></div>
@@ -568,6 +604,10 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
     <span class="course-pill" id="active-course-pill">No course selected</span>
     <label class="btn btn-ghost" style="cursor:pointer">📥 Import CSV<input type="file" accept=".csv" style="display:none" onchange="importCSV(this)"></label>
     <button class="btn btn-green" onclick="nav('log')">+ Log Round</button>
+    <div id="user-pill" style="display:none;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px">
+      <span id="user-email-display" style="color:var(--dim)"></span>
+      <button onclick="signOut()" class="btn btn-ghost" style="font-size:11px;padding:5px 10px">Sign Out</button>
+    </div>
   </div>
   <!-- Mobile: just show import -->
   <label id="topbar-import" style="display:none;cursor:pointer;margin-left:auto" class="btn btn-ghost">
@@ -939,6 +979,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
       <!-- Plastic/notes + Add button -->
       <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
         <div class="fg" style="flex:1;min-width:200px"><label>Plastic / Notes</label><input type="text" id="nd-notes" placeholder="e.g. Champion plastic, overstable bomber"></div>
+        <div class="fg" style="width:110px;flex-shrink:0"><label>Weight (g)</label><input type="number" id="nd-weight" min="130" max="180" placeholder="e.g. 175"></div>
         <button class="btn btn-green" style="height:36px;white-space:nowrap" onclick="addDisc()">+ Add to Bag</button>
         <button class="btn btn-ghost" style="height:36px" onclick="clearDiscForm()">Clear</button>
       </div>
@@ -953,40 +994,19 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   <div id="page-settings" class="page">
     <div class="sec-head"><div class="sec-title">Settings</div><div class="sec-sub">Sync, data management, and preferences</div></div>
 
-    <!-- GitHub Sync -->
+    <!-- Supabase Sync Status -->
     <div class="panel" style="margin-bottom:16px">
-      <div class="panel-title">☁️ GitHub Auto-Sync</div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7">
-        Automatically saves your rounds, throws, and bag to your GitHub repo after every save. 
-        Your data is then available on any device that loads CaddyAI.
-      </p>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div class="fg">
-          <label>GitHub Username</label>
-          <input type="text" id="gh-username" placeholder="e.g. mattnel1259" value="mattnel1259">
-        </div>
-        <div class="fg">
-          <label>Repository Name</label>
-          <input type="text" id="gh-repo" placeholder="e.g. CaddyAI" value="CaddyAI">
-        </div>
-        <div class="fg" style="grid-column:span 2">
-          <label>Personal Access Token <span style="color:var(--muted);font-weight:400;font-size:10px">(stored locally, never shared)</span></label>
-          <input type="password" id="gh-token" placeholder="Paste your GitHub token here...">
-        </div>
-      </div>
-
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-green" onclick="saveGitHubSettings()">Save & Test Connection</button>
-        <button class="btn btn-ghost" onclick="syncToGitHub(true)">🔄 Sync Now</button>
-        <div id="sync-status" style="font-size:12px;color:var(--muted)"></div>
-      </div>
-
-      <div id="sync-info" style="margin-top:14px;display:none;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px 14px;">
+      <div class="panel-title">☁️ Cloud Sync</div>
+      <div id="sync-info" style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px 14px;">
         <div style="font-size:12px;line-height:1.8">
           <div id="sync-last"></div>
           <div id="sync-counts"></div>
         </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-green" onclick="syncToSupabase().then(()=>{ localStorage.setItem('sb_last_sync', new Date().toLocaleString()); renderSettings(); toast('✅ Synced!'); })">🔄 Sync Now</button>
+        <button class="btn btn-ghost" onclick="loadFromSupabase().then(()=>{ renderAll(); toast('☁️ Data refreshed!'); })">⬇️ Pull Latest</button>
+        <button class="btn btn-ghost" onclick="signOut()">🚪 Sign Out</button>
       </div>
     </div>
 
@@ -1145,185 +1165,197 @@ function init(){
 
   save();
   renderAll();
-  // Load latest data from GitHub if token is configured
-  if(localStorage.getItem('gh_token')){
-    loadFromGitHub();
-  }
-}
 
-// ═══════════════════════════════════════════════════════════
-// GITHUB SYNC
-// ═══════════════════════════════════════════════════════════
-
-function getGHSettings(){
-  return {
-    username: localStorage.getItem('gh_username') || 'mattnel1259',
-    repo:     localStorage.getItem('gh_repo')     || 'CaddyAI',
-    token:    localStorage.getItem('gh_token')    || ''
-  };
-}
-
-function saveGitHubSettings(){
-  const username = document.getElementById('gh-username').value.trim();
-  const repo     = document.getElementById('gh-repo').value.trim();
-  const token    = document.getElementById('gh-token').value.trim();
-  if(!token){ toast('⚠️ Enter your GitHub token'); return; }
-  localStorage.setItem('gh_username', username);
-  localStorage.setItem('gh_repo',     repo);
-  localStorage.setItem('gh_token',    token);
-  setSyncStatus('Testing connection...', 'var(--muted)');
-  syncToGitHub(true);
-}
-
-function setSyncStatus(msg, color='var(--muted)'){
-  const el = document.getElementById('sync-status');
-  if(el){ el.textContent = msg; el.style.color = color; }
-}
-
-async function syncToGitHub(showFeedback=false){
-  const { username, repo, token } = getGHSettings();
-  if(!token){
-    if(showFeedback) toast('⚠️ Set your GitHub token in Settings first');
-    return;
-  }
-
-  if(showFeedback) setSyncStatus('Syncing...', 'var(--muted)');
-
-  // Build the data file to save
-  const syncData = {
-    lastSync: new Date().toISOString(),
-    rounds: S.rounds || [],
-    throws: S.throws || [],
-    discs: S.discs || [],
-    selectedCourse: S.selectedCourse
-  };
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(syncData, null, 2))));
-  const path = 'caddyai-data.json';
-
-  try {
-    // First check if file exists to get its SHA (needed for updates)
-    const checkRes = await fetch(
-      `https://api.github.com/repos/${username}/${repo}/contents/${path}`,
-      { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
-    );
-
-    let sha = null;
-    if(checkRes.ok){
-      const existing = await checkRes.json();
-      sha = existing.sha;
-    }
-
-    // Commit the file
-    const body = {
-      message: `CaddyAI sync — ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`,
-      content,
-      ...(sha ? { sha } : {})
-    };
-
-    const res = await fetch(
-      `https://api.github.com/repos/${username}/${repo}/contents/${path}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      }
-    );
-
-    if(res.ok){
-      const now = new Date().toLocaleString();
-      localStorage.setItem('gh_last_sync', now);
-      localStorage.setItem('gh_sync_counts', JSON.stringify({
-        rounds: syncData.rounds.length,
-        throws: syncData.throws.length,
-        discs: syncData.discs.length
-      }));
-      if(showFeedback){
-        setSyncStatus(`✅ Synced at ${now}`, 'var(--grass)');
-        toast('✅ Data synced to GitHub!');
-        updateSyncInfo();
-      }
+  // Check for existing Supabase session
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if(session?.user){
+      onSignedIn(session.user);
     } else {
-      const err = await res.json();
-      const msg = err.message || 'Sync failed';
-      if(showFeedback){
-        setSyncStatus(`❌ ${msg}`, 'var(--rose)');
-        toast(`❌ Sync failed: ${msg}`);
-      }
-      console.error('GitHub sync error:', err);
+      document.getElementById('auth-screen').style.display = 'flex';
     }
-  } catch(e){
-    if(showFeedback){
-      setSyncStatus('❌ Network error', 'var(--rose)');
-      toast('❌ Sync failed — check connection');
+  });
+
+  // Listen for auth changes
+  sb.auth.onAuthStateChange((event, session) => {
+    if(event === 'SIGNED_IN' && session?.user){
+      onSignedIn(session.user);
+    } else if(event === 'SIGNED_OUT'){
+      document.getElementById('auth-screen').style.display = 'flex';
     }
-    console.error('Sync error:', e);
-  }
+  });
 }
 
-async function loadFromGitHub(){
-  const { username, repo, token } = getGHSettings();
-  if(!token) return;
+// ═══════════════════════════════════════════════════════════
+// SUPABASE — AUTH & SYNC
+// ═══════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://nvqxpldebofwpsxlxaqt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_QNHjtTLVqKYzvcvZUKn34w_sGjYQev4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+
+// ── AUTH UI ──
+function switchAuthTab(tab){
+  const isLogin = tab === 'login';
+  document.getElementById('auth-tab-login').style.cssText = isLogin
+    ? 'flex:1;padding:8px;border:none;border-radius:7px;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--grass);color:#000'
+    : 'flex:1;padding:8px;border:none;border-radius:7px;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted)';
+  document.getElementById('auth-tab-signup').style.cssText = !isLogin
+    ? 'flex:1;padding:8px;border:none;border-radius:7px;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--grass);color:#000'
+    : 'flex:1;padding:8px;border:none;border-radius:7px;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted)';
+  document.querySelector('#auth-screen button.btn-green').textContent = isLogin ? 'Sign In' : 'Create Account';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-success').style.display = 'none';
+}
+
+async function handleAuth(){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const isLogin = document.getElementById('auth-tab-login').style.background.includes('grass') ||
+                  document.getElementById('auth-tab-login').style.background === 'var(--grass)';
+  const errEl = document.getElementById('auth-error');
+  const sucEl = document.getElementById('auth-success');
+  errEl.style.display = 'none'; sucEl.style.display = 'none';
+
+  if(!email || !password){ showAuthError('Please enter email and password'); return; }
+
+  const btn = document.querySelector('#auth-screen button.btn-green');
+  btn.textContent = 'Please wait...'; btn.disabled = true;
 
   try {
-    const res = await fetch(
-      `https://api.github.com/repos/${username}/${repo}/contents/caddyai-data.json`,
-      { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
-    );
-    if(!res.ok) return;
-    const file = await res.json();
-    const data = JSON.parse(decodeURIComponent(escape(atob(file.content.replace(/\n/g,'')))));
-
-    // Merge — prefer newer data
-    if(data.rounds?.length > (S.rounds||[]).length) S.rounds = data.rounds;
-    if(data.throws?.length > S.throws.length) S.throws = data.throws;
-    if(data.discs?.length > S.discs.length) S.discs = data.discs;
-    if(data.selectedCourse) S.selectedCourse = data.selectedCourse;
-
-    save();
-    renderAll();
-    toast('☁️ Data loaded from GitHub!');
-  } catch(e){
-    console.log('No GitHub data found or error loading:', e);
-  }
+    let result;
+    if(isLogin){
+      result = await sb.auth.signInWithPassword({ email, password });
+    } else {
+      result = await sb.auth.signUp({ email, password });
+      if(!result.error && result.data.user && !result.data.session){
+        sucEl.textContent = '✅ Check your email to confirm your account!';
+        sucEl.style.display = 'block';
+        btn.textContent = 'Sign In'; btn.disabled = false;
+        return;
+      }
+    }
+    if(result.error){ showAuthError(result.error.message); }
+    else { onSignedIn(result.data.user); }
+  } catch(e){ showAuthError(e.message); }
+  btn.disabled = false;
+  btn.textContent = isLogin ? 'Sign In' : 'Create Account';
 }
 
-function updateSyncInfo(){
-  const info = document.getElementById('sync-info');
-  const lastEl = document.getElementById('sync-last');
-  const countsEl = document.getElementById('sync-counts');
-  if(!info) return;
-
-  const last = localStorage.getItem('gh_last_sync');
-  const counts = JSON.parse(localStorage.getItem('gh_sync_counts')||'{}');
-
-  if(last){
-    info.style.display = 'block';
-    if(lastEl) lastEl.innerHTML = `Last synced: <strong style="color:var(--grass)">${last}</strong>`;
-    if(countsEl) countsEl.innerHTML = `${counts.rounds||0} rounds · ${counts.throws||0} throws · ${counts.discs||0} discs`;
-  }
+function showAuthError(msg){
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.style.display = 'block';
 }
 
+async function onSignedIn(user){
+  currentUser = user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('user-pill').style.display = 'flex';
+  const emailEl = document.getElementById('user-email-display');
+  if(emailEl) emailEl.textContent = user.email;
+  // Load user data from Supabase
+  await loadFromSupabase();
+  renderAll();
+  toast(`👋 Welcome back!`);
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+  currentUser = null;
+  S.discs = []; S.throws = []; S.rounds = []; S.selectedCourse = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('user-pill').style.display = 'none';
+}
+
+// ── SUPABASE SYNC ──
+async function syncToSupabase(){
+  if(!currentUser) return;
+  const uid = currentUser.id;
+  try {
+    // Upsert discs
+    if(S.discs.length){
+      await sb.from('discs').upsert(
+        S.discs.map(d => ({
+          id: d.id, user_id: uid, name: d.name, type: d.type,
+          speed: d.speed, glide: d.glide, turn: d.turn, fade: d.fade,
+          weight: d.weight, notes: d.notes
+        }))
+      );
+    }
+    // Upsert rounds
+    if((S.rounds||[]).length){
+      await sb.from('rounds').upsert(
+        S.rounds.map(r => ({
+          id: r.id, user_id: uid, course_id: r.courseId, course_name: r.courseName,
+          date: r.date, total: r.total, plus_minus: r.pm, birdies: r.birdies,
+          eagles: r.eagles, bogeys: r.bogeys, doubles: r.doubles, pars: r.pars,
+          holes: r.holes, conditions: r.cond, partners: r.partners, notes: r.notes,
+          scores: r.scores
+        }))
+      );
+    }
+    // Upsert throws
+    if(S.throws.length){
+      await sb.from('throws').upsert(
+        S.throws.map(t => ({
+          id: t.id, user_id: uid, course_id: t.courseId, hole: t.hole,
+          date: t.date, disc_id: t.disc, score: t.score,
+          throw_index: t.throwIndex||0, throw_type: t.throwType,
+          landing: t.landing, conditions: t.cond, notes: t.notes
+        }))
+      );
+    }
+    console.log('✅ Synced to Supabase');
+    localStorage.setItem('sb_last_sync', new Date().toLocaleString());
+  } catch(e){ console.error('Supabase sync error:', e); }
+}
+
+async function loadFromSupabase(){
+  if(!currentUser) return;
+  const uid = currentUser.id;
+  try {
+    const [discsRes, roundsRes, throwsRes] = await Promise.all([
+      sb.from('discs').select('*').eq('user_id', uid),
+      sb.from('rounds').select('*').eq('user_id', uid).order('date', {ascending:false}),
+      sb.from('throws').select('*').eq('user_id', uid)
+    ]);
+
+    if(discsRes.data?.length) S.discs = discsRes.data.map(d => ({
+      id:d.id, name:d.name, type:d.type, speed:d.speed, glide:d.glide,
+      turn:d.turn, fade:d.fade, weight:d.weight, notes:d.notes
+    }));
+
+    if(roundsRes.data?.length) S.rounds = roundsRes.data.map(r => ({
+      id:r.id, courseId:r.course_id, courseName:r.course_name, date:r.date,
+      total:r.total, pm:r.plus_minus, birdies:r.birdies, eagles:r.eagles,
+      bogeys:r.bogeys, doubles:r.doubles, pars:r.pars, holes:r.holes,
+      cond:r.conditions, partners:r.partners, notes:r.notes, scores:r.scores
+    }));
+
+    if(throwsRes.data?.length) S.throws = throwsRes.data.map(t => ({
+      id:t.id, courseId:t.course_id, hole:t.hole, date:t.date, disc:t.disc_id,
+      score:t.score, throwIndex:t.throw_index, throwType:t.throw_type,
+      landing:t.landing, cond:t.conditions, notes:t.notes
+    }));
+
+    save(); // cache locally too
+    console.log(`✅ Loaded from Supabase: ${S.rounds.length} rounds, ${S.throws.length} throws`);
+  } catch(e){ console.error('Supabase load error:', e); }
+}
+
+// ── SETTINGS PAGE ──
 function renderSettings(){
-  // Load saved settings into fields
-  const { username, repo, token } = getGHSettings();
-  const unEl = document.getElementById('gh-username');
-  const reEl = document.getElementById('gh-repo');
-  const tkEl = document.getElementById('gh-token');
-  if(unEl) unEl.value = username;
-  if(reEl) reEl.value = repo;
-  if(tkEl && token) tkEl.value = token;
-
-  updateSyncInfo();
-
-  // Data stats
-  const statsEl = document.getElementById('data-stats');
-  if(statsEl){
-    statsEl.innerHTML = `${(S.rounds||[]).length} rounds logged · ${S.throws.length} throws · ${S.discs.length} discs in bag`;
+  const last = localStorage.getItem('sb_last_sync');
+  const infoEl = document.getElementById('sync-info');
+  if(infoEl && last){
+    infoEl.style.display = 'block';
+    const lastEl = document.getElementById('sync-last');
+    const countsEl = document.getElementById('sync-counts');
+    if(lastEl) lastEl.innerHTML = `Last synced: <strong style="color:var(--grass)">${last}</strong>`;
+    if(countsEl) countsEl.innerHTML = `${(S.rounds||[]).length} rounds · ${S.throws.length} throws · ${S.discs.length} discs`;
   }
+  const statsEl = document.getElementById('data-stats');
+  if(statsEl) statsEl.innerHTML = `${(S.rounds||[]).length} rounds · ${S.throws.length} throws · ${S.discs.length} discs in bag`;
   const aboutRounds = document.getElementById('about-rounds');
   const aboutThrows = document.getElementById('about-throws');
   const aboutCourses = document.getElementById('about-courses');
@@ -1335,18 +1367,12 @@ function renderSettings(){
 }
 
 function exportData(){
-  const data = {
-    exportDate: new Date().toISOString(),
-    rounds: S.rounds || [],
-    throws: S.throws || [],
-    discs: S.discs || []
-  };
+  const data = { exportDate: new Date().toISOString(), rounds: S.rounds||[], throws: S.throws, discs: S.discs };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = `caddyai-backup-${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  a.click(); URL.revokeObjectURL(url);
   toast('✅ Data exported!');
 }
 
@@ -1360,6 +1386,7 @@ function restoreBackup(input){
       if(data.throws) S.throws = data.throws;
       if(data.discs)  S.discs  = data.discs;
       save(); renderAll(); renderSettings();
+      syncToSupabase();
       toast(`✅ Restored ${(data.rounds||[]).length} rounds!`);
     } catch(err){ toast('❌ Invalid backup file'); }
     input.value = '';
@@ -1368,169 +1395,6 @@ function restoreBackup(input){
 }
 
 
-
-function getHoleRecommendation(courseId, holeNum){
-  // Get all manually logged throws for throw #1 on this hole
-  const teeThrows = S.throws.filter(t =>
-    t.courseId === courseId &&
-    t.hole === holeNum &&
-    t.throwIndex === 0 // tee shot only
-  );
-
-  // Need at least 3 rounds worth of data
-  const allHoleThrows = S.throws.filter(t => t.courseId === courseId && t.hole === holeNum);
-  const roundCount = [...new Set(allHoleThrows.map(t => t.date))].length;
-  if(roundCount < 3) return null;
-
-  // Group tee throws by disc+throwType combo
-  const combos = {};
-  teeThrows.forEach(t => {
-    const disc = S.discs.find(d => d.id === t.disc);
-    if(!disc || !t.throwType) return;
-    const key = `${disc.name}|${t.throwType}`;
-    if(!combos[key]) combos[key] = { disc: disc.name, throwType: t.throwType, scores: [], landings: [] };
-    combos[key].scores.push(t.score);
-    if(t.landing) combos[key].landings.push(t.landing);
-  });
-
-  const comboList = Object.values(combos).filter(c => c.scores.length >= 2);
-  if(!comboList.length) return null;
-
-  // Score each combo
-  comboList.forEach(c => {
-    c.avgScore = c.scores.reduce((a,b)=>a+b,0) / c.scores.length;
-    const goodLandings = ['Fairway','Circle 1','Circle 2','Basket'];
-    c.goodLandingPct = c.landings.length
-      ? Math.round(c.landings.filter(l => goodLandings.includes(l)).length / c.landings.length * 100)
-      : null;
-    c.obPct = c.landings.length
-      ? Math.round(c.landings.filter(l => l === 'OB').length / c.landings.length * 100)
-      : 0;
-    // Combined rating: lower avg score + higher good landing = better
-    c.rating = c.avgScore - (c.goodLandingPct || 0) * 0.02;
-  });
-
-  const best = comboList.sort((a,b) => a.rating - b.rating)[0];
-  const worst = comboList[comboList.length - 1];
-
-  // Confidence based on throws count
-  const confidence = Math.min(3, Math.floor(best.scores.length / 2));
-
-  return {
-    disc: best.disc,
-    throwType: best.throwType,
-    avgScore: best.avgScore.toFixed(2),
-    goodLandingPct: best.goodLandingPct,
-    obPct: best.obPct,
-    throws: best.scores.length,
-    roundCount,
-    confidence, // 1-3
-    // Comparison to worst combo if different
-    vsDisc: worst !== best ? worst.disc : null,
-    vsAvg: worst !== best ? worst.avgScore.toFixed(2) : null,
-  };
-}
-
-function recBadgeHTML(rec, compact=false){
-  if(!rec) return '';
-
-  const confDots = [1,2,3].map(i =>
-    `<span class="${i<=rec.confidence?'on':''}"></span>`
-  ).join('');
-
-  const throwIcon = rec.throwType==='Backhand'?'🤚':rec.throwType==='Forehand'?'✋':rec.throwType==='Roller'?'🔄':'🪃';
-
-  if(compact){
-    // Mini version for dashboard hole cards
-    return `<div class="rec-mini">
-      🎯 <strong style="color:var(--gold)">${rec.disc} ${rec.throwType}</strong>
-      · avg ${rec.avgScore}
-      ${rec.goodLandingPct!==null?`· ${rec.goodLandingPct}% good landing`:''}
-    </div>`;
-  }
-
-  return `<div class="rec-badge">
-    <div class="rec-badge-icon">🎯</div>
-    <div class="rec-badge-content">
-      <div class="rec-badge-title">
-        Caddie Recommendation
-        <span class="rec-confidence">${confDots}</span>
-      </div>
-      <div class="rec-badge-text">
-        Throw <span class="rec-pill">${throwIcon} ${rec.throwType}</span>
-        with your <strong style="color:var(--text)">${rec.disc}</strong>
-        ${rec.goodLandingPct!==null ? `— lands in a good position <strong style="color:var(--grass)">${rec.goodLandingPct}%</strong> of the time` : ''}
-        ${rec.obPct>0 ? `<span style="color:var(--rose)"> · ${rec.obPct}% OB risk</span>` : ''}
-      </div>
-      <div class="rec-badge-stat">
-        Avg score <strong style="color:var(--sky)">${rec.avgScore}</strong> over ${rec.throws} logged throws
-        ${rec.vsDisc && rec.vsAvg ? ` · vs <strong style="color:var(--rose)">${rec.vsAvg}</strong> with ${rec.vsDisc}` : ''}
-        · Based on ${rec.roundCount} rounds
-      </div>
-    </div>
-  </div>`;
-}
-
-
-const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
-const fmtAvg = v => v ? v.toFixed(2) : '—';
-
-function getHoleStats(cid, hole){
-  const s = S.holeStats[cid]?.[hole];
-  const manual = S.throws.filter(t=>t.courseId===cid&&t.hole===hole);
-  if(manual.length){
-    const scores = manual.map(t=>t.score);
-    return { count:scores.length, avg:avg(scores), best:Math.min(...scores), worst:Math.max(...scores), scores, manual:true };
-  }
-  return s || null;
-}
-
-function getCourse(id){ return S.courses.find(c=>c.id===id); }
-
-function scoreVsPar(score, par){
-  const d = score-par;
-  if(d<=-2) return {label:'Eagle',cls:'chip-gold'};
-  if(d===-1) return {label:'Birdie',cls:'chip-green'};
-  if(d===0)  return {label:'Par',cls:'chip-sky'};
-  if(d===1)  return {label:'Bogey',cls:'chip-fire'};
-  return {label:`+${d}`,cls:'chip-rose'};
-}
-
-function avgColor(avg, par){
-  const d = avg-par;
-  if(d<=-0.5) return 'var(--grass)';
-  if(d<=0.1)  return 'var(--sky)';
-  if(d<=0.8)  return 'var(--fire)';
-  return 'var(--rose)';
-}
-
-function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2400); }
-
-function courseTotalRounds(cid){
-  const hs = S.holeStats[cid] || {};
-  const h1 = Object.values(hs)[0];
-  return h1 ? h1.count : 0;
-}
-
-function globalStats(){
-  let rounds=437, throws=0, totalDiff=0, birdies=0, aces=0;
-  S.courses.forEach(c=>{
-    const hs = S.holeStats[c.id]||{};
-    Object.entries(hs).forEach(([h,d])=>{
-      const par = c.pars[parseInt(h)-1]||3;
-      throws += d.count;
-      totalDiff += (d.avg-par)*d.count;
-      if(d.scores) d.scores.forEach(s=>{ if(s<par) birdies++; if(s===1) aces++; });
-    });
-  });
-  S.throws.forEach(t=>{
-    const c=getCourse(t.courseId);
-    const par=c?c.pars[t.hole-1]:3;
-    throws++;totalDiff+=t.score-par;
-    if(t.score<par)birdies++;if(t.score===1)aces++;
-  });
-  return { rounds, throws, avgDiff: throws?totalDiff/throws:0, birdies, aces };
-}
 
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
@@ -2237,8 +2101,7 @@ function saveRound(){
 
   save(); renderRecentRounds(); renderSidebar();
   toast(`✅ Round saved! ${pm>=0?'+':''}${pm} vs par · ${birdies} birdies`);
-  // Auto-sync to GitHub if configured
-  syncToGitHub(false);
+  syncToSupabase();
   resetLog();
 }
 
@@ -2795,6 +2658,7 @@ function updateFlightPreview(){
 function clearDiscForm(){
   document.getElementById('nd-name').value='';
   document.getElementById('nd-notes').value='';
+  document.getElementById('nd-weight').value='';
   document.getElementById('nd-type').value='Distance Driver';
   document.querySelectorAll('.type-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.fnum-btn').forEach(b=>b.classList.remove('active'));
@@ -2818,8 +2682,9 @@ function renderDiscs(){
       <div class="disc-name">${d.name}</div>
       <div class="disc-type" style="color:${typeColor}">${d.type}</div>
       <div class="disc-nums">
-        <span class="dn">S:${d.speed}</span><span class="dn">G:${d.glide}</span>
-        <span class="dn">T:${d.turn}</span><span class="dn">F:${d.fade}</span>
+        ${d.speed!=null?`<span class="dn">S:${d.speed}</span>`:''}${d.glide!=null?`<span class="dn">G:${d.glide}</span>`:''}
+        ${d.turn!=null?`<span class="dn">T:${d.turn}</span>`:''}${d.fade!=null?`<span class="dn">F:${d.fade}</span>`:''}
+        ${d.weight?`<span class="dn" style="color:var(--sky)">${d.weight}g</span>`:''}
       </div>
       ${d.notes?`<div style="font-size:10px;color:var(--muted);margin-top:5px">${d.notes}</div>`:''}
       <div class="disc-perf">${throws.length?`${throws.length} logged throws · avg ${a.toFixed(2)}`:'No logged throws yet'}</div>
@@ -2838,10 +2703,12 @@ function addDisc(){
     glide: flightState.glide,
     turn: flightState.turn,
     fade: flightState.fade,
+    weight: document.getElementById('nd-weight').value ? parseInt(document.getElementById('nd-weight').value) : null,
     notes: document.getElementById('nd-notes').value
   });
   save(); renderDiscs();
   clearDiscForm();
+  syncToSupabase();
   toast('✅ '+name+' added to bag!');
 }
 
