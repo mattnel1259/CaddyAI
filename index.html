@@ -2739,40 +2739,111 @@ function addCourse(){
 // ═══════════════════════════════════════════════════════════
 function importCSV(input){
   const file=input.files[0]; if(!file)return;
+  toast('📂 Reading CSV...');
   const reader=new FileReader();
   reader.onload=e=>{
     const lines=e.target.result.split(/\r?\n/).filter(l=>l.trim());
-    let imported=0, newCourses=0;
+    if(lines.length < 2){ toast('⚠️ CSV appears empty'); return; }
+
+    let imported=0, newCourses=0, skipped=0;
     const parMap={};
+
+    // First pass — collect all par rows
     lines.slice(1).forEach(line=>{
       const cols=parseCSVLine(line);
-      if(cols.length<9)return;
-      const name=cols[0].trim(), course=cols[1].trim().replace(/\s+/g,' ');
+      if(cols.length<9) return;
+      const name=cols[0].trim();
+      const course=cols[1].trim().replace(/\s+/g,' ');
+      const scores=[];
+      for(let i=8;i<cols.length;i++){
+        const v=cols[i].trim(); if(v==='') break;
+        const n=parseInt(v); if(!isNaN(n)) scores.push(n); else break;
+      }
+      if(name==='Par' && scores.length){ parMap[course]=scores; }
+    });
+
+    // Second pass — collect player names to find the primary player
+    const playerCounts={};
+    lines.slice(1).forEach(line=>{
+      const cols=parseCSVLine(line);
+      if(cols.length<9) return;
+      const name=cols[0].trim();
+      if(name && name!=='Par'){
+        // Use just first name+last for grouping (strip group names like "Matt Nelson + Mark")
+        const primary = name.split('+')[0].trim();
+        playerCounts[primary]=(playerCounts[primary]||0)+1;
+      }
+    });
+    // Find the most common player name (that's the account holder)
+    const primaryPlayer = Object.entries(playerCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '';
+    console.log('Primary player detected:', primaryPlayer, '- counts:', playerCounts);
+
+    // Third pass — import rounds for the primary player
+    lines.slice(1).forEach(line=>{
+      const cols=parseCSVLine(line);
+      if(cols.length<9) return;
+      const name=cols[0].trim();
+      const course=cols[1].trim().replace(/\s+/g,' ');
       const date=cols[3].trim().substring(0,10);
       const scores=[];
       for(let i=8;i<cols.length;i++){
-        const v=cols[i].trim(); if(v==='')break;
+        const v=cols[i].trim(); if(v==='') break;
         const n=parseInt(v); if(!isNaN(n)) scores.push(n); else break;
       }
-      if(name==='Par'){parMap[course]=scores;return;}
-      if(!name.includes('Matt Nelson')||!scores.length)return;
+
+      if(name==='Par') return;
+      // Match primary player (handle "Matt Nelson + Mark" style group names)
+      const isPlayer = name.includes(primaryPlayer) || name.split('+')[0].trim()===primaryPlayer;
+      if(!isPlayer || !scores.length){ skipped++; return; }
+
+      // Find or create course
       let c=S.courses.find(x=>x.name===course);
       if(!c){
         const pars=parMap[course]||Array(scores.length).fill(3);
         c={id:'c_'+Date.now()+'_'+(newCourses++),name:course,holes:scores.length,pars:pars.slice(0,scores.length)};
         S.courses.push(c);
       }
+
+      // Also create a round entry
+      const pars=c.pars;
+      const total=scores.reduce((a,b)=>a+b,0);
+      const totalPar=pars.slice(0,scores.length).reduce((a,b)=>a+b,0);
+      const pm=total-totalPar;
+      const roundId='csv_'+c.id+'_'+date+'_'+total;
+
+      if(!(S.rounds||[]).find(r=>r.id===roundId)){
+        if(!S.rounds) S.rounds=[];
+        S.rounds.push({
+          id:roundId, courseId:c.id, courseName:c.name, date,
+          total, pm, holes:scores.length, scores,
+          birdies:scores.filter((s,i)=>s<(pars[i]||3)).length,
+          eagles:scores.filter((s,i)=>s<=(pars[i]||3)-2).length,
+          bogeys:scores.filter((s,i)=>s===(pars[i]||3)+1).length,
+          doubles:scores.filter((s,i)=>s>=(pars[i]||3)+2).length,
+          pars:scores.filter((s,i)=>s===(pars[i]||3)).length,
+          cond:'', partners:'', notes:'imported from UDisc'
+        });
+      }
+
+      // Import hole scores as throws
       scores.forEach((sc,i)=>{
-        if(sc<=0)return;
+        if(sc<=0) return;
         const h=i+1;
-        if(!S.throws.find(t=>t.courseId===c.id&&t.hole===h&&t.date===date)){
-          S.throws.push({id:'t'+Date.now()+'_'+imported+'_'+i,courseId:c.id,hole:h,date,disc:'',score:sc,landingX:80,landingY:80,cond:'Calm',shot:'',notes:''});
+        const throwId='csv_'+c.id+'_h'+h+'_'+date;
+        if(!S.throws.find(t=>t.id===throwId)){
+          S.throws.push({
+            id:throwId, courseId:c.id, hole:h, date,
+            disc:'', score:sc, throwIndex:0,
+            throwType:'', landing:'', cond:'', notes:''
+          });
           imported++;
         }
       });
     });
+
     save(); renderAll();
-    toast(`✅ Imported ${imported} throws!`);
+    if(currentUser) syncToSupabase();
+    toast(`✅ Imported ${imported} hole scores across ${newCourses} new courses! (${(S.rounds||[]).filter(r=>r.notes==='imported from UDisc').length} rounds total)`);
     input.value='';
   };
   reader.readAsText(file);

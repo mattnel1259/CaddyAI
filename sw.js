@@ -1,4 +1,4 @@
-const CACHE = 'caddyai-v19';
+const CACHE = 'caddyai-v20';
 const ASSETS = [
   '/index.html',
   '/manifest.json',
