@@ -1,7 +1,7 @@
 {
-  "name": "CaddyAI - Disc Golf Analytics",
+  "name": "CaddyAI — Analyze, Execute, Improve",
   "short_name": "CaddyAI",
-  "description": "Personal disc golf analytics, AI caddie, and round tracker",
+  "description": "Disc golf analytics, AI caddie, and round tracker",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0e1117",

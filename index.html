@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CaddyAI">
-<meta name="theme-color" content="#22c55e">
+<meta name="theme-color" content="#3a9a6a">
 <meta name="description" content="Personal disc golf analytics, AI caddie, and round tracker">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -18,20 +18,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap');
 
 :root {
-  --ink: #0e1117;
-  --ink2: #1a2030;
-  --ink3: #252d3d;
-  --border: #2e3a4e;
-  --muted: #5a6a82;
-  --text: #d4dff0;
-  --dim: #8a9ab5;
-  --grass: #22c55e;
-  --grass2: #16a34a;
-  --sky: #38bdf8;
-  --fire: #fb923c;
+  --ink: #0a0f0a;
+  --ink2: #111a11;
+  --ink3: #1a271a;
+  --border: #2a3d2a;
+  --muted: #5a7a5a;
+  --text: #e8f0e8;
+  --dim: #8aaa8a;
+  --grass: #2d6a2d;
+  --grass2: #1e4d1e;
+  --sky: #7dd8f8;
+  --fire: #f5a623;
   --rose: #f43f5e;
-  --gold: #fbbf24;
+  --gold: #f5e642;
   --radius: 10px;
+
+  /* New palette names for clarity */
+  --pine: #3a9a6a;
+  --pine2: #2a7a50;
+  --pine-light: #4aaa7a;
+  --yellow: #f5c842;
+  --yellow2: #d4a800;
+  --blue: #7ab8e8;
+  --blue2: #5a9fd4;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
@@ -110,7 +119,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   padding: 6px 0;
 }
 .mob-nav-btn .icon { font-size: 20px; line-height: 1; }
-.mob-nav-btn.active { color: var(--grass); }
+.mob-nav-btn.active { color: var(--yellow); }
 .mob-nav-btn:hover { color: var(--text); }
 
 /* PWA install banner */
@@ -139,7 +148,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 .brand {
   font-family: 'Archivo Black', sans-serif;
   font-size: 20px; letter-spacing: -0.5px;
-  color: var(--grass); margin-right: 32px;
+  color: var(--yellow); margin-right: 32px;
 }
 .brand span { color: var(--text); }
 .nav-btn {
@@ -149,13 +158,13 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   border-bottom: 2px solid transparent; transition: all .15s;
 }
 .nav-btn:hover { color: var(--text); }
-.nav-btn.active { color: var(--grass); border-bottom-color: var(--grass); }
+.nav-btn.active { color: var(--yellow); border-bottom-color: var(--yellow); }
 .topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .btn { padding: 7px 14px; border-radius: 7px; font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
 .btn-ghost { background: none; border: 1px solid var(--border); color: var(--dim); }
 .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
-.btn-green { background: var(--grass); color: #000; }
-.btn-green:hover { background: var(--grass2); }
+.btn-green { background: var(--pine); color: var(--yellow); }
+.btn-green:hover { background: var(--pine-light); }
 .course-pill {
   font-size: 12px; font-weight: 500; color: var(--sky);
   background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.2);
@@ -179,7 +188,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   border-left: 2px solid transparent;
 }
 .course-item:hover { background: var(--ink3); }
-.course-item.active { background: rgba(34,197,94,.07); border-left-color: var(--grass); }
+.course-item.active { background: rgba(245,230,66,.06); border-left-color: var(--yellow); }
 .course-item-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
 .course-item-meta { font-size: 10px; color: var(--muted); }
 .course-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -187,7 +196,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 .s-stat { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
 .s-stat-val { font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 500; color: var(--text); }
 .add-course-btn { width: 100%; background: none; border: 1px dashed var(--border); color: var(--muted); font-family: 'Archivo', sans-serif; font-size: 12px; padding: 7px; border-radius: 7px; cursor: pointer; transition: all .15s; margin-top: 8px; }
-.add-course-btn:hover { border-color: var(--grass); color: var(--grass); }
+.add-course-btn:hover { border-color: var(--yellow); color: var(--yellow); }
 
 /* ── MAIN SCROLL ── */
 #main { flex: 1; overflow-y: auto; padding: 24px; }
@@ -222,7 +231,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 }
 .hole-card:hover { border-color: var(--grass); transform: translateY(-1px); }
 .hole-card.problem { border-color: rgba(244,63,94,.35); }
-.hole-card.strength { border-color: rgba(34,197,94,.35); }
+.hole-card.strength { border-color: rgba(45,106,45,.5); }
 .hc-num { font-family: 'Archivo Black', sans-serif; font-size: 28px; color: var(--ink3); line-height: 1; }
 .hc-par { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
 .hc-avg { font-family: 'Fira Code', monospace; font-size: 20px; font-weight: 500; }
@@ -254,7 +263,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   font-family: 'Archivo', sans-serif; font-size: 13px;
   padding: 8px 10px; outline: none; transition: border-color .15s;
 }
-.fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--grass); }
+.fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--yellow); }
 .fg select option { background: var(--ink3); }
 .form-actions { display: flex; gap: 10px; margin-top: 14px; }
 
@@ -271,14 +280,14 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 
 /* ── AI CADDIE PANEL ── */
 .ai-panel {
-  background: linear-gradient(135deg, rgba(34,197,94,.06), rgba(56,189,248,.04));
-  border: 1px solid rgba(34,197,94,.2); border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(45,106,45,.08), rgba(125,216,248,.05));
+  border: 1px solid rgba(45,106,45,.35); border-radius: var(--radius);
   padding: 18px; margin-bottom: 16px;
 }
 .ai-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .ai-orb {
   width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--grass), var(--sky));
+  background: linear-gradient(135deg, var(--pine), var(--blue));
   display: flex; align-items: center; justify-content: center; font-size: 18px;
 }
 .ai-title { font-family: 'Archivo Black', sans-serif; font-size: 16px; }
@@ -295,7 +304,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 .caddie-hole-select { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
 .caddie-recommendation {
   background: linear-gradient(135deg, rgba(251,191,36,.06), rgba(34,197,94,.04));
-  border: 1px solid rgba(251,191,36,.25); border-radius: var(--radius); padding: 18px;
+  border: 1px solid rgba(245,230,66,.3); border-radius: var(--radius); padding: 18px;
 }
 .caddie-rec-title { font-family: 'Archivo Black', sans-serif; font-size: 16px; color: var(--gold); margin-bottom: 10px; }
 
@@ -325,7 +334,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   overflow: hidden;
   transition: border-color .15s;
 }
-.hole-log-card.active { border-color: var(--grass); }
+.hole-log-card.active { border-color: var(--yellow); }
 .hole-log-card.scored { border-color: var(--border); opacity: .85; }
 
 .hlc-header {
@@ -375,7 +384,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 .score-btn:hover { border-color: var(--muted); color: var(--text); transform: scale(1.05); }
 .score-btn.selected-ace    { background: rgba(251,191,36,.2); border-color: var(--gold); color: var(--gold); transform: scale(1.1); }
 .score-btn.selected-eagle  { background: rgba(251,191,36,.15); border-color: var(--gold); color: var(--gold); transform: scale(1.08); }
-.score-btn.selected-birdie { background: rgba(34,197,94,.15); border-color: var(--grass); color: var(--grass); transform: scale(1.08); }
+.score-btn.selected-birdie { background: rgba(45,106,45,.25); border-color: var(--pine-light); color: var(--pine-light); transform: scale(1.08); }
 .score-btn.selected-par    { background: rgba(56,189,248,.12); border-color: var(--sky); color: var(--sky); transform: scale(1.05); }
 .score-btn.selected-bogey  { background: rgba(251,146,60,.12); border-color: var(--fire); color: var(--fire); transform: scale(1.05); }
 .score-btn.selected-double { background: rgba(244,63,94,.12); border-color: var(--rose); color: var(--rose); transform: scale(1.05); }
@@ -396,7 +405,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 .toggle-btn.selected { background: rgba(56,189,248,.12); border-color: var(--sky); color: var(--sky); font-weight: 600; }
 .toggle-btn.selected.bh { background: rgba(34,197,94,.12); border-color: var(--grass); color: var(--grass); }
 .toggle-btn.selected.fh { background: rgba(251,191,36,.12); border-color: var(--gold); color: var(--gold); }
-.toggle-btn.selected.fairway { background: rgba(34,197,94,.12); border-color: var(--grass); color: var(--grass); }
+.toggle-btn.selected.fairway { background: rgba(45,106,45,.2); border-color: var(--pine-light); color: var(--pine-light); }
 .toggle-btn.selected.rough   { background: rgba(251,146,60,.12); border-color: var(--fire); color: var(--fire); }
 .toggle-btn.selected.ob      { background: rgba(244,63,94,.12); border-color: var(--rose); color: var(--rose); }
 .toggle-btn.selected.circle  { background: rgba(56,189,248,.12); border-color: var(--sky); color: var(--sky); }
@@ -405,19 +414,19 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 /* ── RECOMMENDATIONS ── */
 .rec-badge {
   display: flex; align-items: flex-start; gap: 10px;
-  background: linear-gradient(135deg, rgba(251,191,36,.08), rgba(34,197,94,.05));
-  border: 1px solid rgba(251,191,36,.25);
+  background: linear-gradient(135deg, rgba(245,230,66,.07), rgba(45,106,45,.08));
+  border: 1px solid rgba(245,230,66,.3);
   border-radius: 8px; padding: 10px 12px;
 }
 .rec-badge-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
 .rec-badge-content { flex: 1; min-width: 0; }
-.rec-badge-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); margin-bottom: 3px; }
+.rec-badge-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--yellow); margin-bottom: 3px; }
 .rec-badge-text { font-size: 12px; line-height: 1.6; color: var(--text); }
 .rec-badge-stat { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
-.rec-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(251,191,36,.4); color: var(--gold); background: rgba(251,191,36,.08); margin-right: 4px; }
+.rec-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(245,230,66,.4); color: var(--yellow); background: rgba(245,230,66,.08); margin-right: 4px; }
 .rec-confidence { display: inline-flex; gap: 2px; vertical-align: middle; margin-left: 4px; }
 .rec-confidence span { width: 5px; height: 5px; border-radius: 50%; background: var(--border); display: inline-block; }
-.rec-confidence span.on { background: var(--gold); }
+.rec-confidence span.on { background: var(--yellow); }
 /* Mini version for dashboard hole cards */
 .rec-mini { font-size: 10px; color: var(--gold); margin-top: 5px; line-height: 1.5; }
 
@@ -429,10 +438,10 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   font-family: 'Fira Code', monospace; font-size: 15px; font-weight: 600;
   text-align: center; outline: none; transition: border-color .15s;
 }
-.sc-score-input:focus { border-color: var(--grass); }
+.sc-score-input:focus { border-color: var(--yellow); }
 .sc-score-input.ace    { background: rgba(251,191,36,.15); border-color: var(--gold); color: var(--gold); }
 .sc-score-input.eagle  { background: rgba(251,191,36,.1);  border-color: var(--gold); color: var(--gold); }
-.sc-score-input.birdie { background: rgba(34,197,94,.12);  border-color: var(--grass); color: var(--grass); }
+.sc-score-input.birdie { background: rgba(45,106,45,.2);  border-color: var(--pine-light); color: var(--pine-light); }
 .sc-score-input.par    { background: rgba(56,189,248,.1);  border-color: var(--sky);   color: var(--sky); }
 .sc-score-input.bogey  { background: rgba(251,146,60,.1);  border-color: var(--fire);  color: var(--fire); }
 .sc-score-input.double { background: rgba(244,63,94,.12);  border-color: var(--rose);  color: var(--rose); }
@@ -442,7 +451,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 .course-suggestion { padding: 10px 14px; cursor: pointer; transition: background .1s; border-bottom: 1px solid var(--border); }
 .course-suggestion:last-child { border-bottom: none; }
 .course-suggestion:hover { background: var(--ink3); }
-.course-suggestion.known { border-left: 3px solid var(--grass); }
+.course-suggestion.known { border-left: 3px solid var(--pine-light); }
 .course-suggestion.ai-result { border-left: 3px solid var(--sky); }
 
 .disc-suggestion {
@@ -461,7 +470,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   white-space: nowrap;
 }
 .type-btn:hover { border-color: var(--muted); color: var(--text); }
-.type-btn.active { background: rgba(34,197,94,.12); border-color: var(--grass); color: var(--grass); }
+.type-btn.active { background: rgba(245,230,66,.1); border-color: var(--yellow); color: var(--yellow); }
 
 .flight-group { display: flex; flex-direction: column; gap: 8px; }
 .flight-label { display: flex; align-items: baseline; gap: 8px; }
@@ -479,7 +488,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   display: flex; align-items: center; justify-content: center;
 }
 .fnum-btn:hover { border-color: var(--dim); color: var(--text); transform: scale(1.05); }
-.fnum-btn.active { background: rgba(34,197,94,.15); border-color: var(--grass); color: var(--grass); font-weight: 700; transform: scale(1.08); box-shadow: 0 0 0 2px rgba(34,197,94,.2); }
+.fnum-btn.active { background: rgba(245,230,66,.12); border-color: var(--yellow); color: var(--yellow); font-weight: 700; transform: scale(1.08); box-shadow: 0 0 0 2px rgba(245,230,66,.25); }
 .fnum-understable { border-color: rgba(56,189,248,.2); color: var(--sky); }
 .fnum-understable:hover { border-color: var(--sky); }
 .fnum-understable.active { background: rgba(56,189,248,.15); border-color: var(--sky); color: var(--sky); box-shadow: 0 0 0 2px rgba(56,189,248,.2); }
@@ -560,8 +569,9 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 <div id="auth-screen" style="display:none;position:fixed;inset:0;background:var(--ink);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:400px">
     <div style="text-align:center;margin-bottom:32px">
-      <div style="font-family:'Archivo Black',sans-serif;font-size:36px;color:var(--grass)">Caddy<span style="color:var(--text)">AI</span></div>
-      <div style="font-size:13px;color:var(--muted);margin-top:6px">Disc golf analytics & AI caddie</div>
+      <img src="icons/logo.png" style="width:120px;height:120px;object-fit:contain;margin-bottom:8px;border-radius:16px" alt="CaddyAI">
+      <div style="font-family:'Archivo Black',sans-serif;font-size:36px;color:var(--pine-light)">Caddy<span style="color:var(--blue)">AI</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:2px;text-transform:uppercase;font-weight:600">Analyze, Execute, Improve.</div>
     </div>
 
     <!-- Tab switcher -->
@@ -593,7 +603,10 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <div class="brand">Caddy<span>AI</span></div>
+  <div class="brand" style="display:flex;align-items:center;gap:10px">
+    <img src="icons/logo.png" style="height:36px;width:36px;object-fit:contain;border-radius:6px" alt="CaddyAI">
+    <span style="color:var(--pine-light)">Caddy<span style="color:var(--blue)">AI</span></span>
+  </div>
   <button class="nav-btn active" onclick="nav('dashboard')">Dashboard</button>
   <button class="nav-btn" onclick="nav('caddie')">🎯 AI Caddie</button>
   <button class="nav-btn" onclick="nav('log')">Log Round</button>
