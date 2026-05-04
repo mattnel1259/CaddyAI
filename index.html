@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CaddyAI">
-<meta name="theme-color" content="#3a9a6a">
+<meta name="theme-color" content="#2d6a2d">
 <meta name="description" content="Personal disc golf analytics, AI caddie, and round tracker">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -18,6 +18,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap');
 
 :root {
+  --ink: #f2f6f2;
+  --ink2: #ffffff;
+  --ink3: #e8f0e8;
+  --border: #c0d8c0;
+  --muted: #6a8a6a;
+  --text: #1a2e1a;
+  --dim: #3a5a3a;
+  --grass: #2d6a2d;
+  --grass2: #1e4d1e;
+  --sky: #7dd8f8;
+  --fire: #d4720a;
+  --rose: #c4304a;
+  --gold: #c49000;
+  --radius: 10px;
+  --pine: #2d6a2d;
+  --pine2: #1e4d1e;
+  --pine-light: #3a8a3a;
+  --yellow: #c49000;
+  --yellow2: #a47000;
+  --blue: #2a8abf;
+  --blue2: #1a6a9f;
+}
+
+/* ── DARK MODE ── */
+body.dark {
   --ink: #0a0f0a;
   --ink2: #111a11;
   --ink3: #1a271a;
@@ -31,9 +56,6 @@
   --fire: #f5a623;
   --rose: #f43f5e;
   --gold: #f5e642;
-  --radius: 10px;
-
-  /* New palette names for clarity */
   --pine: #3a9a6a;
   --pine2: #2a7a50;
   --pine-light: #4aaa7a;
@@ -105,21 +127,21 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   position: fixed;
   bottom: 0; left: 0; right: 0;
   height: 58px;
-  background: var(--ink2);
+  background: var(--pine);
   border-top: 1px solid var(--border);
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom);
 }
 .mob-nav-btn {
   flex: 1; background: none; border: none;
-  color: var(--muted); font-family: 'Archivo', sans-serif;
+  color: rgba(255,255,255,.6); font-family: 'Archivo', sans-serif;
   font-size: 10px; font-weight: 500;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px; cursor: pointer; transition: color .15s;
   padding: 6px 0;
 }
 .mob-nav-btn .icon { font-size: 20px; line-height: 1; }
-.mob-nav-btn.active { color: var(--yellow); }
+.mob-nav-btn.active { color: #ffffff; }
 .mob-nav-btn:hover { color: var(--text); }
 
 /* PWA install banner */
@@ -140,8 +162,8 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 /* ── EXISTING CSS CONTINUES ── */
 #topbar {
   height: 52px; flex-shrink: 0;
-  background: var(--ink2);
-  border-bottom: 1px solid var(--border);
+  background: var(--pine);
+  border-bottom: 1px solid var(--pine2);
   display: flex; align-items: center;
   padding: 0 20px; gap: 0; position: relative; z-index: 10;
 }
@@ -153,21 +175,22 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 .brand span { color: var(--text); }
 .nav-btn {
   height: 52px; padding: 0 16px; border: none; background: none;
-  color: var(--muted); font-family: 'Archivo', sans-serif;
+  color: rgba(255,255,255,.7); font-family: 'Archivo', sans-serif;
   font-size: 13px; font-weight: 500; cursor: pointer;
   border-bottom: 2px solid transparent; transition: all .15s;
 }
-.nav-btn:hover { color: var(--text); }
-.nav-btn.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+.nav-btn:hover { color: #ffffff; }
+.nav-btn.active { color: #ffffff; border-bottom-color: #ffffff; }
 .topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .btn { padding: 7px 14px; border-radius: 7px; font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
 .btn-ghost { background: none; border: 1px solid var(--border); color: var(--dim); }
+.topbar-right .btn-ghost { border-color: rgba(255,255,255,.4); color: rgba(255,255,255,.8); }
 .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
 .btn-green { background: var(--pine); color: var(--yellow); }
 .btn-green:hover { background: var(--pine-light); }
 .course-pill {
-  font-size: 12px; font-weight: 500; color: var(--sky);
-  background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.2);
+  font-size: 12px; font-weight: 500; color: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
   padding: 4px 10px; border-radius: 20px;
 }
 
@@ -177,7 +200,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 /* ── SIDEBAR ── */
 #sidebar {
   width: 220px; flex-shrink: 0;
-  background: var(--ink2); border-right: 1px solid var(--border);
+  background: var(--ink3); border-right: 1px solid var(--border);
   display: flex; flex-direction: column; overflow: hidden;
 }
 .sidebar-head { padding: 14px 14px 8px; }
@@ -335,7 +358,8 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 }
 .hole-scorer-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px;
+  gap: 12px;
+  padding: 14px 16px;
   background: var(--ink3);
   border-bottom: 1px solid var(--border);
 }
@@ -728,7 +752,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 <body>
 
 <!-- AUTH SCREEN -->
-<div id="auth-screen" style="display:none;position:fixed;inset:0;background:var(--ink);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px">
+<div id="auth-screen" style="display:none;position:fixed;inset:0;background:var(--pine);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:400px">
     <div style="text-align:center;margin-bottom:32px">
       <img src="icons/logo.png" style="width:120px;height:120px;object-fit:contain;margin-bottom:8px;border-radius:16px" alt="CaddyAI">
@@ -742,7 +766,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
       <button id="auth-tab-signup" onclick="switchAuthTab('signup')" style="flex:1;padding:8px;border:none;border-radius:7px;font-family:Archivo,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted);transition:all .15s">Sign Up</button>
     </div>
 
-    <div style="background:var(--ink2);border:1px solid var(--border);border-radius:12px;padding:24px">
+    <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:24px">
       <div class="fg" style="margin-bottom:14px">
         <label>Email</label>
         <input type="email" id="auth-email" placeholder="your@email.com" style="width:100%">
@@ -767,7 +791,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 <div id="topbar">
   <div class="brand" style="display:flex;align-items:center;gap:10px">
     <img src="icons/logo.png" style="height:36px;width:36px;object-fit:contain;border-radius:6px" alt="CaddyAI">
-    <span style="color:var(--pine-light)">Caddy<span style="color:var(--blue)">AI</span></span>
+    <span style="color:#ffffff;font-family:'Archivo Black',sans-serif">Caddy<span style="color:var(--sky)">AI</span></span>
   </div>
   <button class="nav-btn active" onclick="nav('dashboard')">Dashboard</button>
   <button class="nav-btn" onclick="nav('caddie')">🎯 AI Caddie</button>
@@ -908,12 +932,29 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
               <div style="font-size:15px;font-weight:700;color:var(--text)" id="scb-name"></div>
               <div style="font-size:12px;color:var(--muted);margin-top:3px" id="scb-meta"></div>
             </div>
-            <button class="btn btn-green" onclick="buildScorecard()" style="white-space:nowrap">
-              Start Round →
-            </button>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn btn-ghost" style="font-size:12px" onclick="toggleDistanceEditor()">📏 Edit Distances</button>
+              <button class="btn btn-green" onclick="buildScorecard()" style="white-space:nowrap">Start Round →</button>
+            </div>
           </div>
+
           <!-- Layout hole pars preview -->
-          <div id="scb-pars" style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap"></div>
+          <div id="scb-pars" style="margin-top:10px"></div>
+
+          <!-- Distance editor — hidden by default -->
+          <div id="dist-editor" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
+            <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">
+              Edit Hole Distances (feet)
+              <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0"> — leave blank if unknown</span>
+            </div>
+            <div id="dist-inputs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:12px"></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-green" style="font-size:12px" onclick="saveDistances()">💾 Save Distances</button>
+              <button class="btn btn-ghost" style="font-size:12px" onclick="lookupDistances()">🤖 AI Lookup</button>
+              <button class="btn btn-ghost" style="font-size:12px" onclick="toggleDistanceEditor()">Cancel</button>
+            </div>
+            <div id="dist-lookup-status" style="font-size:11px;color:var(--muted);margin-top:8px"></div>
+          </div>
         </div>
 
         <!-- New layout form — shows when "Add new layout" selected -->
@@ -1087,15 +1128,10 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
           <label>Disc Name</label>
           <input type="text" id="nd-name" placeholder="e.g. Innova Destroyer" autocomplete="off">
         </div>
-        <div class="fg"><label>Type</label>
-          <div id="nd-type-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
-            <button class="type-btn active" data-val="Distance Driver" onclick="selectType(this)">💨 Distance</button>
-            <button class="type-btn" data-val="Fairway Driver" onclick="selectType(this)">🎯 Fairway</button>
-            <button class="type-btn" data-val="Hybrid Driver" onclick="selectType(this)">⚡ Hybrid</button>
-            <button class="type-btn" data-val="Midrange" onclick="selectType(this)">🔵 Midrange</button>
-            <button class="type-btn" data-val="Putter" onclick="selectType(this)">🟢 Putter</button>
-          </div>
-          <input type="hidden" id="nd-type" value="Distance Driver">
+        <div class="fg" style="display:flex;align-items:center;gap:12px;padding-top:22px">
+          <div style="font-size:12px;color:var(--muted)">Type:</div>
+          <div id="nd-type-display" style="font-size:13px;font-weight:600;color:var(--muted)">— set speed to classify</div>
+          <input type="hidden" id="nd-type" value="">
         </div>
       </div>
 
@@ -1215,6 +1251,22 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   <!-- SETTINGS -->
   <div id="page-settings" class="page">
     <div class="sec-head"><div class="sec-title">Settings</div><div class="sec-sub">Sync, data management, and preferences</div></div>
+
+    <!-- Appearance -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">🎨 Appearance</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">Dark Mode</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Switch between light and dark theme</div>
+        </div>
+        <button id="dark-mode-toggle" onclick="toggleDarkMode()"
+          style="width:52px;height:28px;border-radius:14px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0"
+          title="Toggle dark mode">
+          <span id="dark-mode-knob" style="position:absolute;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)"></span>
+        </button>
+      </div>
+    </div>
 
     <!-- Supabase Sync Status -->
     <div class="panel" style="margin-bottom:16px">
@@ -1384,11 +1436,14 @@ function init(){
 
   // Restore selected course, default to Lighthouse
   if(!S.selectedCourse || !S.courses.find(c=>c.id===S.selectedCourse)){
-    S.selectedCourse = S.courses.find(c=>c.id==='c_lighthouse_at_como_l')?.id || S.courses[0]?.id;
+    S.selectedCourse = S.courses.find(c=>c.name==='Lighthouse at Como Lake')?.id
+      || S.courses.find(c=>S.holeStats?.[c.id])?.id
+      || S.courses[0]?.id;
   }
 
   save();
   renderAll();
+  initDarkMode();
 
   // Check for existing Supabase session
   sb.auth.getSession().then(({ data: { session } }) => {
@@ -1418,7 +1473,31 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 
-// ── AUTH UI ──
+// ── DARK MODE ──
+function applyDarkMode(dark){
+  document.body.classList.toggle('dark', dark);
+  const btn = document.getElementById('dark-mode-toggle');
+  const knob = document.getElementById('dark-mode-knob');
+  if(btn){
+    btn.style.background = dark ? '#3a8a3a' : '#c0d8c0';
+    knob.style.left = dark ? '27px' : '3px';
+  }
+}
+
+function toggleDarkMode(){
+  const isDark = document.body.classList.contains('dark');
+  localStorage.setItem('cai_dark_mode', !isDark ? '1' : '0');
+  applyDarkMode(!isDark);
+}
+
+function initDarkMode(){
+  const saved = localStorage.getItem('cai_dark_mode');
+  // Default to light mode unless user explicitly set dark
+  const dark = saved === '1';
+  applyDarkMode(dark);
+}
+
+
 function switchAuthTab(tab){
   const isLogin = tab === 'login';
   document.getElementById('auth-tab-login').style.cssText = isLogin
@@ -1569,6 +1648,9 @@ async function loadFromSupabase(){
 
 // ── SETTINGS PAGE ──
 function renderSettings(){
+  // Sync dark mode toggle
+  const isDark = document.body.classList.contains('dark');
+  applyDarkMode(isDark);
   const last = localStorage.getItem('sb_last_sync');
   const infoEl = document.getElementById('sync-info');
   if(infoEl && last){
@@ -1756,7 +1838,7 @@ function renderSidebar(){
   const gs = globalStats();
   document.getElementById('ss-rounds').textContent = gs.rounds;
   document.getElementById('ss-avg').textContent = (gs.avgDiff>=0?'+':'')+gs.avgDiff.toFixed(2);
-  document.getElementById('ss-avg').style.color = gs.avgDiff<=0?'var(--grass)':'var(--rose)';
+  document.getElementById('ss-avg').style.color = gs.avgDiff<=0?'var(--pine-light)':'var(--rose)';
   document.getElementById('ss-birdies').textContent = gs.birdies;
   document.getElementById('ss-aces').textContent = gs.aces;
   // Course pill
@@ -1770,6 +1852,10 @@ function selectCourse(id){ S.selectedCourse=id; save(); renderSidebar(); renderD
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════
 function renderDashboard(){
+  // Auto-select first course with holeStats if nothing selected
+  if(!S.selectedCourse || !getCourse(S.selectedCourse)){
+    S.selectedCourse = S.courses.find(c => S.holeStats?.[c.id])?.id || S.courses[0]?.id;
+  }
   const c = getCourse(S.selectedCourse);
   const kpiEl = document.getElementById('kpi-row');
   const title = document.getElementById('dash-title');
@@ -1932,9 +2018,11 @@ function recBadgeHTML(rec, compact=false){
 // ═══════════════════════════════════════════════════════════
 // LOG ROUND — LAYOUT AWARE
 // ═══════════════════════════════════════════════════════════
-let activeCourse = null;  // { id, name }
-let activeLayout = null;  // { id, name, holes, pars, distances }
-let holeData = [];        // per-hole state
+let activeCourse = null;
+let activeLayout = null;
+let holeData = [];
+let activeHoleIndex = 0;
+let editingRoundId = null;
 let courseSearchTimer = null;
 
 // Layout storage key
@@ -1962,6 +2050,11 @@ function renderLog(){
 
 function resetLog(){
   activeCourse = null; activeLayout = null; holeData = [];
+  editingRoundId = null;
+  // Reset save button text
+  document.querySelectorAll('[onclick="saveRound()"]').forEach(btn=>{
+    btn.textContent = '💾 Save Round';
+  });
   document.getElementById('log-step2').style.display = 'none';
   document.getElementById('log-step1').style.display = 'block';
   document.getElementById('log-recent-section').style.display = 'block';
@@ -2051,7 +2144,7 @@ function onLayoutChange(){
   const layout = layouts.find(l=>l.layoutId===val);
   if(!layout) return;
 
-  activeLayout = layout;
+  activeLayout = loadDistanceOverrides({...layout});
   showCourseBanner();
 }
 
@@ -2063,15 +2156,48 @@ function showCourseBanner(){
   document.getElementById('scb-meta').textContent =
     `${activeLayout.layoutName} · ${activeLayout.holes} holes · Par ${(activeLayout.pars||[]).reduce((a,b)=>a+b,0)}`;
 
-  // Show par chips
+  // Show par preview as a proper scorecard grid
   const pars = document.getElementById('scb-pars');
-  pars.innerHTML = (activeLayout.pars||[]).map((p,i) => {
-    const dist = activeLayout.distances?.[i];
-    return `<div style="text-align:center">
-      <div class="par-chip p${p}">H${i+1} P${p}</div>
-      ${dist?`<div class="dist-badge">${dist}ft</div>`:''}
+  const holes = activeLayout.pars || [];
+  const dists = activeLayout.distances || [];
+
+  // Split into front 9 and back 9
+  const front = holes.slice(0, 9);
+  const back = holes.slice(9);
+  const frontPar = front.reduce((a,b)=>a+b,0);
+  const backPar = back.reduce((a,b)=>a+b,0);
+  const totalPar = holes.reduce((a,b)=>a+b,0);
+
+  const makeRow = (startHole, pars, label) => {
+    const cells = pars.map((p, i) => {
+      const hNum = startHole + i;
+      const dist = dists[startHole + i - 1];
+      const pColor = p===3?'var(--blue)':p===4?'var(--yellow)':'var(--fire)';
+      return `<div style="text-align:center;flex:1;min-width:0">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">${hNum}</div>
+        <div style="font-family:'Fira Code',monospace;font-size:14px;font-weight:700;color:${pColor}">${p}</div>
+        ${dist?`<div style="font-size:8px;color:var(--muted)">${dist}</div>`:''}
+      </div>`;
+    }).join('');
+    const rowPar = pars.reduce((a,b)=>a+b,0);
+    return `<div style="display:flex;align-items:center;gap:2px;background:var(--ink3);border-radius:8px;padding:8px 10px">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);width:32px;flex-shrink:0">${label}</div>
+      <div style="display:flex;flex:1;gap:2px">${cells}</div>
+      <div style="text-align:center;width:36px;flex-shrink:0;border-left:1px solid var(--border);padding-left:8px">
+        <div style="font-size:9px;color:var(--muted)">PAR</div>
+        <div style="font-family:'Fira Code',monospace;font-size:14px;font-weight:700;color:var(--text)">${rowPar}</div>
+      </div>
     </div>`;
-  }).join('');
+  };
+
+  pars.innerHTML = `<div style="width:100%;display:flex;flex-direction:column;gap:6px;margin-top:4px">
+    ${makeRow(1, front, 'OUT')}
+    ${back.length ? makeRow(10, back, 'IN') : ''}
+    <div style="display:flex;justify-content:flex-end;gap:16px;padding:4px 10px 0;font-size:12px;color:var(--muted)">
+      <span>Total Par: <strong style="color:var(--text);font-family:'Fira Code',monospace">${totalPar}</strong></span>
+      <span>${holes.length} holes</span>
+    </div>
+  </div>`;
 }
 
 function saveNewLayout(){
@@ -2106,6 +2232,172 @@ function saveNewLayout(){
   showCourseBanner();
   toast('✅ Layout saved!');
 }
+
+function toggleDistanceEditor(){
+  const editor = document.getElementById('dist-editor');
+  const isOpen = editor.style.display !== 'none';
+  if(isOpen){ editor.style.display='none'; return; }
+
+  const inputs = document.getElementById('dist-inputs');
+  const holes = activeLayout?.holes || 18;
+  const dists = activeLayout?.distances || [];
+  const hasCommunityData = dists.filter(Boolean).length > 0;
+
+  inputs.innerHTML = Array.from({length:holes},(_,i)=>`
+    <div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:3px;text-align:center">H${i+1}</div>
+      <input type="number" id="dist-h${i+1}" value="${dists[i]||''}" placeholder="ft"
+        min="50" max="1200"
+        style="width:100%;background:var(--ink2);border:1px solid ${dists[i]?'var(--blue)':'var(--border)'};border-radius:6px;
+               color:var(--text);font-family:'Fira Code',monospace;font-size:13px;
+               padding:7px 6px;outline:none;text-align:center;transition:border-color .15s"
+        onfocus="this.style.borderColor='var(--pine-light)'" onblur="this.style.borderColor='${dists[i]?'var(--blue)':'var(--border)'}'">
+    </div>
+  `).join('');
+
+  const statusEl = document.getElementById('dist-lookup-status');
+  if(hasCommunityData){
+    statusEl.innerHTML = `<span style="color:var(--pine-light)">✅ Community distances loaded — edit and save to update</span>`;
+  } else {
+    statusEl.innerHTML = `<span style="color:var(--muted)">No distances yet — enter manually or use AI Lookup</span>`;
+  }
+
+  editor.style.display='block';
+  editor.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function saveDistances(){
+  if(!activeLayout) return;
+  const holes = activeLayout.holes || 18;
+  const distances = Array.from({length:holes},(_,i)=>{
+    const val = parseInt(document.getElementById(`dist-h${i+1}`)?.value)||0;
+    return val > 0 ? val : null;
+  });
+
+  activeLayout.distances = distances;
+
+  // Save locally
+  const overrides = JSON.parse(localStorage.getItem('cai_dist_overrides')||'{}');
+  overrides[activeLayout.layoutId] = distances;
+  localStorage.setItem('cai_dist_overrides', JSON.stringify(overrides));
+
+  // Save to custom layouts if custom
+  const customs = getAllLayouts();
+  const idx = customs.findIndex(l=>l.layoutId===activeLayout.layoutId);
+  if(idx>=0){ customs[idx].distances = distances; saveLayouts(customs); }
+
+  // Push to Supabase shared database
+  submitLayoutToSupabase(activeLayout, distances);
+
+  document.getElementById('dist-editor').style.display='none';
+  showCourseBanner();
+  toast('✅ Distances saved & shared with all CaddyAI users!');
+}
+
+async function submitLayoutToSupabase(layout, distances){
+  if(!currentUser) return;
+  try{
+    await sb.from('course_layouts').upsert({
+      id: layout.layoutId,
+      course_id: layout.courseId || activeCourse?.id,
+      course_name: activeCourse?.name || layout.courseName || '',
+      layout_id: layout.layoutId,
+      layout_name: layout.layoutName,
+      holes: layout.holes,
+      pars: layout.pars,
+      distances: distances,
+      submitted_by: currentUser.id,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'course_id,layout_id' });
+    console.log('✅ Layout distances shared to community database');
+  } catch(e){ console.error('Failed to share layout:', e); }
+}
+
+async function fetchLayoutFromSupabase(courseId, layoutId){
+  try{
+    const { data } = await sb.from('course_layouts')
+      .select('distances, pars, holes, verified, upvotes')
+      .eq('course_id', courseId)
+      .eq('layout_id', layoutId)
+      .single();
+    return data || null;
+  } catch(e){ return null; }
+}
+
+function loadDistanceOverrides(layout){
+  // First check local overrides
+  const overrides = JSON.parse(localStorage.getItem('cai_dist_overrides')||'{}');
+  if(overrides[layout.layoutId]){
+    layout.distances = overrides[layout.layoutId];
+  }
+  // Then try Supabase in background (async, updates UI when ready)
+  if(!layout.distances?.filter(Boolean).length){
+    fetchLayoutFromSupabase(layout.courseId || activeCourse?.id, layout.layoutId)
+      .then(data => {
+        if(data?.distances?.filter(Boolean).length){
+          activeLayout.distances = data.distances;
+          showCourseBanner(); // refresh display with community distances
+          console.log('✅ Loaded community distances from Supabase');
+        }
+      });
+  }
+  return layout;
+}
+
+
+
+async function lookupDistances(){
+  if(!activeCourse || !activeLayout) return;
+  const statusEl = document.getElementById('dist-lookup-status');
+  statusEl.textContent = '🤖 Looking up distances...';
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:600,
+        messages:[{role:'user',content:`You are a disc golf course database.
+
+Course: ${activeCourse.name}
+Layout: ${activeLayout.layoutName}
+Holes: ${activeLayout.holes}
+Pars: ${(activeLayout.pars||[]).join(', ')}
+
+Provide the hole-by-hole distances in feet for this specific layout if you know them.
+Return ONLY valid JSON, no markdown:
+{"distances":[200,285,310,175,220,195,340,160,280,210,195,225,175,310,240,195,280,220],"confidence":"high|medium|low","note":"brief source note"}
+
+If you don't know the distances for this specific course and layout, return:
+{"distances":[],"confidence":"none","note":"Course not in training data"}`
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b=>b.type==='text')?.text||'';
+    let parsed;
+    try{ parsed=JSON.parse(text.replace(/```[\w]*/g,'').trim()); }catch(e){ parsed=null; }
+
+    if(!parsed||!parsed.distances?.length||parsed.confidence==='none'){
+      statusEl.innerHTML = `<span style="color:var(--rose)">⚠️ ${parsed?.note||'Distances not found — enter manually above'}</span>`;
+      return;
+    }
+
+    // Fill in the inputs
+    parsed.distances.slice(0,activeLayout.holes).forEach((d,i)=>{
+      const inp = document.getElementById(`dist-h${i+1}`);
+      if(inp && d > 0) inp.value = d;
+    });
+
+    const confColor = parsed.confidence==='high'?'var(--pine-light)':parsed.confidence==='medium'?'var(--yellow)':'var(--fire)';
+    statusEl.innerHTML = `<span style="color:${confColor}">✅ ${parsed.note} · Confidence: ${parsed.confidence} — review and save</span>`;
+
+  } catch(e){
+    statusEl.innerHTML = `<span style="color:var(--rose)">❌ Lookup failed — enter manually</span>`;
+  }
+}
+
 
 async function lookupCourse(name){
   const spinner = document.getElementById('course-lookup-spinner');
@@ -2200,8 +2492,20 @@ function renderActiveHole(){
       <div class="hole-scorer-head">
         <div>
           <div class="hole-num-big">Hole ${h.hole}</div>
-          <div class="hole-par-info">Par ${h.par}${h.dist?` · ${h.dist}ft`:''} · ${activeHoleIndex+1} of ${holeData.length}</div>
+          <div class="hole-par-info">${activeHoleIndex+1} of ${holeData.length} · Par ${h.par}</div>
         </div>
+
+        <!-- Distance — prominently displayed -->
+        <div style="text-align:center;flex:1">
+          ${h.dist ? `
+            <div style="font-family:'Fira Code',monospace;font-size:28px;font-weight:700;color:var(--blue);line-height:1">${h.dist}</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px">feet</div>
+          ` : `
+            <div style="font-size:12px;color:var(--border)">—</div>
+            <div style="font-size:10px;color:var(--muted)">no distance</div>
+          `}
+        </div>
+
         <div style="text-align:right">
           ${rec ? `<div style="font-size:11px;color:var(--yellow)">🎯 ${rec.disc}</div><div style="font-size:10px;color:var(--muted)">${rec.throwType} · avg ${rec.avgScore}</div>` : ''}
         </div>
@@ -2689,7 +2993,8 @@ function saveRound(){
   const parsCount = holeData.filter(h=>h.score===h.par).length;
 
   const round = {
-    id:'r'+Date.now(), courseId:activeCourse.id, courseName:activeCourse.name,
+    id: editingRoundId || 'r'+Date.now(),
+    courseId:activeCourse.id, courseName:activeCourse.name,
     layoutId:activeLayout.layoutId, layoutName:activeLayout.layoutName,
     date, cond, partners, notes, scores,
     discs:holeData.map(h=>h.throws[0]?.disc||''),
@@ -2699,7 +3004,19 @@ function saveRound(){
   };
 
   if(!S.rounds) S.rounds=[];
-  S.rounds.push(round);
+
+  if(editingRoundId){
+    // Replace existing round
+    const idx = S.rounds.findIndex(r=>r.id===editingRoundId);
+    if(idx>=0) S.rounds[idx] = round;
+    else S.rounds.push(round);
+    // Remove old throws for this round and replace
+    S.throws = S.throws.filter(t => !(t.date===date && t.courseId===activeCourse.id && t.layoutId===activeLayout.layoutId));
+    toast(`✅ Round updated! ${pm>=0?'+':''}${pm} · ${birdies} birdies`);
+  } else {
+    S.rounds.push(round);
+    toast(`✅ Round saved! ${pm>=0?'+':''}${pm} · ${birdies} birdies`);
+  }
 
   // Save all throws with layout tag
   holeData.forEach(h=>{
@@ -2732,17 +3049,110 @@ function renderRecentRounds(){
   }
   tbody.innerHTML = rounds.map(r=>{
     const pmCol = r.pm<0?'var(--pine-light)':r.pm===0?'var(--blue)':'var(--rose)';
-    return `<tr>
+    const birdieStr = r.birdies>0?`<span style="color:var(--pine-light);font-size:10px">🐦${r.birdies}</span>`:'';
+    const eagleStr  = r.eagles>0?`<span style="color:var(--yellow);font-size:10px">🦅${r.eagles}</span>`:'';
+    return `<tr style="cursor:pointer" onclick="editRound('${r.id}')">
       <td class="mono" style="color:var(--muted);font-size:11px">${r.date}</td>
       <td style="font-size:12px;font-weight:500">${r.courseName||r.courseId}</td>
       <td style="font-size:11px;color:var(--blue)">${r.layoutName||'—'}</td>
       <td class="mono" style="font-weight:600">${r.total||'—'}</td>
       <td class="mono" style="color:${pmCol};font-weight:700">${r.pm!=null?(r.pm>=0?'+':'')+r.pm:'—'}</td>
-      <td style="font-size:11px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes||r.partners||'—'}</td>
-      <td><button onclick="deleteRound('${r.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">✕</button></td>
+      <td style="font-size:11px;display:flex;gap:4px;align-items:center">${eagleStr}${birdieStr}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes||r.partners||'—'}</td>
+      <td style="white-space:nowrap">
+        <button onclick="event.stopPropagation();editRound('${r.id}')" style="background:none;border:1px solid var(--border);color:var(--dim);cursor:pointer;font-size:11px;padding:3px 8px;border-radius:5px;margin-right:4px">✏️ Edit</button>
+        <button onclick="event.stopPropagation();deleteRound('${r.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">✕</button>
+      </td>
     </tr>`;
   }).join('');
 }
+
+function editRound(id){
+  const r = (S.rounds||[]).find(r=>r.id===id);
+  if(!r){ toast('⚠️ Round not found'); return; }
+
+  // Find course and layout
+  const course = S.courses.find(c=>c.id===r.courseId);
+  if(!course){ toast('⚠️ Course not found'); return; }
+
+  const layouts = getLayoutsForCourse(r.courseId);
+  let layout = layouts.find(l=>l.layoutId===r.layoutId);
+
+  // If layout not found, reconstruct from round data
+  if(!layout){
+    layout = {
+      layoutId: r.layoutId||'unknown',
+      layoutName: r.layoutName||'Unknown Layout',
+      holes: r.holes||r.scores?.length||18,
+      pars: course.pars||Array(r.holes||18).fill(3),
+      distances: []
+    };
+  }
+
+  // Set active course and layout
+  activeCourse = course;
+  activeLayout = layout;
+
+  // Reconstruct holeData from saved round
+  holeData = Array.from({length:layout.holes},(_,i)=>({
+    hole: i+1,
+    par: layout.pars[i]||3,
+    dist: layout.distances?.[i]||null,
+    score: r.scores?.[i] || layout.pars[i] || 3,
+    throws: [{
+      disc: r.discs?.[i]||'',
+      throwType: r.throwTypes?.[i]||'',
+      landing: r.landings?.[i]||''
+    }]
+  }));
+
+  // Restore multi-throw data from S.throws if available
+  holeData.forEach((h,i)=>{
+    const holeThrows = S.throws.filter(t=>
+      t.courseId===r.courseId &&
+      t.hole===h.hole &&
+      t.date===r.date &&
+      (!r.layoutId || !t.layoutId || t.layoutId===r.layoutId)
+    ).sort((a,b)=>(a.throwIndex||0)-(b.throwIndex||0));
+
+    if(holeThrows.length > 1){
+      h.throws = holeThrows.map(t=>({
+        disc: t.disc||'',
+        throwType: t.throwType||'',
+        landing: t.landing||''
+      }));
+    }
+  });
+
+  // Set pre-fill values for step 1 fields
+  document.getElementById('log-date').value = r.date;
+  document.getElementById('log-cond').value = r.cond||'Calm';
+  document.getElementById('log-partners').value = r.partners||'';
+  document.getElementById('log-round-notes').value = r.notes||'';
+
+  // Mark as editing
+  editingRoundId = id;
+
+  // Show scorecard
+  activeHoleIndex = 0;
+  document.getElementById('log-step1').style.display='none';
+  document.getElementById('log-recent-section').style.display='none';
+  document.getElementById('log-step2').style.display='block';
+  document.getElementById('sc-course-name').textContent = course.name;
+  document.getElementById('sc-layout-name').textContent = layout.layoutName + ' · Editing';
+
+  // Update save button to say "Update Round"
+  document.querySelectorAll('[onclick="saveRound()"]').forEach(btn=>{
+    btn.textContent = '💾 Update Round';
+  });
+
+  renderProgress();
+  renderActiveHole();
+  updateRunningTotal();
+  nav('log');
+  toast(`✏️ Editing round from ${r.date}`);
+}
+
 
 function deleteRound(id){
   S.rounds=(S.rounds||[]).filter(r=>r.id!==id);
@@ -3228,21 +3638,37 @@ let lookupTimer = null;
 
 
 
-function selectType(btn){
-  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('nd-type').value = btn.dataset.val;
+function classifyDiscType(speed){
+  if(speed == null) return { type: '', label: '— set speed to classify', color: 'var(--muted)' };
+  if(speed <= 4)  return { type: 'Putt & Approach', label: '🟢 Putt & Approach', color: 'var(--pine-light)' };
+  if(speed <= 6)  return { type: 'Midrange',        label: '🔵 Midrange',        color: 'var(--blue)' };
+  if(speed <= 9)  return { type: 'Fairway Driver',  label: '🎯 Fairway Driver',  color: 'var(--yellow)' };
+  return           { type: 'Distance Driver',       label: '💨 Distance Driver', color: 'var(--rose)' };
 }
+
+function updateDiscTypeDisplay(){
+  const speed = flightState.speed;
+  const { type, label, color } = classifyDiscType(speed);
+  document.getElementById('nd-type').value = type;
+  const disp = document.getElementById('nd-type-display');
+  if(disp){ disp.textContent = label; disp.style.color = color; }
+}
+
+function selectType(btn){
+  // Legacy function — no longer used, keep for safety
+}
+
+
 
 function selectFlight(btn){
   const group = btn.dataset.group;
   const val = parseFloat(btn.dataset.val);
-  // Deselect others in same group
   document.querySelectorAll(`.fnum-btn[data-group="${group}"]`).forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   flightState[group] = val;
   document.getElementById(`nd-${group}-val`).textContent = val >= 0 && group==='turn' ? '+'+val : val;
   updateFlightPreview();
+  if(group === 'speed') updateDiscTypeDisplay();
 }
 
 function updateFlightPreview(){
@@ -3266,16 +3692,24 @@ function updateFlightPreview(){
 }
 
 function clearDiscForm(){
+  editingDiscId = null;
   document.getElementById('nd-name').value='';
   document.getElementById('nd-notes').value='';
   document.getElementById('nd-weight').value='';
-  document.getElementById('nd-type').value='Distance Driver';
-  document.querySelectorAll('.type-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.getElementById('nd-type').value='';
   document.querySelectorAll('.fnum-btn').forEach(b=>b.classList.remove('active'));
-  ['speed','glide','turn','fade'].forEach(g=>{ flightState[g]=null; const el=document.getElementById(`nd-${g}-val`); if(el) el.textContent='—'; });
-  const fp=document.getElementById('fp-speed'); if(fp){ fp.textContent='—'; document.getElementById('fp-glide').textContent='—'; document.getElementById('fp-turn').textContent='—'; document.getElementById('fp-fade').textContent='—'; }
+  ['speed','glide','turn','fade'].forEach(g=>{
+    flightState[g]=null;
+    const el=document.getElementById(`nd-${g}-val`);
+    if(el) el.textContent='—';
+  });
+  updateDiscTypeDisplay();
+  const fp=document.getElementById('fp-speed');
+  if(fp){ fp.textContent='—'; document.getElementById('fp-glide').textContent='—'; document.getElementById('fp-turn').textContent='—'; document.getElementById('fp-fade').textContent='—'; }
   document.getElementById('fp-stability-tag').textContent='';
   document.getElementById('fp-flight-desc').textContent='';
+  const addBtn = document.querySelector('[onclick="addDisc()"]');
+  if(addBtn) addBtn.textContent = '+ Add to Bag';
 }
 
 
@@ -3286,43 +3720,101 @@ function renderDiscs(){
   bag.innerHTML=S.discs.map(d=>{
     const throws=S.throws.filter(t=>t.disc===d.id);
     const a=throws.length?avg(throws.map(t=>t.score)):null;
-    const typeColor=d.type.includes('Driver')?'var(--rose)':d.type==='Midrange'?'var(--sky)':'var(--grass)';
+    const typeColor=d.type?.includes('Driver')?'var(--rose)':d.type==='Midrange'?'var(--sky)':'var(--pine-light)';
+    const flightNums = [
+      d.speed!=null?`<span class="dn">S:${d.speed}</span>`:'',
+      d.glide!=null?`<span class="dn">G:${d.glide}</span>`:'',
+      d.turn!=null?`<span class="dn">T:${d.turn}</span>`:'',
+      d.fade!=null?`<span class="dn">F:${d.fade}</span>`:'',
+      d.weight?`<span class="dn" style="color:var(--blue)">${d.weight}g</span>`:''
+    ].filter(Boolean).join('');
     return `<div class="disc-card">
-      <button class="disc-del" onclick="removeDisc('${d.id}')">✕</button>
-      <div class="disc-name">${d.name}</div>
-      <div class="disc-type" style="color:${typeColor}">${d.type}</div>
-      <div class="disc-nums">
-        ${d.speed!=null?`<span class="dn">S:${d.speed}</span>`:''}${d.glide!=null?`<span class="dn">G:${d.glide}</span>`:''}
-        ${d.turn!=null?`<span class="dn">T:${d.turn}</span>`:''}${d.fade!=null?`<span class="dn">F:${d.fade}</span>`:''}
-        ${d.weight?`<span class="dn" style="color:var(--sky)">${d.weight}g</span>`:''}
+      <div style="position:absolute;top:8px;right:8px;display:flex;gap:4px">
+        <button onclick="editDisc('${d.id}')" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:11px;padding:2px 7px;border-radius:5px;transition:all .15s" onmouseover="this.style.borderColor='var(--pine-light)';this.style.color='var(--pine-light)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✏️</button>
+        <button class="disc-del" onclick="removeDisc('${d.id}')">✕</button>
       </div>
+      <div class="disc-name">${d.name}</div>
+      <div class="disc-type" style="color:${typeColor}">${d.type||'—'}</div>
+      <div class="disc-nums">${flightNums||'<span style="font-size:10px;color:var(--muted)">No flight numbers</span>'}</div>
       ${d.notes?`<div style="font-size:10px;color:var(--muted);margin-top:5px">${d.notes}</div>`:''}
-      <div class="disc-perf">${throws.length?`${throws.length} logged throws · avg ${a.toFixed(2)}`:'No logged throws yet'}</div>
+      <div class="disc-perf">${throws.length?`${throws.length} throws · avg ${a.toFixed(2)}`:'No throws logged yet'}</div>
     </div>`;
   }).join('');
 }
 
+let editingDiscId = null;
+
+function editDisc(id){
+  const d = S.discs.find(d=>d.id===id);
+  if(!d) return;
+  editingDiscId = id;
+
+  // Pre-fill name and notes
+  document.getElementById('nd-name').value = d.name;
+  document.getElementById('nd-notes').value = d.notes||'';
+  document.getElementById('nd-weight').value = d.weight||'';
+
+  // Type is auto-classified from speed — no buttons to set
+  updateDiscTypeDisplay();
+
+  // Set flight number buttons
+  const fields = {speed:d.speed, glide:d.glide, turn:d.turn, fade:d.fade};
+  Object.entries(fields).forEach(([group, val])=>{
+    if(val==null) return;
+    document.querySelectorAll(`.fnum-btn[data-group="${group}"]`).forEach(b=>b.classList.remove('active'));
+    const btn = document.querySelector(`.fnum-btn[data-group="${group}"][data-val="${val}"]`);
+    if(btn){ btn.classList.add('active'); }
+    flightState[group] = val;
+    const valEl = document.getElementById(`nd-${group}-val`);
+    if(valEl) valEl.textContent = val>=0&&group==='turn'?'+'+val:val;
+  });
+  updateFlightPreview();
+
+  // Update Add button to say Save Changes
+  const addBtn = document.querySelector('[onclick="addDisc()"]');
+  if(addBtn) addBtn.textContent = '💾 Save Changes';
+
+  // Scroll to form
+  document.getElementById('add-disc-panel')?.scrollIntoView({behavior:'smooth', block:'start'});
+  toast(`✏️ Editing ${d.name}`);
+}
+
 function addDisc(){
   const name=document.getElementById('nd-name').value.trim();
-  const type=document.getElementById('nd-type').value;
   if(!name){toast('⚠️ Enter disc name');return;}
-  // Flight numbers are optional — use null if not selected
-  S.discs.push({
-    id:'d'+Date.now(), name, type,
+  const { type } = classifyDiscType(flightState.speed);
+
+  const discData = {
+    name, type,
     speed: flightState.speed,
     glide: flightState.glide,
     turn: flightState.turn,
     fade: flightState.fade,
     weight: document.getElementById('nd-weight').value ? parseInt(document.getElementById('nd-weight').value) : null,
     notes: document.getElementById('nd-notes').value
-  });
-  save(); renderDiscs();
-  clearDiscForm();
-  syncToSupabase();
-  toast('✅ '+name+' added to bag!');
+  };
+
+  if(editingDiscId){
+    // Update existing disc
+    const idx = S.discs.findIndex(d=>d.id===editingDiscId);
+    if(idx>=0) S.discs[idx] = {...S.discs[idx], ...discData};
+    editingDiscId = null;
+    const addBtn = document.querySelector('[onclick="addDisc()"]');
+    if(addBtn) addBtn.textContent = '+ Add to Bag';
+    save(); renderDiscs(); clearDiscForm(); syncToSupabase();
+    toast(`✅ ${name} updated!`);
+  } else {
+    // Add new disc
+    S.discs.push({id:'d'+Date.now(), ...discData});
+    save(); renderDiscs(); clearDiscForm(); syncToSupabase();
+    toast('✅ '+name+' added to bag!');
+  }
 }
 
-function removeDisc(id){ S.discs=S.discs.filter(d=>d.id!==id); save(); renderDiscs(); toast('🗑️ Disc removed'); }
+function removeDisc(id){
+  if(editingDiscId===id){ editingDiscId=null; clearDiscForm(); const addBtn=document.querySelector('[onclick="addDisc()"]'); if(addBtn) addBtn.textContent='+ Add to Bag'; }
+  S.discs=S.discs.filter(d=>d.id!==id); save(); renderDiscs(); toast('🗑️ Disc removed');
+}
 
 // ═══════════════════════════════════════════════════════════
 // COURSES
