@@ -2424,7 +2424,7 @@ function buildScorecard(){
   holeData = Array.from({length:activeLayout.holes},(_,i)=>({
     hole:i+1, par:activeLayout.pars[i]||3, dist:activeLayout.distances?.[i]||null,
     score:activeLayout.pars[i]||3,
-    throws:[{disc:'',throwType:'',landing:''}]
+    throws:[{disc:'',throwType:'',landing:'',distRange:''}]
   }));
 
   activeHoleIndex = 0;
@@ -2487,33 +2487,25 @@ function renderActiveHole(){
 
       <!-- Hole header -->
       <div class="hole-scorer-head">
-        <div>
+        <div style="display:flex;align-items:baseline;gap:16px;flex:1">
           <div class="hole-num-big">Hole ${h.hole}</div>
-          <div class="hole-par-info">${activeHoleIndex+1} of ${holeData.length} · Par ${h.par}</div>
+          <div style="font-family:'Fira Code',monospace;font-size:28px;font-weight:700;color:var(--muted)">P${h.par}</div>
+          ${h.dist
+            ? `<div style="font-family:'Fira Code',monospace;font-size:28px;font-weight:700;color:var(--blue);cursor:pointer" onclick="editHoleDist(${h.hole})">${h.dist}<span style="font-size:13px;font-weight:400;color:var(--muted);margin-left:3px">ft</span></div>`
+            : `<div style="font-size:14px;color:var(--muted);cursor:pointer;border-bottom:1px dashed var(--border)" onclick="editHoleDist(${h.hole})">+ dist</div>`
+          }
+          <div style="font-size:11px;color:var(--muted);margin-left:auto"></div>
         </div>
-
-        <!-- Distance — prominently displayed -->
-        <div style="text-align:center;flex:1">
-          ${h.dist ? `
-            <div style="font-family:'Fira Code',monospace;font-size:28px;font-weight:700;color:var(--blue);line-height:1">${h.dist}</div>
-            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px">feet</div>
-          ` : `
-            <div style="font-size:12px;color:var(--border)">—</div>
-            <div style="font-size:10px;color:var(--muted)">no distance</div>
-          `}
-        </div>
-
-        <div style="text-align:right">
+        <div style="text-align:right;flex-shrink:0">
           ${rec ? `<div style="font-size:11px;color:var(--yellow)">🎯 ${rec.disc}</div><div style="font-size:10px;color:var(--muted)">${rec.throwType} · avg ${rec.avgScore}</div>` : ''}
         </div>
       </div>
 
-      <!-- Score stepper -->
+      <!-- Score stepper — no label below -->
       <div class="score-row">
         <button class="btn-score-adj minus" onclick="adjScore(-1)">−</button>
         <div class="score-center">
           <div class="score-big" id="live-score" style="color:${col}">${h.score}</div>
-          <div class="score-tag" id="live-tag" style="color:${col}">${tag||'PAR'}</div>
         </div>
         <button class="btn-score-adj plus" onclick="adjScore(1)">+</button>
       </div>
@@ -2525,6 +2517,48 @@ function renderActiveHole(){
 
       <div style="padding:0 12px 12px">
         <button class="add-throw-btn" onclick="addThrow()">+ Add Throw</button>
+      </div>
+
+      <!-- 📸 Photo AI Analysis -->
+      <div style="padding:0 12px 12px">
+        <div id="photo-ai-${h.hole}" style="background:var(--ink3);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          
+          <!-- Collapsed state -->
+          <div id="photo-ai-header-${h.hole}" style="padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="togglePhotoAI(${h.hole})">
+            <span style="font-size:18px">📸</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600;color:var(--dim)">AI Hole Analysis</div>
+              <div style="font-size:10px;color:var(--muted)">Photo the hole for disc & shot recommendations</div>
+            </div>
+            <span id="photo-ai-chev-${h.hole}" style="color:var(--muted);font-size:12px;transition:transform .2s">▼</span>
+          </div>
+
+          <!-- Expanded body -->
+          <div id="photo-ai-body-${h.hole}" style="display:none;border-top:1px solid var(--border);padding:12px 14px">
+            
+            <!-- Photo preview -->
+            <div id="photo-preview-${h.hole}" style="display:none;margin-bottom:10px">
+              <img id="photo-img-${h.hole}" style="width:100%;max-height:220px;object-fit:cover;border-radius:8px;display:block">
+              <button onclick="clearHolePhoto(${h.hole})" style="margin-top:6px;background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:0">✕ Remove photo</button>
+            </div>
+
+            <!-- Upload button -->
+            <label id="photo-upload-label-${h.hole}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ink2);border:1px dashed var(--border);border-radius:8px;padding:14px;cursor:pointer;transition:all .15s;margin-bottom:10px"
+              onmouseover="this.style.borderColor='var(--pine-light)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:20px">📷</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--dim)">Take or upload a photo</div>
+                <div style="font-size:10px;color:var(--muted)">From the tee pad facing the basket</div>
+              </div>
+              <input type="file" accept="image/*" capture="environment" style="display:none"
+                onchange="analyzeHolePhoto(${h.hole}, this)">
+            </label>
+
+            <!-- AI result -->
+            <div id="photo-ai-result-${h.hole}" style="display:none"></div>
+
+          </div>
+        </div>
       </div>
 
       <!-- Next hole button inside card -->
@@ -2555,19 +2589,41 @@ function throwRowHTML(h, ti){
     <!-- Disc pills -->
     <div class="disc-pills" id="disc-pills-${ti}">
       ${S.discs.length
-        ? S.discs.map(d => `<button class="disc-pill ${t.disc===d.id?'selected':''}" onclick="setThrow(${ti},'disc','${d.id}',this)">${d.name}</button>`).join('')
+        ? [...S.discs].sort((a,b)=>(b.speed||0)-(a.speed||0)).map(d => `<button class="disc-pill ${t.disc===d.id?'selected':''}" onclick="setThrow(${ti},'disc','${d.id}',this)">${d.name}${d.speed!=null?' <span style="font-size:9px;opacity:.6">S${d.speed}</span>':''}</button>`).join('')
         : `<span style="font-size:12px;color:var(--muted)">Add discs to your bag first</span>`
       }
     </div>
 
     <!-- Throw type -->
     <div class="throw-type-row" id="tt-row-${ti}">
-      ${[['🤚','BH','Backhand',''],['✋','FH','Forehand','fh'],['🔄','Roll','Roller',''],['🔁','Thumb','Thumber',''],['🪃','Over','Overhand','']].map(([e,short,full,cls])=>
-        `<button class="tt-btn ${t.throwType===full?'selected '+cls:''}" onclick="setThrow(${ti},'throwType','${full}',this)">${e} ${short}</button>`
+      ${[['🤚','Backhand',''],['✋','Forehand','fh']].map(([e,full,cls])=>
+        `<button class="tt-btn ${t.throwType===full?'selected '+cls:''}" onclick="setThrow(${ti},'throwType','${full}',this)">${e} ${full}</button>`
       ).join('')}
+      <select onchange="setThrowTypeFromSelect(${ti}, this)"
+        style="flex:1;background:var(--ink2);border:1px solid ${['FH Roller','BH Roller','Grenade','Tomahawk','Thumber'].includes(t.throwType)?'var(--yellow)':'var(--border)'};
+               color:${['FH Roller','BH Roller','Grenade','Tomahawk','Thumber'].includes(t.throwType)?'var(--yellow)':'var(--muted)'};
+               font-family:Archivo,sans-serif;font-size:12px;padding:8px 8px;border-radius:8px;outline:none;cursor:pointer">
+        <option value="">Other shots...</option>
+        ${['FH Roller','BH Roller','Grenade','Tomahawk','Thumber'].map(s=>
+          `<option value="${s}" ${t.throwType===s?'selected':''}>${s}</option>`
+        ).join('')}
+      </select>
+    </div>
+
+    <!-- Distance range -->
+    <div class="throw-row-label" style="margin-top:8px">Throw Distance</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px" id="dr-grid-${ti}">
+      ${['0-100','100-200','200-300','300-400','400+'].map(r=>{
+        const sel = t.distRange===r;
+        return `<button class="lz-btn ${sel?'selected circle':''}" onclick="setThrow(${ti},'distRange','${r}',this)" style="padding:8px 2px">
+          <span style="font-size:11px;font-weight:600">${r}</span>
+          <span style="font-size:9px;color:var(--muted)">ft</span>
+        </button>`;
+      }).join('')}
     </div>
 
     <!-- Landing zone grid -->
+    <div class="throw-row-label">Landing Zone</div>
     <div class="landing-grid" id="lz-grid-${ti}">
       ${[['🌿','Fairway','fairway'],['🌾','Rough','rough'],['🚫','OB','ob'],['🎯','Circle 1','circle'],['🔵','Circle 2','circle'],['⛳','Basket','basket']].map(([e,label,cls])=>
         `<button class="lz-btn ${t.landing===label?'selected '+cls:''}" onclick="setThrow(${ti},'landing','${label}',this)">
@@ -2583,6 +2639,19 @@ function restoreThrowRow(h, ti){
   // Nothing needed — inline onclick handles state, classes already rendered
 }
 
+function setThrowTypeFromSelect(ti, sel){
+  const value = sel.value;
+  if(!value) return;
+  const h = holeData[activeHoleIndex];
+  h.throws[ti].throwType = value;
+  // Deselect BH/FH buttons
+  document.querySelectorAll(`#tt-row-${ti} .tt-btn`).forEach(b=>b.className='tt-btn');
+  // Style the select to show selection
+  sel.style.borderColor = 'var(--yellow)';
+  sel.style.color = 'var(--yellow)';
+}
+
+
 function setThrow(ti, field, value, btn){
   const h = holeData[activeHoleIndex];
   if(!h.throws[ti]) return;
@@ -2593,8 +2662,13 @@ function setThrow(ti, field, value, btn){
     document.querySelectorAll(`#disc-pills-${ti} .disc-pill`).forEach(b => b.classList.remove('selected'));
   } else if(field === 'throwType'){
     document.querySelectorAll(`#tt-row-${ti} .tt-btn`).forEach(b => { b.className='tt-btn'; });
-    // Re-add fh class if forehand
     if(value==='Forehand') btn.classList.add('fh');
+    // Reset the "other" dropdown
+    const otherSel = document.querySelector(`#tt-row-${ti} select`);
+    if(otherSel){ otherSel.value=''; otherSel.style.borderColor='var(--border)'; otherSel.style.color='var(--muted)'; }
+  } else if(field === 'distRange'){
+    document.querySelectorAll(`#dr-grid-${ti} .lz-btn`).forEach(b=>{ b.className='lz-btn'; });
+    btn.classList.add('selected','circle');
   } else if(field === 'landing'){
     document.querySelectorAll(`#lz-grid-${ti} .lz-btn`).forEach(b => { b.className='lz-btn'; });
     // Re-add color class
@@ -2604,12 +2678,249 @@ function setThrow(ti, field, value, btn){
   btn.classList.add('selected');
 }
 
+function editHoleDist(hole){
+  const h = holeData[hole-1];
+  const current = h.dist || '';
+
+  // Show a small inline prompt
+  const val = prompt(`Hole ${hole} distance (feet):`, current);
+  if(val === null) return; // cancelled
+
+  const dist = parseInt(val) || null;
+  h.dist = dist;
+
+  // Persist to activeLayout.distances
+  if(!activeLayout.distances) activeLayout.distances = Array(activeLayout.holes).fill(null);
+  activeLayout.distances[hole-1] = dist;
+
+  // Save to localStorage overrides
+  const overrides = JSON.parse(localStorage.getItem('cai_dist_overrides')||'{}');
+  overrides[activeLayout.layoutId] = activeLayout.distances;
+  localStorage.setItem('cai_dist_overrides', JSON.stringify(overrides));
+
+  // Save to custom layouts if custom
+  const customs = getAllLayouts();
+  const idx = customs.findIndex(l=>l.layoutId===activeLayout.layoutId);
+  if(idx>=0){ customs[idx].distances = activeLayout.distances; saveLayouts(customs); }
+
+  // Push to Supabase in background
+  submitLayoutToSupabase(activeLayout, activeLayout.distances);
+
+  renderActiveHole();
+  toast(`📏 Hole ${hole}: ${dist ? dist + ' ft saved' : 'distance cleared'}`);
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// PHOTO AI HOLE ANALYSIS
+// ═══════════════════════════════════════════════════════════
+const holePhotos = {}; // hole -> base64 image data
+
+function togglePhotoAI(hole){
+  const body = document.getElementById(`photo-ai-body-${hole}`);
+  const chev = document.getElementById(`photo-ai-chev-${hole}`);
+  const isOpen = body?.style.display !== 'none';
+  if(body) body.style.display = isOpen ? 'none' : 'block';
+  if(chev) chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function clearHolePhoto(hole){
+  delete holePhotos[hole];
+  document.getElementById(`photo-preview-${hole}`).style.display = 'none';
+  document.getElementById(`photo-ai-result-${hole}`).style.display = 'none';
+  document.getElementById(`photo-upload-label-${hole}`).style.display = 'flex';
+}
+
+async function analyzeHolePhoto(hole, input){
+  const file = input.files[0];
+  if(!file) return;
+
+  const h = holeData[hole-1];
+  const resultEl = document.getElementById(`photo-ai-result-${hole}`);
+  const previewEl = document.getElementById(`photo-preview-${hole}`);
+  const imgEl = document.getElementById(`photo-img-${hole}`);
+  const uploadLabel = document.getElementById(`photo-upload-label-${hole}`);
+
+  // Show preview immediately
+  const objectUrl = URL.createObjectURL(file);
+  imgEl.src = objectUrl;
+  previewEl.style.display = 'block';
+  uploadLabel.style.display = 'none';
+
+  // Show loading state
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(45,106,45,.06);border-radius:8px">
+      <div style="width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--pine-light);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0"></div>
+      <div style="font-size:12px;color:var(--muted)">Analyzing hole — reading the terrain, gaps, and hazards...</div>
+    </div>`;
+
+  // Convert to base64
+  const base64 = await new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result.split(',')[1]);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+  holePhotos[hole] = base64;
+
+  // Build context about the hole
+  const discList = S.discs.length
+    ? S.discs.sort((a,b)=>(b.speed||0)-(a.speed||0)).map(d=>`${d.name} (S:${d.speed||'?'} G:${d.glide||'?'} T:${d.turn||'?'} F:${d.fade||'?'})`).join(', ')
+    : 'No discs in bag yet';
+
+  const holeContext = `Hole ${hole}, Par ${h.par}${h.dist ? `, ${h.dist} feet` : ''}`;
+  const layoutContext = activeLayout ? `${activeCourse?.name} — ${activeLayout.layoutName}` : '';
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 }
+            },
+            {
+              type: 'text',
+              text: `You are an expert disc golf caddie analyzing a hole photo taken from the tee pad.
+
+Hole info: ${holeContext}
+Course: ${layoutContext}
+Player's bag: ${discList}
+
+Analyze this photo and provide:
+1. What you see (hazards, gaps, elevation, OB, trees, doglegs)
+2. The ideal flight line description
+3. Best throw type (Backhand, Forehand, FH Roller, BH Roller, Hyzer, Anhyzer, etc.)
+4. Best disc from the player's bag (or disc type if bag is empty)
+5. Shot shape advice (hyzer, flat, anhyzer angle)
+6. One key tip
+
+Be specific and concise. Format as JSON only, no markdown:
+{
+  "terrain": "brief description of what you see",
+  "flightLine": "describe the ideal flight path",
+  "throwType": "recommended throw type",
+  "disc": "disc name from bag or disc type",
+  "shotShape": "hyzer/flat/anhyzer + why",
+  "tip": "one key piece of advice",
+  "confidence": "high/medium/low"
+}`
+            }
+          ]
+        }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.find(b=>b.type==='text')?.text || '';
+    let rec;
+    try { rec = JSON.parse(text.replace(/```[\w]*/g,'').trim()); } catch(e){ rec = null; }
+
+    if(!rec){
+      resultEl.innerHTML = `<div style="font-size:12px;color:var(--rose);padding:8px">⚠️ Couldn't parse recommendation — try a clearer photo</div>`;
+      return;
+    }
+
+    const confColor = rec.confidence==='high'?'var(--pine-light)':rec.confidence==='medium'?'var(--yellow)':'var(--fire)';
+
+    resultEl.innerHTML = `
+      <div style="background:linear-gradient(135deg,rgba(45,106,45,.08),rgba(42,138,191,.05));border:1px solid rgba(45,106,45,.2);border-radius:10px;overflow:hidden">
+        
+        <!-- Header -->
+        <div style="background:var(--pine);padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:13px;font-weight:700;color:#fff">🤖 AI Caddie Read</div>
+          <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.15);color:#fff">${rec.confidence} confidence</span>
+        </div>
+
+        <!-- Terrain read -->
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px">What I See</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.5">${rec.terrain}</div>
+        </div>
+
+        <!-- Flight line -->
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px">Ideal Flight Line</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.5">${rec.flightLine}</div>
+        </div>
+
+        <!-- Recommendation pills -->
+        <div style="padding:12px 14px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border)">
+          <div style="background:rgba(45,106,45,.12);border:1px solid rgba(45,106,45,.3);border-radius:20px;padding:5px 12px">
+            <span style="font-size:10px;color:var(--muted)">DISC </span>
+            <span style="font-size:13px;font-weight:700;color:var(--pine-light)">${rec.disc}</span>
+          </div>
+          <div style="background:rgba(42,138,191,.1);border:1px solid rgba(42,138,191,.25);border-radius:20px;padding:5px 12px">
+            <span style="font-size:10px;color:var(--muted)">THROW </span>
+            <span style="font-size:13px;font-weight:700;color:var(--blue)">${rec.throwType}</span>
+          </div>
+          <div style="background:rgba(196,144,0,.1);border:1px solid rgba(196,144,0,.25);border-radius:20px;padding:5px 12px">
+            <span style="font-size:10px;color:var(--muted)">SHAPE </span>
+            <span style="font-size:13px;font-weight:700;color:var(--yellow)">${rec.shotShape}</span>
+          </div>
+        </div>
+
+        <!-- Tip -->
+        <div style="padding:12px 14px;background:rgba(196,144,0,.05)">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--yellow);margin-bottom:4px">💡 Key Tip</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.5">${rec.tip}</div>
+        </div>
+
+      </div>
+
+      <button onclick="applyAIRecommendation(${hole}, '${rec.disc}', '${rec.throwType}')"
+        class="btn btn-green" style="width:100%;margin-top:8px;font-size:12px;padding:10px">
+        ✓ Apply to Throw 1
+      </button>`;
+
+  } catch(e){
+    resultEl.innerHTML = `<div style="font-size:12px;color:var(--rose);padding:8px">❌ Analysis failed — check connection</div>`;
+    console.error('Photo AI error:', e);
+  }
+  input.value = '';
+}
+
+function applyAIRecommendation(hole, discName, throwType){
+  // Find disc in bag by name
+  const disc = S.discs.find(d => d.name.toLowerCase() === discName.toLowerCase())
+    || S.discs.find(d => discName.toLowerCase().includes(d.name.toLowerCase()));
+
+  const h = holeData[hole-1];
+  if(!h.throws[0]) h.throws[0] = {disc:'', throwType:'', landing:''};
+
+  if(disc) h.throws[0].disc = disc.id;
+
+  // Map to standard throw types
+  const throwMap = {
+    'backhand':'Backhand', 'forehand':'Forehand',
+    'fh roller':'FH Roller', 'bh roller':'BH Roller',
+    'roller':'BH Roller', 'tomahawk':'Tomahawk',
+    'grenade':'Grenade', 'thumber':'Thumber'
+  };
+  const mapped = throwMap[throwType.toLowerCase()] || throwType;
+  h.throws[0].throwType = mapped;
+
+  // Re-render throw rows
+  const container = document.getElementById('throw-rows-container');
+  if(container) container.innerHTML = h.throws.map((_,ti) => throwRowHTML(h,ti)).join('');
+
+  toast(`✅ Applied: ${discName} · ${mapped}`);
+}
+
+
 function adjScore(delta){
   const h = holeData[activeHoleIndex];
   h.score = Math.max(1, Math.min(15, h.score + delta));
 
   // Auto-adjust throw count
-  while(h.throws.length < h.score) h.throws.push({disc:'',throwType:'',landing:''});
+  while(h.throws.length < h.score) h.throws.push({disc:'',throwType:'',landing:'',distRange:''});
   while(h.throws.length > h.score && h.throws.length > 1) h.throws.pop();
 
   // Update display
@@ -2617,9 +2928,7 @@ function adjScore(delta){
   const tag = getScoreLabel(h.score, h.par);
   const col = scoreLabelColor(cls);
   const scoreEl = document.getElementById('live-score');
-  const tagEl = document.getElementById('live-tag');
   if(scoreEl){ scoreEl.textContent = h.score; scoreEl.style.color = col; }
-  if(tagEl){ tagEl.textContent = tag||'PAR'; tagEl.style.color = col; }
 
   // Re-render throw rows
   const container = document.getElementById('throw-rows-container');
@@ -2631,7 +2940,7 @@ function adjScore(delta){
 
 function addThrow(){
   const h = holeData[activeHoleIndex];
-  h.throws.push({disc:'',throwType:'',landing:''});
+  h.throws.push({disc:'',throwType:'',landing:'',distRange:''});
   const container = document.getElementById('throw-rows-container');
   if(container) container.innerHTML = h.throws.map((_,ti) => throwRowHTML(h,ti)).join('');
 }
@@ -2720,8 +3029,9 @@ function holeCardHTML(h, rec){
 }
 
 function discOptHTML(){
+  const sorted = [...S.discs].sort((a,b)=>(b.speed||0)-(a.speed||0));
   return '<option value="">— Select disc —</option>' +
-    S.discs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    sorted.map(d=>`<option value="${d.id}">${d.name}${d.speed!=null?' (S:'+d.speed+')':''}</option>`).join('');
 }
 
 function throwCardHTML(hole, ti, t){
@@ -2760,11 +3070,16 @@ function throwCardHTML(hole, ti, t){
       <!-- Throw type -->
       <div class="throw-detail-section">
         <div class="throw-detail-label">Throw Type</div>
-        <div class="toggle-row">
-          ${[['🤚','Backhand','bh'],['✋','Forehand','fh'],['🔄','Roller',''],['🔁','Thumber',''],['🪃','Overhand','']].map(([e,v,c])=>{
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${[['🤚','Backhand','bh'],['✋','Forehand','fh']].map(([e,v,c])=>{
             const sel = t.throwType===v ? `selected ${c}` : '';
             return `<button class="toggle-btn ${sel}" onclick="setThrowField(${hole},${ti},'throwType','${v}');selectToggle(this);updateThrowSummary(${hole},${ti})">${e} ${v}</button>`;
           }).join('')}
+          <select onchange="setThrowField(${hole},${ti},'throwType',this.value);updateThrowSummary(${hole},${ti});this.style.borderColor=this.value?'var(--yellow)':'var(--border)';this.style.color=this.value?'var(--yellow)':'var(--muted)'"
+            style="flex:1;background:var(--ink2);border:1px solid ${['FH Roller','BH Roller','Grenade','Tomahawk','Thumber'].includes(t.throwType)?'var(--yellow)':'var(--border)'};color:${['FH Roller','BH Roller','Grenade','Tomahawk','Thumber'].includes(t.throwType)?'var(--yellow)':'var(--muted)'};font-family:Archivo,sans-serif;font-size:12px;padding:7px 8px;border-radius:7px;outline:none">
+            <option value="">Other shots...</option>
+            ${['FH Roller','BH Roller','Grenade','Tomahawk','Thumber'].map(s=>`<option value="${s}" ${t.throwType===s?'selected':''}>${s}</option>`).join('')}
+          </select>
         </div>
       </div>
 
@@ -2810,7 +3125,7 @@ function updateThrowSummary(hole, ti){
 }
 
 function addThrow(hole){
-  holeData[hole-1].throws.push({disc:'',throwType:'',landing:''});
+  holeData[hole-1].throws.push({disc:'',throwType:'',landing:'',distRange:''});
   const ti = holeData[hole-1].throws.length-1;
   const container = document.getElementById(`throw-cards-${hole}`);
   if(container){
@@ -2857,7 +3172,7 @@ function adjustScore(hole, delta){
   if(vpEl){ vpEl.textContent = label; vpEl.style.color = color; }
 
   // Auto-adjust throw slots to match score
-  while(h.throws.length < h.score) h.throws.push({disc:'',throwType:'',landing:''});
+  while(h.throws.length < h.score) h.throws.push({disc:'',throwType:'',landing:'',distRange:''});
   while(h.throws.length > h.score && h.throws.length > 1) h.throws.pop();
 
   // Re-render throw cards
@@ -3024,7 +3339,7 @@ function saveRound(){
           courseId:activeCourse.id, layoutId:activeLayout.layoutId,
           hole:h.hole, date, disc:t.disc, score:h.score,
           throwIndex:ti, throwType:t.throwType, landing:t.landing,
-          cond, notes:''
+          distRange:t.distRange||'', cond, notes:''
         });
       }
     });
