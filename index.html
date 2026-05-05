@@ -801,17 +801,12 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   <button class="nav-btn" onclick="nav('settings')">⚙️ Settings</button>
   <div class="topbar-right">
     <span class="course-pill" id="active-course-pill">No course selected</span>
-    <label class="btn btn-ghost" style="cursor:pointer">📥 Import CSV<input type="file" accept=".csv" style="display:none" onchange="importCSV(this)"></label>
     <button class="btn btn-green" onclick="nav('log')">+ Log Round</button>
     <div id="user-pill" style="display:none;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px">
       <span id="user-email-display" style="color:var(--dim)"></span>
       <button onclick="signOut()" class="btn btn-ghost" style="font-size:11px;padding:5px 10px">Sign Out</button>
     </div>
   </div>
-  <!-- Mobile: just show import -->
-  <label id="topbar-import" style="display:none;cursor:pointer;margin-left:auto" class="btn btn-ghost">
-    📥<input type="file" accept=".csv" style="display:none" onchange="importCSV(this)">
-  </label>
 </div>
 
 <div id="app">
@@ -978,42 +973,36 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
     </div>
 
     <!-- STEP 2: Full screen hole scorer -->
-    <div id="log-step2" style="display:none">
+    <div id="log-step2" style="display:none;position:fixed;inset:0;background:var(--ink);z-index:100;display:none;flex-direction:column;overflow:hidden">
 
-      <!-- Top bar: navigation + running score -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:16px;gap:8px">
-
-        <!-- Prev hole -->
-        <button id="btn-prev-hole" onclick="goHole(activeHoleIndex-1)"
-          style="width:44px;height:44px;background:var(--ink3);border:1px solid var(--border);border-radius:10px;color:var(--dim);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
-
-        <!-- Course + hole counter -->
-        <div style="flex:1;text-align:center">
-          <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sc-course-name"></div>
-          <div style="font-size:11px;color:var(--muted)" id="sc-layout-name"></div>
+      <!-- TOP BAR: course + navigation -->
+      <div style="background:var(--pine);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <button onclick="resetLog()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">←</button>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sc-course-name"></div>
+          <div style="font-size:10px;color:rgba(255,255,255,.7)" id="sc-layout-name"></div>
         </div>
-
-        <!-- Running total -->
-        <div style="text-align:center;min-width:60px">
-          <div style="font-family:'Fira Code',monospace;font-size:18px;font-weight:700;line-height:1" id="sc-total-display">—</div>
-          <div style="font-family:'Fira Code',monospace;font-size:12px;font-weight:600" id="sc-vspar-display" style="color:var(--muted)">—</div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:'Fira Code',monospace;font-size:20px;font-weight:700;color:#fff;line-height:1" id="sc-total-display">—</div>
+          <div style="font-family:'Fira Code',monospace;font-size:12px;font-weight:600" id="sc-vspar-display" style="color:rgba(255,255,255,.7)">—</div>
         </div>
-
-        <!-- Next hole -->
-        <button id="btn-next-hole" onclick="goHole(activeHoleIndex+1)"
-          style="width:44px;height:44px;background:var(--ink3);border:1px solid var(--border);border-radius:10px;color:var(--dim);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
+        <button class="btn btn-green" onclick="saveRound()" style="font-size:12px;padding:7px 12px;flex-shrink:0;background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)">💾</button>
       </div>
 
-      <!-- Hole progress strip -->
-      <div id="sc-progress" style="display:flex;gap:3px;margin-bottom:16px;flex-wrap:wrap"></div>
+      <!-- PROGRESS STRIP -->
+      <div id="sc-progress" style="display:flex;gap:2px;padding:6px 14px;background:var(--ink3);flex-shrink:0"></div>
 
-      <!-- Single hole card — full width -->
-      <div id="active-hole-card"></div>
+      <!-- HOLE CARD — scrollable inner content -->
+      <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 14px 80px">
+        <div id="active-hole-card"></div>
+      </div>
 
-      <!-- Bottom nav -->
-      <div style="display:flex;gap:10px;margin-top:16px;margin-bottom:32px">
-        <button class="btn btn-ghost" onclick="resetLog()" style="flex:1">← Back</button>
-        <button class="btn btn-green" onclick="saveRound()" style="flex:2;font-size:14px">💾 Save Round</button>
+      <!-- BOTTOM NAV: prev / next -->
+      <div style="position:absolute;bottom:0;left:0;right:0;background:var(--ink2);border-top:1px solid var(--border);padding:10px 14px;display:flex;gap:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))">
+        <button id="btn-prev-hole" onclick="goHole(activeHoleIndex-1)"
+          style="flex:1;height:48px;background:var(--ink3);border:1px solid var(--border);border-radius:10px;color:var(--dim);font-size:20px;cursor:pointer">‹ Prev</button>
+        <button id="btn-next-hole" onclick="goHole(activeHoleIndex+1)"
+          style="flex:2;height:48px;background:var(--pine);border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:700;cursor:pointer" id="btn-next-hole">Next ›</button>
       </div>
 
     </div>
@@ -1939,16 +1928,58 @@ function renderDashboard(){
       <div class="hc-trend">${sparkHTML}</div>
       ${s?`<div class="hc-rounds">Best: ${s.best} · Worst: ${s.worst}</div>`:'<div class="hc-rounds" style="color:var(--muted)">No data yet</div>'}
       ${recHTML}
+      <div id="community-h${h}" style="font-size:10px;color:var(--muted);margin-top:4px"></div>
     `;
     card.onclick=()=>{ S.selectedCourse=c.id; document.getElementById('ai-course').value=c.id; document.getElementById('ai-hole').value=h; nav('analytics'); runAnalysis(); };
     grid.appendChild(card);
+
+    // Load community analytics async for this hole
+    fetchHoleCommunityAnalytics(c.id, h);
   }
 }
 
-// ═══════════════════════════════════════════════════════════
+// ── COMMUNITY HOLE ANALYTICS ──
+async function fetchHoleCommunityAnalytics(courseId, hole){
+  const el = document.getElementById(`community-h${hole}`);
+  if(!el) return;
+  try{
+    const { data } = await sb.from('hole_analytics')
+      .select('throw_type, disc_type, landing, dist_range, score_vs_par')
+      .eq('course_id', courseId)
+      .eq('hole', hole)
+      .eq('throw_index', 0)
+      .limit(200);
 
-// ═══════════════════════════════════════════════════════════
-// RECOMMENDATION ENGINE
+    if(!data || data.length < 3) return;
+
+    // Most common throw type
+    const throwCounts = {};
+    data.forEach(r=>{ if(r.throw_type) throwCounts[r.throw_type]=(throwCounts[r.throw_type]||0)+1; });
+    const topThrow = Object.entries(throwCounts).sort((a,b)=>b[1]-a[1])[0];
+
+    // Most common disc type
+    const discCounts = {};
+    data.forEach(r=>{ if(r.disc_type) discCounts[r.disc_type]=(discCounts[r.disc_type]||0)+1; });
+    const topDisc = Object.entries(discCounts).sort((a,b)=>b[1]-a[1])[0];
+
+    // Most common landing
+    const landCounts = {};
+    data.forEach(r=>{ if(r.landing) landCounts[r.landing]=(landCounts[r.landing]||0)+1; });
+    const topLand = Object.entries(landCounts).sort((a,b)=>b[1]-a[1])[0];
+    const landPct = topLand ? Math.round(topLand[1]/data.filter(r=>r.landing).length*100) : null;
+
+    if(!topThrow && !topDisc) return;
+
+    const parts = [];
+    if(topDisc) parts.push(`<strong style="color:var(--pine-light)">${topDisc[0]}</strong>`);
+    if(topThrow) parts.push(`<strong style="color:var(--blue)">${topThrow[0]}</strong>`);
+    if(topLand && landPct) parts.push(`lands <strong style="color:var(--muted)">${topLand[0]} ${landPct}%</strong>`);
+
+    el.innerHTML = `👥 Most throw ${parts.join(' · ')} <span style="opacity:.5">· ${data.length} throws</span>`;
+  } catch(e){ /* silent fail */ }
+}
+
+
 // ═══════════════════════════════════════════════════════════
 function getHoleRecommendation(courseId, holeNum, layoutId){
   const teeThrows = S.throws.filter(t =>
@@ -2430,7 +2461,8 @@ function buildScorecard(){
   activeHoleIndex = 0;
   document.getElementById('log-step1').style.display='none';
   document.getElementById('log-recent-section').style.display='none';
-  document.getElementById('log-step2').style.display='block';
+  const step2 = document.getElementById('log-step2');
+  step2.style.display='flex';
   document.getElementById('sc-course-name').textContent = activeCourse.name;
   document.getElementById('sc-layout-name').textContent = activeLayout.layoutName;
 
@@ -2444,32 +2476,59 @@ function goHole(idx){
   activeHoleIndex = idx;
   renderProgress();
   renderActiveHole();
-  // Scroll to top of hole card
+  // Update bottom nav
+  const prevBtn = document.getElementById('btn-prev-hole');
+  const nextBtn = document.getElementById('btn-next-hole');
+  if(prevBtn) prevBtn.style.opacity = idx===0?'.3':'1';
+  if(nextBtn){
+    if(idx===holeData.length-1){
+      nextBtn.textContent='💾 Save';
+      nextBtn.onclick=saveRound;
+      nextBtn.style.background='var(--pine-light)';
+    } else {
+      nextBtn.textContent=`Hole ${idx+2} ›`;
+      nextBtn.onclick=()=>goHole(idx+1);
+      nextBtn.style.background='var(--pine)';
+    }
+  }
   document.getElementById('active-hole-card')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function renderProgress(){
   const el = document.getElementById('sc-progress');
   if(!el) return;
-  const total = holeData.length;
-  const dotW = Math.max(12, Math.min(24, Math.floor((window.innerWidth - 40) / total) - 4));
   el.innerHTML = holeData.map((h,i) => {
     const cls = getScoreClass(h.score, h.par);
-    let dotCls = 'hole-dot';
-    if(i === activeHoleIndex) dotCls += ' active';
-    else if(cls.includes('eagle')) dotCls += ' done-eagle';
-    else if(cls.includes('birdie')) dotCls += ' done-birdie';
-    else if(cls.includes('par') && h.score > 0) dotCls += ' done-par';
-    else if(cls.includes('bogey')) dotCls += ' done-bogey';
-    else if(cls.includes('double')) dotCls += ' done-double';
-    return `<div class="${dotCls}" style="flex:1;min-width:${dotW}px" onclick="goHole(${i})" title="H${h.hole}: ${h.score}"></div>`;
+    let color = 'var(--border)';
+    if(i === activeHoleIndex) color = 'var(--pine-light)';
+    else if(cls.includes('eagle'))  color = 'var(--yellow)';
+    else if(cls.includes('birdie')) color = 'var(--pine-light)';
+    else if(cls.includes('par') && h.score > 0) color = 'var(--blue)';
+    else if(cls.includes('bogey'))  color = 'var(--fire)';
+    else if(cls.includes('double')) color = 'var(--rose)';
+
+    const isActive = i === activeHoleIndex;
+    return `<div onclick="goHole(${i})" style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:2px 1px">
+      <div style="font-size:9px;font-weight:${isActive?'700':'500'};color:${isActive?'#fff':'rgba(255,255,255,.5)'};white-space:nowrap">Hole ${h.hole}</div>
+      <div style="width:100%;height:5px;border-radius:3px;background:${color};transition:all .2s"></div>
+    </div>`;
   }).join('');
 
-  // Prev/next buttons
+  // Update bottom nav
   const prev = document.getElementById('btn-prev-hole');
   const next = document.getElementById('btn-next-hole');
   if(prev) prev.style.opacity = activeHoleIndex === 0 ? '.3' : '1';
-  if(next) next.style.opacity = activeHoleIndex === holeData.length-1 ? '.3' : '1';
+  if(next){
+    if(activeHoleIndex === holeData.length-1){
+      next.textContent = '💾 Save';
+      next.onclick = saveRound;
+      next.style.background = 'var(--pine-light)';
+    } else {
+      next.textContent = `Hole ${activeHoleIndex+2} ›`;
+      next.onclick = ()=>goHole(activeHoleIndex+1);
+      next.style.background = 'var(--pine)';
+    }
+  }
 }
 
 function renderActiveHole(){
@@ -2489,15 +2548,16 @@ function renderActiveHole(){
       <div class="hole-scorer-head">
         <div style="display:flex;align-items:baseline;gap:16px;flex:1">
           <div class="hole-num-big">Hole ${h.hole}</div>
-          <div style="font-family:'Fira Code',monospace;font-size:28px;font-weight:700;color:var(--muted)">P${h.par}</div>
-          ${h.dist
-            ? `<div style="font-family:'Fira Code',monospace;font-size:28px;font-weight:700;color:var(--blue);cursor:pointer" onclick="editHoleDist(${h.hole})">${h.dist}<span style="font-size:13px;font-weight:400;color:var(--muted);margin-left:3px">ft</span></div>`
-            : `<div style="font-size:14px;color:var(--muted);cursor:pointer;border-bottom:1px dashed var(--border)" onclick="editHoleDist(${h.hole})">+ dist</div>`
-          }
-          <div style="font-size:11px;color:var(--muted);margin-left:auto"></div>
+          <div style="font-family:'Fira Code',monospace;font-size:22px;font-weight:700;color:var(--muted)">PAR ${h.par}</div>
         </div>
         <div style="text-align:right;flex-shrink:0">
           ${rec ? `<div style="font-size:11px;color:var(--yellow)">🎯 ${rec.disc}</div><div style="font-size:10px;color:var(--muted)">${rec.throwType} · avg ${rec.avgScore}</div>` : ''}
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:8px">
+          ${h.dist
+            ? `<div style="font-family:'Fira Code',monospace;font-size:22px;font-weight:700;color:var(--blue);cursor:pointer" onclick="editHoleDist(${h.hole})">${h.dist}<span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:3px">ft</span></div>`
+            : `<div style="font-size:13px;color:var(--muted);cursor:pointer;border-bottom:1px dashed var(--border)" onclick="editHoleDist(${h.hole})">+ Distance</div>`
+          }
         </div>
       </div>
 
@@ -2519,8 +2579,7 @@ function renderActiveHole(){
         <button class="add-throw-btn" onclick="addThrow()">+ Add Throw</button>
       </div>
 
-      <!-- 📸 Photo AI Analysis -->
-      <div style="padding:0 12px 12px">
+      <!-- 📸 Photo AI Analysis -->      <div style="padding:0 12px 12px">
         <div id="photo-ai-${h.hole}" style="background:var(--ink3);border:1px solid var(--border);border-radius:10px;overflow:hidden">
           
           <!-- Collapsed state -->
@@ -2561,14 +2620,6 @@ function renderActiveHole(){
         </div>
       </div>
 
-      <!-- Next hole button inside card -->
-      <div style="padding:0 12px 14px;display:flex;gap:8px">
-        ${activeHoleIndex < holeData.length-1
-          ? `<button class="btn btn-green" style="flex:1;font-size:14px;padding:12px" onclick="goHole(${activeHoleIndex+1})">Next: Hole ${h.hole+1} →</button>`
-          : `<button class="btn btn-green" style="flex:1;font-size:14px;padding:12px" onclick="saveRound()">💾 Save Round</button>`
-        }
-      </div>
-
     </div>`;
 
   // Restore disc selections
@@ -2586,12 +2637,36 @@ function throwRowHTML(h, ti){
     <div class="throw-row-label">${label} ${ti>0?`<button onclick="removeThrow(${ti})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;float:right">✕ remove</button>`:''}
     </div>
 
-    <!-- Disc pills -->
-    <div class="disc-pills" id="disc-pills-${ti}">
-      ${S.discs.length
-        ? [...S.discs].sort((a,b)=>(b.speed||0)-(a.speed||0)).map(d => `<button class="disc-pill ${t.disc===d.id?'selected':''}" onclick="setThrow(${ti},'disc','${d.id}',this)">${d.name}${d.speed!=null?' <span style="font-size:9px;opacity:.6">S${d.speed}</span>':''}</button>`).join('')
-        : `<span style="font-size:12px;color:var(--muted)">Add discs to your bag first</span>`
-      }
+    <!-- Disc selection — grouped by type -->
+    <div id="disc-groups-${ti}" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">
+      ${(()=>{
+        const groups = [
+          { label:'💨 Distance Drivers', types:['Distance Driver'], color:'var(--rose)' },
+          { label:'🎯 Fairway Drivers',  types:['Fairway Driver'],  color:'var(--yellow)' },
+          { label:'🔵 Midranges',        types:['Midrange'],        color:'var(--blue)' },
+          { label:'🟢 Putt & Approach',  types:['Putt & Approach'], color:'var(--pine-light)' },
+        ];
+        const sorted = [...S.discs].sort((a,b)=>(b.speed||0)-(a.speed||0));
+        return groups.map(g => {
+          const discs = sorted.filter(d => g.types.includes(d.type));
+          if(!discs.length) return '';
+          const hasSelected = discs.some(d=>d.id===t.disc);
+          const selectedName = hasSelected ? S.discs.find(d=>d.id===t.disc)?.name : '';
+          return `<div class="disc-group" id="dg-${ti}-${g.label.replace(/\s/g,'')}">
+            <button onclick="toggleDiscGroup(this)" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:${hasSelected?g.color+'18':'var(--ink2)'};border:1px solid ${hasSelected?g.color:'var(--border)'};border-radius:8px;padding:8px 12px;cursor:pointer;transition:all .12s">
+              <span style="font-size:12px;font-weight:600;color:${hasSelected?g.color:'var(--dim)'}">${g.label}</span>
+              <span style="display:flex;align-items:center;gap:8px">
+                ${hasSelected?`<span style="font-size:11px;color:${g.color};font-weight:700">${selectedName}</span>`:''}
+                <span style="font-size:10px;color:var(--muted)">${discs.length} discs ▼</span>
+              </span>
+            </button>
+            <div class="disc-group-body" style="display:${hasSelected?'flex':'none'};flex-wrap:wrap;gap:5px;padding:6px 4px 2px">
+              ${discs.map(d=>`<button class="disc-pill ${t.disc===d.id?'selected':''}" onclick="setThrow(${ti},'disc','${d.id}',this);collapseOtherGroups(${ti},'${g.label.replace(/\s/g,'')}')">${d.name}</button>`).join('')}
+            </div>
+          </div>`;
+        }).join('');
+      })()}
+      ${!S.discs.length ? '<span style="font-size:12px;color:var(--muted)">Add discs to your bag first</span>' : ''}
     </div>
 
     <!-- Throw type -->
@@ -2639,6 +2714,27 @@ function restoreThrowRow(h, ti){
   // Nothing needed — inline onclick handles state, classes already rendered
 }
 
+function toggleDiscGroup(btn){
+  const body = btn.nextElementSibling;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'flex';
+  // Update chevron
+  const chev = btn.querySelector('span:last-child');
+  if(chev) chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function collapseOtherGroups(ti, selectedGroup){
+  // Close all groups except the one with the selected disc
+  document.querySelectorAll(`#disc-groups-${ti} .disc-group`).forEach(g => {
+    const groupId = g.id.replace(`dg-${ti}-`,'');
+    if(groupId !== selectedGroup){
+      const body = g.querySelector('.disc-group-body');
+      if(body) body.style.display = 'none';
+    }
+  });
+}
+
+
 function setThrowTypeFromSelect(ti, sel){
   const value = sel.value;
   if(!value) return;
@@ -2659,7 +2755,22 @@ function setThrow(ti, field, value, btn){
 
   // Update button states in the same group
   if(field === 'disc'){
-    document.querySelectorAll(`#disc-pills-${ti} .disc-pill`).forEach(b => b.classList.remove('selected'));
+    // Update all disc pills selection state
+    document.querySelectorAll(`#disc-groups-${ti} .disc-pill`).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    // Update group header to show selected disc name and color
+    const group = btn.closest('.disc-group');
+    if(group){
+      const disc = S.discs.find(d=>d.id===value);
+      const headerBtn = group.querySelector('button');
+      const nameSpan = headerBtn?.querySelectorAll('span')[0];
+      // Re-render throw row to update headers cleanly
+      const container = document.getElementById('throw-rows-container');
+      if(container){
+        const h = holeData[activeHoleIndex];
+        container.innerHTML = h.throws.map((_,i) => throwRowHTML(h,i)).join('');
+      }
+    }
   } else if(field === 'throwType'){
     document.querySelectorAll(`#tt-row-${ti} .tt-btn`).forEach(b => { b.className='tt-btn'; });
     if(value==='Forehand') btn.classList.add('fh');
@@ -3330,10 +3441,12 @@ function saveRound(){
     toast(`✅ Round saved! ${pm>=0?'+':''}${pm} · ${birdies} birdies`);
   }
 
-  // Save all throws with layout tag
+  // Save all throws + push to community hole_analytics
+  const analyticsRows = [];
   holeData.forEach(h=>{
     h.throws.forEach((t,ti)=>{
       if(h.score>0){
+        const disc = S.discs.find(d=>d.id===t.disc);
         S.throws.push({
           id:'t'+Date.now()+'_'+h.hole+'_'+ti,
           courseId:activeCourse.id, layoutId:activeLayout.layoutId,
@@ -3341,13 +3454,32 @@ function saveRound(){
           throwIndex:ti, throwType:t.throwType, landing:t.landing,
           distRange:t.distRange||'', cond, notes:''
         });
+        analyticsRows.push({
+          course_id: activeCourse.id,
+          layout_id: activeLayout.layoutId,
+          hole: h.hole,
+          throw_index: ti,
+          disc_type: disc ? classifyDiscType(disc.speed).type : null,
+          disc_speed: disc?.speed||null,
+          throw_type: t.throwType||null,
+          landing: t.landing||null,
+          dist_range: t.distRange||null,
+          score_vs_par: h.score - h.par,
+          user_id: currentUser?.id||null
+        });
       }
     });
   });
 
   save(); renderRecentRounds(); renderSidebar();
   syncToSupabase();
-  toast(`✅ Round saved! ${pm>=0?'+':''}${pm} · ${birdies} birdies`);
+
+  // Push community analytics in background
+  if(analyticsRows.length && currentUser){
+    sb.from('hole_analytics').insert(analyticsRows)
+      .then(({error})=>{ if(error) console.error('Analytics error:',error); else console.log(`✅ ${analyticsRows.length} analytics pushed`); });
+  }
+
   resetLog();
 }
 
@@ -4047,8 +4179,7 @@ function renderDiscs(){
       d.weight?`<span class="dn" style="color:var(--blue)">${d.weight}g</span>`:''
     ].filter(Boolean).join('');
     return `<div class="disc-card">
-      <div style="position:absolute;top:8px;right:8px;display:flex;gap:4px">
-        <button onclick="editDisc('${d.id}')" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:11px;padding:2px 7px;border-radius:5px;transition:all .15s" onmouseover="this.style.borderColor='var(--pine-light)';this.style.color='var(--pine-light)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✏️</button>
+      <div style="position:absolute;top:8px;right:8px">
         <button class="disc-del" onclick="removeDisc('${d.id}')">✕</button>
       </div>
       <div class="disc-name">${d.name}</div>
@@ -4056,6 +4187,9 @@ function renderDiscs(){
       <div class="disc-nums">${flightNums||'<span style="font-size:10px;color:var(--muted)">No flight numbers</span>'}</div>
       ${d.notes?`<div style="font-size:10px;color:var(--muted);margin-top:5px">${d.notes}</div>`:''}
       <div class="disc-perf">${throws.length?`${throws.length} throws · avg ${a.toFixed(2)}`:'No throws logged yet'}</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
+        <button onclick="editDisc('${d.id}')" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:11px;padding:3px 10px;border-radius:5px;transition:all .15s" onmouseover="this.style.borderColor='var(--pine-light)';this.style.color='var(--pine-light)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✏️ Edit</button>
+      </div>
     </div>`;
   }).join('');
 }
