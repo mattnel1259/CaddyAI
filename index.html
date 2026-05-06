@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#2d6a2d">
 <meta name="description" content="Personal disc golf analytics, AI caddie, and round tracker">
 <link rel="manifest" href="manifest.json">
+<link rel="canonical" href="https://mattnel1259.github.io/CaddyAI/">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <title>CaddyAI</title>
@@ -1298,6 +1299,67 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
         <div>Discs in bag: <strong style="color:var(--text)" id="about-discs">—</strong></div>
       </div>
     </div>
+
+    <!-- ADMIN PANEL — only visible to admins -->
+    <div id="admin-panel" style="display:none">
+      <div class="sec-head"><div class="sec-title">🔐 Admin Dashboard</div></div>
+
+      <!-- Stats cards -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px">
+        <div class="panel" style="text-align:center;padding:14px">
+          <div style="font-size:28px;font-weight:700;color:var(--pine-light)" id="adm-users">—</div>
+          <div style="font-size:11px;color:var(--muted)">Total Users</div>
+        </div>
+        <div class="panel" style="text-align:center;padding:14px">
+          <div style="font-size:28px;font-weight:700;color:var(--blue)" id="adm-rounds">—</div>
+          <div style="font-size:11px;color:var(--muted)">Total Rounds</div>
+        </div>
+        <div class="panel" style="text-align:center;padding:14px">
+          <div style="font-size:28px;font-weight:700;color:var(--yellow)" id="adm-throws">—</div>
+          <div style="font-size:11px;color:var(--muted)">Throws Logged</div>
+        </div>
+        <div class="panel" style="text-align:center;padding:14px">
+          <div style="font-size:28px;font-weight:700;color:var(--fire)" id="adm-analytics">—</div>
+          <div style="font-size:11px;color:var(--muted)">Analytics Events</div>
+        </div>
+      </div>
+
+      <!-- Users table -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-title">👤 Users
+          <button onclick="loadAdminData()" class="btn btn-ghost" style="font-size:11px;padding:4px 10px;margin-left:8px">🔄 Refresh</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl" id="adm-users-table">
+            <thead><tr><th>Email</th><th>Joined</th><th>Rounds</th><th>Throws</th><th>Last Active</th></tr></thead>
+            <tbody id="adm-users-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent rounds across all users -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-title">📋 Recent Rounds (All Users)</div>
+        <div style="overflow-x:auto">
+          <table class="tbl" id="adm-rounds-table">
+            <thead><tr><th>Date</th><th>User</th><th>Course</th><th>Layout</th><th>Score</th><th>+/-</th></tr></thead>
+            <tbody id="adm-rounds-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Top courses -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-title">📍 Most Played Courses</div>
+        <div id="adm-courses-list" style="font-size:13px;color:var(--muted);padding:8px 0">Loading...</div>
+      </div>
+
+      <!-- Top holes analytics -->
+      <div class="panel">
+        <div class="panel-title">🎯 Community Throw Patterns</div>
+        <div id="adm-analytics-list" style="font-size:13px;color:var(--muted);padding:8px 0">Loading...</div>
+      </div>
+    </div>
   </div>
 
 <!-- MODALS -->
@@ -1459,7 +1521,165 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 
-// ── DARK MODE ──
+// ═══════════════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════════════
+let isAdmin = false;
+
+async function checkAdminStatus(){
+  if(!currentUser) return;
+  try{
+    const { data } = await sb.from('profiles')
+      .select('is_admin')
+      .eq('id', currentUser.id)
+      .single();
+    isAdmin = data?.is_admin === true;
+    if(isAdmin){
+      const panel = document.getElementById('admin-panel');
+      if(panel) panel.style.display = 'block';
+    }
+  } catch(e){ isAdmin = false; }
+}
+
+async function loadAdminData(){
+  if(!isAdmin) return;
+
+  try{
+    // Load all users via profiles
+    const { data: profiles } = await sb.from('profiles')
+      .select('id, username, created_at')
+      .order('created_at', {ascending: false});
+
+    // Load all rounds
+    const { data: allRounds } = await sb.from('rounds')
+      .select('id, user_id, course_name, layout_name, date, total, plus_minus')
+      .order('created_at', {ascending: false})
+      .limit(50);
+
+    // Load all throws count
+    const { count: throwCount } = await sb.from('throws')
+      .select('*', {count:'exact', head:true});
+
+    // Load analytics count
+    const { count: analyticsCount } = await sb.from('hole_analytics')
+      .select('*', {count:'exact', head:true});
+
+    // Per-user round counts
+    const { data: roundCounts } = await sb.from('rounds')
+      .select('user_id');
+    const userRounds = {};
+    roundCounts?.forEach(r => userRounds[r.user_id] = (userRounds[r.user_id]||0)+1);
+
+    // Per-user throw counts
+    const { data: throwCounts } = await sb.from('throws')
+      .select('user_id');
+    const userThrows = {};
+    throwCounts?.forEach(t => userThrows[t.user_id] = (userThrows[t.user_id]||0)+1);
+
+    // Update stat cards
+    document.getElementById('adm-users').textContent = profiles?.length || 0;
+    document.getElementById('adm-rounds').textContent = roundCounts?.length || 0;
+    document.getElementById('adm-throws').textContent = throwCount || 0;
+    document.getElementById('adm-analytics').textContent = analyticsCount || 0;
+
+    // Users table
+    const tbody = document.getElementById('adm-users-tbody');
+    if(profiles?.length){
+      tbody.innerHTML = profiles.map(p => {
+        const rounds = userRounds[p.id] || 0;
+        const throws = userThrows[p.id] || 0;
+        const joined = p.created_at ? new Date(p.created_at).toLocaleDateString() : '—';
+        const isMe = p.id === currentUser?.id;
+        return `<tr>
+          <td style="font-size:12px">${p.username||'—'} ${isMe?'<span style="color:var(--pine-light);font-size:10px">(you)</span>':''}</td>
+          <td class="mono" style="font-size:11px;color:var(--muted)">${joined}</td>
+          <td class="mono" style="color:var(--blue)">${rounds}</td>
+          <td class="mono" style="color:var(--muted)">${throws}</td>
+          <td style="font-size:11px;color:var(--muted)">—</td>
+        </tr>`;
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">No users yet</td></tr>';
+    }
+
+    // Recent rounds table
+    const rtbody = document.getElementById('adm-rounds-tbody');
+    if(allRounds?.length){
+      rtbody.innerHTML = allRounds.map(r => {
+        const pmCol = r.plus_minus<0?'var(--pine-light)':r.plus_minus===0?'var(--blue)':'var(--rose)';
+        const profile = profiles?.find(p=>p.id===r.user_id);
+        return `<tr>
+          <td class="mono" style="font-size:11px;color:var(--muted)">${r.date}</td>
+          <td style="font-size:11px;color:var(--muted)">${profile?.username||r.user_id?.slice(0,8)||'—'}</td>
+          <td style="font-size:12px">${r.course_name||'—'}</td>
+          <td style="font-size:11px;color:var(--muted)">${r.layout_name||'—'}</td>
+          <td class="mono" style="font-weight:600">${r.total||'—'}</td>
+          <td class="mono" style="color:${pmCol};font-weight:700">${r.plus_minus!=null?(r.plus_minus>=0?'+':'')+r.plus_minus:'—'}</td>
+        </tr>`;
+      }).join('');
+    } else {
+      rtbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">No rounds yet</td></tr>';
+    }
+
+    // Top courses
+    const courseCounts = {};
+    allRounds?.forEach(r => { if(r.course_name) courseCounts[r.course_name]=(courseCounts[r.course_name]||0)+1; });
+    const topCourses = Object.entries(courseCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const coursesEl = document.getElementById('adm-courses-list');
+    if(topCourses.length){
+      coursesEl.innerHTML = topCourses.map(([name,count],i) =>
+        `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text)">${i+1}. ${name}</span>
+          <span class="mono" style="color:var(--blue)">${count} rounds</span>
+        </div>`
+      ).join('');
+    } else {
+      coursesEl.innerHTML = '<div style="color:var(--muted)">No course data yet</div>';
+    }
+
+    // Community throw patterns
+    const { data: analyticsData } = await sb.from('hole_analytics')
+      .select('course_id, hole, throw_type, disc_type, landing')
+      .limit(500);
+
+    const patternMap = {};
+    analyticsData?.forEach(a => {
+      const key = `${a.course_id}|${a.hole}`;
+      if(!patternMap[key]) patternMap[key] = {throws:[], course:a.course_id, hole:a.hole};
+      patternMap[key].throws.push(a);
+    });
+
+    const analyticsEl = document.getElementById('adm-analytics-list');
+    const patterns = Object.values(patternMap).filter(p=>p.throws.length>=3).sort((a,b)=>b.throws.length-a.throws.length).slice(0,8);
+    if(patterns.length){
+      analyticsEl.innerHTML = patterns.map(p => {
+        const throwTypes = {};
+        p.throws.forEach(t=>{ if(t.throw_type) throwTypes[t.throw_type]=(throwTypes[t.throw_type]||0)+1; });
+        const topThrow = Object.entries(throwTypes).sort((a,b)=>b[1]-a[1])[0];
+        const discTypes = {};
+        p.throws.forEach(t=>{ if(t.disc_type) discTypes[t.disc_type]=(discTypes[t.disc_type]||0)+1; });
+        const topDisc = Object.entries(discTypes).sort((a,b)=>b[1]-a[1])[0];
+        const cName = S.courses.find(c=>c.id===p.course)?.name || p.course;
+        return `<div style="padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:12px;font-weight:600;color:var(--text)">${cName} · Hole ${p.hole}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">
+            ${topDisc?`<span style="color:var(--pine-light)">${topDisc[0]}</span> · `:''}
+            ${topThrow?`<span style="color:var(--blue)">${topThrow[0]}</span> · `:''}
+            <span>${p.throws.length} throws logged</span>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      analyticsEl.innerHTML = '<div style="color:var(--muted)">Not enough analytics data yet</div>';
+    }
+
+  } catch(e){
+    console.error('Admin data load error:', e);
+    toast('❌ Failed to load admin data');
+  }
+}
+
+
 function applyDarkMode(dark){
   document.body.classList.toggle('dark', dark);
   const btn = document.getElementById('dark-mode-toggle');
@@ -1545,6 +1765,7 @@ async function onSignedIn(user){
   // Load user data from Supabase
   await loadFromSupabase();
   renderAll();
+  checkAdminStatus();
   toast(`👋 Welcome back!`);
 }
 
@@ -1637,7 +1858,11 @@ function renderSettings(){
   // Sync dark mode toggle
   const isDark = document.body.classList.contains('dark');
   applyDarkMode(isDark);
-  const last = localStorage.getItem('sb_last_sync');
+  if(isAdmin){
+    const panel = document.getElementById('admin-panel');
+    if(panel) panel.style.display = 'block';
+    loadAdminData();
+  }
   const infoEl = document.getElementById('sync-info');
   if(infoEl && last){
     infoEl.style.display = 'block';
