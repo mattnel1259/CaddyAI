@@ -127,23 +127,40 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
   display: none;
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  height: 58px;
+  height: 62px;
   background: var(--pine);
   border-top: 1px solid var(--border);
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+#mobile-nav::-webkit-scrollbar { display: none; }
+#mobile-nav { justify-content: space-around; }
 .mob-nav-btn {
-  flex: 1; background: none; border: none;
-  color: rgba(255,255,255,.6); font-family: 'Archivo', sans-serif;
-  font-size: 10px; font-weight: 500;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; cursor: pointer; transition: color .15s;
-  padding: 6px 0;
+  flex: 1; min-width: 52px; background: none; border: none;
+  color: rgba(255,255,255,.9); font-family: 'Archivo', sans-serif;
+  font-size: 11px; font-weight: 600;
+  display: flex; flex-direction: row; align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer; transition: color .15s;
+  padding: 6px 16px; height: 62px;
+  -webkit-tap-highlight-color: transparent;
 }
 .mob-nav-btn .icon { font-size: 20px; line-height: 1; }
 .mob-nav-btn.active { color: #ffffff; }
-.mob-nav-btn:hover { color: var(--text); }
+.mob-menu-item {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; background: none; border: none; border-top: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.85); font-family: 'Archivo', sans-serif;
+  font-size: 15px; font-weight: 500;
+  padding: 16px 20px; cursor: pointer; text-align: left;
+  transition: background .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-menu-item:active { background: rgba(255,255,255,.1); }
+.mob-menu-item span { font-size: 20px; }
 
 /* PWA install banner */
 #install-banner {
@@ -872,7 +889,7 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
     <div id="log-step1">
       <div class="sec-head"><div class="sec-title">Log a Round</div><div class="sec-sub">Select course, layout, and conditions first</div></div>
       <div class="panel">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px">
 
           <!-- Course search -->
           <div class="fg" style="position:relative">
@@ -886,12 +903,6 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
             <div id="course-suggestions" style="display:none;position:absolute;z-index:50;background:var(--ink2);border:1px solid var(--border);border-radius:8px;margin-top:4px;width:100%;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
           </div>
 
-          <!-- Date -->
-          <div class="fg">
-            <label>Date Played</label>
-            <input type="date" id="log-date">
-          </div>
-
           <!-- Layout select — appears after course is chosen -->
           <div class="fg" id="log-layout-wrap" style="display:none">
             <label>Layout / Tees</label>
@@ -900,16 +911,22 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
             </select>
           </div>
 
-          <!-- Conditions -->
-          <div class="fg">
-            <label>Conditions</label>
-            <select id="log-cond">
-              <option>Calm</option><option>Windy</option><option>Rainy</option><option>Cold</option><option>Hot</option>
-            </select>
+          <!-- Date + Conditions side by side -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="fg">
+              <label>Date Played</label>
+              <input type="date" id="log-date">
+            </div>
+            <div class="fg">
+              <label>Conditions</label>
+              <select id="log-cond">
+                <option>Calm</option><option>Windy</option><option>Rainy</option><option>Cold</option><option>Hot</option>
+              </select>
+            </div>
           </div>
 
-          <!-- Partners -->
-          <div class="fg">
+          <!-- Partners + Notes side by side -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <label>Playing Partners</label>
             <input type="text" id="log-partners" placeholder="e.g. Mark, Trevor">
           </div>
@@ -1378,25 +1395,28 @@ body { font-family: 'Archivo', sans-serif; background: var(--ink); color: var(--
 
 <!-- MOBILE BOTTOM NAV -->
 <nav id="mobile-nav">
-  <button class="mob-nav-btn active" onclick="nav('dashboard');setMobNav(this)">
-    <span class="icon">📊</span>Dashboard
-  </button>
-  <button class="mob-nav-btn" onclick="nav('caddie');setMobNav(this)">
-    <span class="icon">🎯</span>Caddie
-  </button>
-  <button class="mob-nav-btn" onclick="nav('log');setMobNav(this)">
-    <span class="icon">✏️</span>Log
-  </button>
-  <button class="mob-nav-btn" onclick="nav('analytics');setMobNav(this)">
-    <span class="icon">📈</span>Analytics
-  </button>
-  <button class="mob-nav-btn" onclick="nav('discs');setMobNav(this)">
-    <span class="icon">🥏</span>My Bag
-  </button>
-  <button class="mob-nav-btn" onclick="nav('settings');setMobNav(this)">
-    <span class="icon">⚙️</span>Settings
+  <button class="mob-nav-btn active" id="mob-active-btn" onclick="toggleMobMenu()">
+    <span class="icon" id="mob-active-icon">📊</span>
+    <span id="mob-active-label">Home</span>
+    <span style="font-size:10px;opacity:.7;margin-left:2px">▲</span>
   </button>
 </nav>
+
+<!-- Mobile dropdown menu -->
+<div id="mob-menu" style="display:none;position:fixed;bottom:62px;left:0;right:0;z-index:99;background:var(--pine);border-top:1px solid var(--pine2);box-shadow:0 -4px 20px rgba(0,0,0,.3)">
+  ${['dashboard','caddie','log','analytics','discs','settings'].map((p,i) => {
+    const icons = ['📊','🎯','✏️','📈','🥏','⚙️'];
+    const labels = ['Dashboard','AI Caddie','Log Round','Analytics','My Bag','Settings'];
+    return ``;
+  })}
+  <button class="mob-menu-item" onclick="navAndClose('dashboard')"><span>📊</span> Dashboard</button>
+  <button class="mob-menu-item" onclick="navAndClose('caddie')"><span>🎯</span> AI Caddie</button>
+  <button class="mob-menu-item" onclick="navAndClose('log')"><span>✏️</span> Log Round</button>
+  <button class="mob-menu-item" onclick="navAndClose('analytics')"><span>📈</span> Analytics</button>
+  <button class="mob-menu-item" onclick="navAndClose('discs')"><span>🥏</span> My Bag</button>
+  <button class="mob-menu-item" onclick="navAndClose('settings')"><span>⚙️</span> Settings</button>
+</div>
+<div id="mob-menu-overlay" onclick="closeMobMenu()" style="display:none;position:fixed;inset:0;z-index:98;background:rgba(0,0,0,.3)"></div>
 
 <div id="toast"></div>
 
@@ -1492,6 +1512,13 @@ function init(){
   save();
   renderAll();
   initDarkMode();
+
+  // Handle email confirmation redirect (Supabase appends #access_token to URL)
+  const hash = window.location.hash;
+  if(hash && hash.includes('access_token')){
+    // Supabase will pick this up automatically via onAuthStateChange
+    window.history.replaceState(null, '', window.location.pathname);
+  }
 
   // Check for existing Supabase session
   sb.auth.getSession().then(({ data: { session } }) => {
@@ -1720,35 +1747,58 @@ function switchAuthTab(tab){
 async function handleAuth(){
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
-  const isLogin = document.getElementById('auth-tab-login').style.background.includes('grass') ||
-                  document.getElementById('auth-tab-login').style.background === 'var(--grass)';
+  const isLogin = document.getElementById('auth-tab-login').style.background.includes('pine') ||
+                  document.getElementById('auth-tab-login').style.background === 'var(--pine)' ||
+                  document.querySelector('#auth-screen button.btn-green')?.textContent === 'Sign In';
   const errEl = document.getElementById('auth-error');
   const sucEl = document.getElementById('auth-success');
   errEl.style.display = 'none'; sucEl.style.display = 'none';
 
   if(!email || !password){ showAuthError('Please enter email and password'); return; }
+  if(!isLogin && password.length < 6){ showAuthError('Password must be at least 6 characters'); return; }
 
   const btn = document.querySelector('#auth-screen button.btn-green');
+  const origText = btn.textContent;
   btn.textContent = 'Please wait...'; btn.disabled = true;
 
   try {
     let result;
     if(isLogin){
       result = await sb.auth.signInWithPassword({ email, password });
+      if(result.error){
+        if(result.error.message.includes('Email not confirmed')){
+          showAuthError('Please check your email and click the confirmation link first.');
+        } else if(result.error.message.includes('Invalid login')){
+          showAuthError('Incorrect email or password.');
+        } else {
+          showAuthError(result.error.message);
+        }
+      } else {
+        onSignedIn(result.data.user);
+      }
     } else {
-      result = await sb.auth.signUp({ email, password });
-      if(!result.error && result.data.user && !result.data.session){
-        sucEl.textContent = '✅ Check your email to confirm your account!';
+      result = await sb.auth.signUp({
+        email, password,
+        options: {
+          emailRedirectTo: 'https://mattnel1259.github.io/CaddyAI'
+        }
+      });
+      if(result.error){
+        showAuthError(result.error.message);
+      } else if(result.data.user && !result.data.session){
+        // Email confirmation required
+        sucEl.innerHTML = `✅ Account created! <strong>Check your email</strong> for a confirmation link, then come back and sign in.`;
         sucEl.style.display = 'block';
-        btn.textContent = 'Sign In'; btn.disabled = false;
-        return;
+        switchAuthTab('login');
+      } else if(result.data.session){
+        // Email confirmation disabled — sign in directly
+        onSignedIn(result.data.user);
       }
     }
-    if(result.error){ showAuthError(result.error.message); }
-    else { onSignedIn(result.data.user); }
   } catch(e){ showAuthError(e.message); }
+
   btn.disabled = false;
-  btn.textContent = isLogin ? 'Sign In' : 'Create Account';
+  btn.textContent = origText;
 }
 
 function showAuthError(msg){
@@ -4645,9 +4695,46 @@ function renderAll(){
 // ═══════════════════════════════════════════════════════════
 // MOBILE NAV SYNC
 // ═══════════════════════════════════════════════════════════
+function toggleMobMenu(){
+  const menu = document.getElementById('mob-menu');
+  const overlay = document.getElementById('mob-menu-overlay');
+  const chev = document.querySelector('#mob-active-btn span:last-child');
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  overlay.style.display = isOpen ? 'none' : 'block';
+  if(chev) chev.textContent = isOpen ? '▲' : '▼';
+}
+
+function closeMobMenu(){
+  document.getElementById('mob-menu').style.display = 'none';
+  document.getElementById('mob-menu-overlay').style.display = 'none';
+  const chev = document.querySelector('#mob-active-btn span:last-child');
+  if(chev) chev.textContent = '▲';
+}
+
+function navAndClose(page){
+  closeMobMenu();
+  nav(page);
+  // Update active button label
+  const pageData = {
+    dashboard: {icon:'📊', label:'Dashboard'},
+    caddie:    {icon:'🎯', label:'AI Caddie'},
+    log:       {icon:'✏️', label:'Log Round'},
+    analytics: {icon:'📈', label:'Analytics'},
+    discs:     {icon:'🥏', label:'My Bag'},
+    settings:  {icon:'⚙️', label:'Settings'}
+  };
+  const d = pageData[page];
+  if(d){
+    const iconEl = document.getElementById('mob-active-icon');
+    const labelEl = document.getElementById('mob-active-label');
+    if(iconEl) iconEl.textContent = d.icon;
+    if(labelEl) labelEl.textContent = d.label;
+  }
+}
+
 function setMobNav(btn){
-  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  // Legacy — no longer needed but kept for safety
 }
 
 // Keep mobile nav in sync with desktop nav - safe override
